@@ -6,11 +6,8 @@
 #include "stm32f4xx_it.h"
 
 #define SYS_HX711_ONLINE_CHECK_TIME	(2000)//when power on 2000ms start check HX711  , total 3 times
-#define MCU_VERSION			        (83)//2024.06.17
-#define DIWEN_VERSION		        (83)//2024.06.19
-
-//#define MCU_VERSION			        (82)//2023.11.23
-//#define DIWEN_VERSION		        (82)//2023.11.23
+#define MCU_VERSION			        (821)//2024.08.21
+#define DIWEN_VERSION		        (821)//2024.08.21
 
 
 extern UINT32 get_SysTick_ByTimer(void);

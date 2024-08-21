@@ -34,7 +34,8 @@
 			"app_t5l_cfg.h": "c",
 			"app_innerscreen_cfg.h": "c",
 			"app_externalscreen_cfg.h": "c",
-			"app_balancingdatahandle.h": "c"
+			"app_balancingdatahandle.h": "c",
+			"stm32f4xx.h": "c"
 		}
 	}
 }

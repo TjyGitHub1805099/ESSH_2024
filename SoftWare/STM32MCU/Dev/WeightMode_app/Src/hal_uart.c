@@ -17,265 +17,14 @@
 #include "hal_uart.h"
 #include "usart.h"
 
-  // UART 外设
-USART_TypeDef* UART_PORT[] = { UART1_PORT, UART2_PORT };
-const INT8 UART_PORT_IRQn[] = { UART1_PORT_IRQn, UART2_PORT_IRQn };
-const UINT8 UART_PORT_GPIO_AF[] = { UART1_PORT_GPIO_AF, UART2_PORT_GPIO_AF };
-// UART 发送引脚
-GPIO_TypeDef* UART_TX_GPIO_PORT[] = { UART1_TX_GPIO_PORT, UART2_TX_GPIO_PORT };
-const UINT16 UART_TX_GPIO_PIN[] = { UART1_TX_GPIO_PIN, UART2_TX_GPIO_PIN };
-// UART 接收引脚
-GPIO_TypeDef* UART_RX_GPIO_PORT[] = { UART1_RX_GPIO_PORT, UART2_RX_GPIO_PORT };
-const UINT16 UART_RX_GPIO_PIN[] = { UART1_RX_GPIO_PIN, UART2_RX_GPIO_PIN };
-// UART 发送使能引脚
-GPIO_TypeDef* UART_DEA_GPIO_PORT[] = { UART1_DEA_GPIO_PORT, UART2_DEA_GPIO_PORT };
-const UINT16 UART_DEA_GPIO_PIN[] = { UART1_DEA_GPIO_PIN, UART2_DEA_GPIO_PIN };
-//// UART 接收使能引脚
-//GPIO_TypeDef* UART_REA_GPIO_PORT[] = { UART1_REA_GPIO_PORT };
-//const UINT16 UART_REA_GPIO_PIN[] = { UART1_REA_GPIO_PIN };
-// UART 发送DMA
-//const UINT32 UART_TX_DMA_IT_GIF[] = { UART1_TX_DMA_IT_GIF };
-//const UINT32 UART_TX_DMA_FLAG_GIF[] = { UART1_TX_DMA_FLAG_GIF };
-// UART 接收DMA
-//const UINT32 UART_RX_DMA_IT_TCIF[] = { UART2_RX_DMA_IT_TCIF, UART3_RX_DMA_IT_TCIF };
-//const UINT32 UART_RX_DMA_FLAG_TCIF[] = { UART2_RX_DMA_FLAG_TCIF, UART3_RX_DMA_FLAG_TCIF };
-//const UINT32 UART_RX_DMA_FLAG_GIF[] = { UART1_RX_DMA_FLAG_GIF };
-
-const UINT32 g_UartBaudTab[] = { 4800, 9600, 19200, 38400, 57600, 115200, 1000000, 2000000, 3000000, 4000000 };
-UartDeviceType	g_UartDevice[UART_NUMBER] = { UartDevice1Default, UartDevice2Default ,UartDevice3Default};
-
-extern void app_uart_extern_msg_packet_process( UartDeviceType *pUartDevice );
-//extern void hal_3048_msg_packet_process( UartDeviceType *pUartDevice );
-
-
-/**
- * @brief  UART引脚初始化
- * @param  pUartDevice: 要操作的串口设备
- * @retval 无
- */
-void hal_uart_gpio_init( UartDeviceType *pUartDevice )
-{
-	#if 0 
-	switch( pUartDevice->LinkType )
-	{
-		case UART_LINK_RX_ONLY:
-		// 使能口线时钟
-		drv_rcc_ahb1_clk_enable( UART_RX_GPIO_CLK[pUartDevice->Port] );
-		// 配置引脚为复用功能
-		drv_gpio_alternate_function_init( UART_RX_GPIO_PORT[pUartDevice->Port], UART_RX_GPIO_PIN[pUartDevice->Port], GPIO_PUPD_PULL, GPIO_OTYPE_PP, GPIO_SPEED_MID );
-		// 连接到串口引脚
-		drv_gpio_alternate_function_connect( UART_RX_GPIO_PORT[pUartDevice->Port], UART_RX_PIN_SOURCE[pUartDevice->Port], UART_PORT_GPIO_AF[pUartDevice->Port] );
-		break;
-		case UART_LINK_RX_ONLY_ENABE:
-		// 使能口线时钟
-		drv_rcc_ahb1_clk_enable( UART_RX_GPIO_CLK[pUartDevice->Port] );
-		//			drv_rcc_ahb1_clk_enable( UART_REA_GPIO_CLK[ pUartDevice->Port] );
-					// 配置使能控制脚为输出
-		//			drv_gpio_output_init( UART_REA_GPIO_PORT[pUartDevice->Port], UART_REA_GPIO_PIN[ pUartDevice->Port], GPIO_PUPD_PULL, GPIO_OTYPE_PP, GPIO_SPEED_MID );
-					// 配置引脚为复用功能
-		drv_gpio_alternate_function_init( UART_RX_GPIO_PORT[pUartDevice->Port], UART_RX_GPIO_PIN[pUartDevice->Port], GPIO_PUPD_PULL, GPIO_OTYPE_PP, GPIO_SPEED_MID );
-		// 连接到串口引脚
-		drv_gpio_alternate_function_connect( UART_RX_GPIO_PORT[pUartDevice->Port], UART_RX_PIN_SOURCE[pUartDevice->Port], UART_PORT_GPIO_AF[pUartDevice->Port] );
-		// 设置使能模式为接收方式
-		hal_uart_set_rx_mode( pUartDevice );
-		break;
-		case UART_LINK_TX_ONLY:
-		// 使能口线时钟
-		drv_rcc_ahb1_clk_enable( UART_TX_GPIO_CLK[pUartDevice->Port] );
-		// 配置引脚为复用功能
-		drv_gpio_alternate_function_init( UART_TX_GPIO_PORT[pUartDevice->Port], UART_TX_GPIO_PIN[pUartDevice->Port], GPIO_PUPD_PULL, GPIO_OTYPE_PP, GPIO_SPEED_MID );
-		// 连接到串口引脚
-		drv_gpio_alternate_function_connect( UART_TX_GPIO_PORT[pUartDevice->Port], UART_TX_PIN_SOURCE[pUartDevice->Port], UART_PORT_GPIO_AF[pUartDevice->Port] );
-		break;
-		case UART_LINK_TX_ONLY_ENABE:
-		// 使能口线时钟
-		drv_rcc_ahb1_clk_enable( UART_TX_GPIO_CLK[pUartDevice->Port] );
-		drv_rcc_ahb1_clk_enable( UART_DEA_GPIO_CLK[pUartDevice->Port] );
-		// 配置使能控制脚为输出
-		drv_gpio_output_init( UART_DEA_GPIO_PORT[pUartDevice->Port], UART_DEA_GPIO_PIN[pUartDevice->Port], GPIO_PUPD_PULL, GPIO_OTYPE_PP, GPIO_SPEED_MID );
-		// 配置引脚为复用功能
-		drv_gpio_alternate_function_init( UART_RX_GPIO_PORT[pUartDevice->Port], UART_TX_GPIO_PIN[pUartDevice->Port], GPIO_PUPD_PULL, GPIO_OTYPE_PP, GPIO_SPEED_MID );
-		// 连接到串口引脚
-		drv_gpio_alternate_function_connect( UART_TX_GPIO_PORT[pUartDevice->Port], UART_TX_PIN_SOURCE[pUartDevice->Port], UART_PORT_GPIO_AF[pUartDevice->Port] );
-		// 设置使能模式为发送方式
-		hal_uart_set_tx_mode( pUartDevice );
-		break;
-		case UART_LINK_RX_TX_HALF:
-		case UART_LINK_RX_TX_HALF_ENABE:
-		// 使能口线时钟
-		drv_rcc_ahb1_clk_enable( UART_TX_GPIO_CLK[pUartDevice->Port] );
-		drv_rcc_ahb1_clk_enable( UART_RX_GPIO_CLK[pUartDevice->Port] );
-		drv_rcc_ahb1_clk_enable( UART_DEA_GPIO_CLK[pUartDevice->Port] );
-		//			drv_rcc_ahb1_clk_enable( UART_REA_GPIO_CLK[ pUartDevice->Port] );
-					// 配置使能控制脚为输出
-		drv_gpio_output_init( UART_DEA_GPIO_PORT[pUartDevice->Port], UART_DEA_GPIO_PIN[pUartDevice->Port], GPIO_PUPD_PULL, GPIO_OTYPE_PP, GPIO_SPEED_MID );
-		//			drv_gpio_output_init( UART_REA_GPIO_PORT[pUartDevice->Port], UART_REA_GPIO_PIN[ pUartDevice->Port], GPIO_PUPD_PULL, GPIO_OTYPE_PP, GPIO_SPEED_MID );
-					// 配置引脚为复用功能
-		drv_gpio_alternate_function_init( UART_TX_GPIO_PORT[pUartDevice->Port], UART_TX_GPIO_PIN[pUartDevice->Port], GPIO_PUPD_PULL, GPIO_OTYPE_PP, GPIO_SPEED_MID );
-		drv_gpio_alternate_function_init( UART_RX_GPIO_PORT[pUartDevice->Port], UART_RX_GPIO_PIN[pUartDevice->Port], GPIO_PUPD_PULL, GPIO_OTYPE_PP, GPIO_SPEED_MID );
-		// 连接到串口引脚
-		drv_gpio_alternate_function_connect( UART_TX_GPIO_PORT[pUartDevice->Port], UART_TX_PIN_SOURCE[pUartDevice->Port], UART_PORT_GPIO_AF[pUartDevice->Port] );
-		drv_gpio_alternate_function_connect( UART_RX_GPIO_PORT[pUartDevice->Port], UART_RX_PIN_SOURCE[pUartDevice->Port], UART_PORT_GPIO_AF[pUartDevice->Port] );
-		// 设置使能模式为接收方式
-		hal_uart_set_rx_mode( pUartDevice );
-		break;
-		case UART_LINK_RX_TX_FULL:
-		// 使能口线时钟
-		drv_rcc_ahb1_clk_enable( UART_TX_GPIO_CLK[pUartDevice->Port] );
-		drv_rcc_ahb1_clk_enable( UART_RX_GPIO_CLK[pUartDevice->Port] );
-		// 配置引脚为复用功能
-		drv_gpio_alternate_function_init( UART_TX_GPIO_PORT[pUartDevice->Port], UART_TX_GPIO_PIN[pUartDevice->Port], GPIO_PUPD_PULL, GPIO_OTYPE_PP, GPIO_SPEED_MID );
-		drv_gpio_alternate_function_init( UART_RX_GPIO_PORT[pUartDevice->Port], UART_RX_GPIO_PIN[pUartDevice->Port], GPIO_PUPD_PULL, GPIO_OTYPE_PP, GPIO_SPEED_MID );
-		// 连接到串口引脚
-		drv_gpio_alternate_function_connect( UART_TX_GPIO_PORT[pUartDevice->Port], UART_TX_PIN_SOURCE[pUartDevice->Port], UART_PORT_GPIO_AF[pUartDevice->Port] );
-		drv_gpio_alternate_function_connect( UART_RX_GPIO_PORT[pUartDevice->Port], UART_RX_PIN_SOURCE[pUartDevice->Port], UART_PORT_GPIO_AF[pUartDevice->Port] );
-		break;
-		case UART_LINK_RX_TX_FULL_ENABE:
-		// 使能口线时钟
-		drv_rcc_ahb1_clk_enable( UART_TX_GPIO_CLK[pUartDevice->Port] );
-		drv_rcc_ahb1_clk_enable( UART_RX_GPIO_CLK[pUartDevice->Port] );
-		drv_rcc_ahb1_clk_enable( UART_DEA_GPIO_CLK[pUartDevice->Port] );
-		//			drv_rcc_ahb1_clk_enable( UART_REA_GPIO_CLK[ pUartDevice->Port] );
-					// 配置使能控制脚为输出
-		drv_gpio_output_init( UART_DEA_GPIO_PORT[pUartDevice->Port], UART_DEA_GPIO_PIN[pUartDevice->Port], GPIO_PUPD_PULL, GPIO_OTYPE_PP, GPIO_SPEED_MID );
-		//			drv_gpio_output_init( UART_REA_GPIO_PORT[pUartDevice->Port], UART_REA_GPIO_PIN[ pUartDevice->Port], GPIO_PUPD_PULL, GPIO_OTYPE_PP, GPIO_SPEED_MID );
-					// 配置引脚为复用功能
-		drv_gpio_alternate_function_init( UART_TX_GPIO_PORT[pUartDevice->Port], UART_TX_GPIO_PIN[pUartDevice->Port], GPIO_PUPD_PULL, GPIO_OTYPE_PP, GPIO_SPEED_MID );
-		drv_gpio_alternate_function_init( UART_RX_GPIO_PORT[pUartDevice->Port], UART_RX_GPIO_PIN[pUartDevice->Port], GPIO_PUPD_PULL, GPIO_OTYPE_PP, GPIO_SPEED_MID );
-		// 连接到串口引脚
-		drv_gpio_alternate_function_connect( UART_TX_GPIO_PORT[pUartDevice->Port], UART_TX_PIN_SOURCE[pUartDevice->Port], UART_PORT_GPIO_AF[pUartDevice->Port] );
-		drv_gpio_alternate_function_connect( UART_RX_GPIO_PORT[pUartDevice->Port], UART_RX_PIN_SOURCE[pUartDevice->Port], UART_PORT_GPIO_AF[pUartDevice->Port] );
-		// 设置使能模式为同时接收和发送方式
-		hal_uart_set_rx_tx_mode( pUartDevice );
-		break;
-		default:
-		break;
-	}
-	#endif
-}
-
-/**
- * @brief  UART端口初始化
- * @param  pUartDevice: 要操作的串口设备
- * @retval 0：正常	1：参数传入错误	2：发送DMA等待可配置超时·3：接收DMA等待可配置超时
- */
-void hal_uart_port_init( UartDeviceType *pUartDevice )
-{
-#if 0 //串口的初始化在main.c中自动完成
-	// UART外设引脚配置  
-	hal_uart_gpio_init( pUartDevice );
-
-	// 使能UART外设时钟，复位 
-	if( UART_PORT[pUartDevice->Port] == USART1 )
-	{
-		drv_rcc_apb2_clk_enable( UART_PORT_CLK[pUartDevice->Port] );
-		//		drv_rcc_apb2_periph_reset_enable(UART_PORT_CLK[pUartDevice->Port]);
-		//		drv_rcc_apb2_periph_reset_disable(UART_PORT_CLK[pUartDevice->Port]);
-	}
-	else
-	{
-		drv_rcc_apb1_clk_enable( UART_PORT_CLK[pUartDevice->Port] );
-		//		drv_rcc_apb1_periph_reset_enable(UART_PORT_CLK[pUartDevice->Port]);
-		//		drv_rcc_apb1_periph_reset_disable(UART_PORT_CLK[pUartDevice->Port]);
-	}
-
-	drv_uart_deinit( UART_PORT[pUartDevice->Port] );
-
-	// 初始化UART 
-	drv_uart_init( UART_PORT[pUartDevice->Port], g_UartBaudTab[pUartDevice->Baudrate], pUartDevice->DataBit, pUartDevice->StopBit, pUartDevice->Parity );
-
-	if( pUartDevice->LinkType != UART_LINK_RX_ONLY )
-	{
-		if( pUartDevice->RxTxMode == UART_RX_TX_MODE_DMA )
-		{
-			//使能DMA时钟
-			drv_rcc_ahb1_clk_enable( UART_TX_DMA_CLK[pUartDevice->Port] );
-			// 初始化UART发送DMA
-			drv_dma_stream_init( UART_TX_DMA_CHANNEL[pUartDevice->Port], (UINT32)(pUartDevice->pTxBuffer), (UINT32)(&(UART_PORT[pUartDevice->Port]->TDR)),
-				0, DMA_CIRC_MODE_DISABLE, DMA_CHANNEL_PRIORITY_HIGH, DMA_DIR_MEM_TO_PERIPH, DMA_DATA_WIDTH_BYTE );
-			drv_uart_dma_tx_enable( UART_PORT[pUartDevice->Port] );
-			// 配置DMA发送完成中断
-			drv_dma_stream_clear_it_pending_bit( UART_TX_DMA_IT_TCIF[pUartDevice->Port] );
-			drv_nvic_init( UART_TX_DMA_IRQn[pUartDevice->Port], 0, PRIO_UART_DMA_TX );
-			drv_nvic_enable( UART_TX_DMA_IRQn[pUartDevice->Port] );
-			drv_dma_stream_it_enable( UART_TX_DMA_CHANNEL[pUartDevice->Port], DMA_IT_TC );
-		}
-		else if( pUartDevice->RxTxMode == UART_RX_TX_MODE_INTERRUPT )
-		{
-			// 配置发送缓冲区空中断
-			drv_nvic_init( UART_PORT_IRQn[pUartDevice->Port], 0, 0 );
-			drv_uart_clear_it_pending_bit( UART_PORT[pUartDevice->Port], USART_IT_TXE );
-			drv_uart_it_enable( UART_PORT[pUartDevice->Port], USART_IT_TXE );
-		}
-	}
-
-	if( pUartDevice->LinkType != UART_LINK_TX_ONLY )
-	{
-		if( pUartDevice->RxTxMode == UART_RX_TX_MODE_DMA )
-		{
-			//使能DMA时钟
-			drv_rcc_ahb1_clk_enable( UART_RX_DMA_CLK[pUartDevice->Port] );
-			// 初始化UART接收DMA
-			drv_dma_stream_init( UART_RX_DMA_CHANNEL[pUartDevice->Port], (UINT32)(pUartDevice->pRxBuffer), (UINT32)(&(UART_PORT[pUartDevice->Port]->RDR)),
-				0, DMA_CIRC_MODE_DISABLE, DMA_CHANNEL_PRIORITY_HIGH, DMA_DIR_PERIPH_TO_MEM, DMA_DATA_WIDTH_BYTE );
-			drv_uart_dma_rx_enable( UART_PORT[pUartDevice->Port] );
-			// 启动DMA接收
-			hal_uart_dma_rx_start( pUartDevice, pUartDevice->pRxBuffer, pUartDevice->RxBytesMax );
-			// 配置接收超时中断
-			drv_uart_clear_it_pending_bit( UART_PORT[pUartDevice->Port], USART_IT_RTO );
-			drv_nvic_init( UART_PORT_IRQn[pUartDevice->Port], 0, PRIO_UART_DMA_TX );
-			drv_nvic_enable( UART_PORT_IRQn[pUartDevice->Port] );
-			//开UART超时中断
-			drv_uart_it_enable( UART_PORT[pUartDevice->Port], USART_IT_RTO );
-			// 开启错误中断
-			//drv_uart_clear_it_pending_bit(UART_PORT[pUartDevice->Port], USART_IT_LBD);
-			drv_uart_clear_it_pending_bit( UART_PORT[pUartDevice->Port], USART_IT_ERR );
-			//drv_uart_it_enable(UART_PORT[pUartDevice->Port], USART_IT_LBD);
-			drv_uart_it_enable( UART_PORT[pUartDevice->Port], USART_IT_ERR );
-		}
-		else if( pUartDevice->RxTxMode == UART_RX_TX_MODE_INTERRUPT )
-		{
-			drv_nvic_init( UART_PORT_IRQn[pUartDevice->Port], 0, PRIO_UART_DMA_TX );
-			drv_nvic_enable( UART_PORT_IRQn[pUartDevice->Port] );
-			drv_uart_clear_it_pending_bit( UART_PORT[pUartDevice->Port], USART_IT_RXNE );
-			drv_uart_clear_it_pending_bit( UART_PORT[pUartDevice->Port], USART_IT_RTO );
-			drv_uart_it_enable( UART_PORT[pUartDevice->Port], USART_IT_RXNE );
-			drv_uart_it_enable( UART_PORT[pUartDevice->Port], USART_IT_RTO );
-			// 开启错误中断
-			//drv_uart_clear_it_pending_bit(UART_PORT[pUartDevice->Port], USART_IT_LBD);
-			drv_uart_clear_it_pending_bit( UART_PORT[pUartDevice->Port], USART_IT_ERR );
-			//drv_uart_it_enable(UART_PORT[pUartDevice->Port], USART_IT_LBD);
-			drv_uart_it_enable( UART_PORT[pUartDevice->Port], USART_IT_ERR );
-		}
-	}
-#endif
-}
-
-/**
-* @brief  UART设置波特率
-* @param  pUartDevice: 要操作的串口设备
-* @retval 无
-*/
-void hal_uart_set_braudrate( UartDeviceType *pUartDevice, enumUartBaudType Baudrate )
-{
-	#if 0 
-	if( Baudrate < UART_BAUD_END )
-	{
-		pUartDevice->Baudrate = Baudrate;
-		drv_uart_set_baudrate( UART_PORT[pUartDevice->Port], g_UartBaudTab[pUartDevice->Baudrate] );
-	}
-	#endif
-}
-
-/**
-* @brief  UART设置接收超时时间
-* @param  pUartDevice: 要操作的串口设备
-* @retval 无
-*/
-void hal_uart_set_timeout( UartDeviceType *pUartDevice )
-{
-
-}
+UartDeviceType	g_UartDevice[UART_NUMBER] = { 
+	UartDeviceModbusDefault, 
+	UartDeviceInnerScreenDefault ,
+	UartDeviceExternalScreenDefault , 
+	UartDeviceUSART3Default , 
+	UartDeviceUSART5Default,
+	UartDeviceUSART6Default,
+};
 
 /**
 * @brief  UART发送
@@ -286,308 +35,149 @@ void hal_uart_set_timeout( UartDeviceType *pUartDevice )
 */
 UINT8 hal_uart_tx_bytes( UartDeviceType *pUartDevice, UINT8 *pTxData, UINT16 TxLength )
 {
-	if(UART_EXTERN == pUartDevice->Port)//内屏 USART1
+	if(UART_INNER_SCREEN == pUartDevice->Port)//内部显示屏的串口通信  USART1
 	{
 		HAL_UART_Transmit_DMA(&huart1, pTxData, TxLength); 
 	}
-	else if(UART_EXTERN2 == pUartDevice->Port)//外屏USART2
+	else if(UART_EXTERNAL_SCREEN == pUartDevice->Port)//外部显示屏的串口通信 USART2
 	{
 		HAL_UART_Transmit_DMA(&huart2, pTxData, TxLength); 
 	}	
-	else if(UART_COM == pUartDevice->Port)//RS485 UART4
+	else if(UART_MODBUS == pUartDevice->Port)//RS485的串口通信 UART4
 	{
 		//RS485发送时需要使能发送
 		HAL_GPIO_WritePin(STM32_RS485_EN_GPIO_Port, STM32_RS485_EN_Pin, GPIO_PIN_SET);
 		HAL_UART_Transmit_DMA(&huart4, pTxData, TxLength); 
 	}
+	else if(UART3_CHANNEL_XX == pUartDevice->Port)//USART3
+	{
+		HAL_UART_Transmit_DMA(&huart3, pTxData, TxLength); 
+	}
+	else if(UART5_CHANNEL_YY == pUartDevice->Port)//USART5
+	{
+		HAL_UART_Transmit_DMA(&huart5, pTxData, TxLength); 
+	}	
+	else if(UART6_CHANNEL_ZZ == pUartDevice->Port)//USART6
+	{
+		HAL_UART_Transmit_DMA(&huart6, pTxData, TxLength); 
+	}
 	return 0;
 }
 
 /**
-* @brief  UART使用DMA接收
+* @brief  UART通道选择
 * @param  pUartDevice: 要操作的串口设备
-* @param  pRxData: 接收数据缓冲区
-* @param  RxLength: 数据字节数
-* @retval 无
+* @param  channel: 需要选择的通道
+* @retval void
 */
-void hal_uart_dma_rx_start( UartDeviceType *pUartDevice, UINT8 *pRxData, UINT16 RxLength )
+void hal_uart_choice( UartDeviceType *pUartDevice, UINT8 ba_Vlu )
 {
-	#if 0 
-	//drv_dma_stream_disable( UART_RX_DMA_CHANNEL[pUartDevice->Port] );
-	// 清中断标志
-	drv_uart_clear_it_pending_bit( UART_PORT[pUartDevice->Port], USART_IT_RTO );
-	drv_uart_clear_it_pending_bit( UART_PORT[pUartDevice->Port], USART_IT_LBD );
-	drv_uart_clear_it_pending_bit( UART_PORT[pUartDevice->Port], USART_IT_ERR );
-	//使能DMA 使能前清楚标志位
-	//drv_dma_stream_clear_flag_status( UART_RX_DMA_FLAG_GIF[ pUartDevice->Port ] );
-	drv_dma_stream_start_periph_to_mem( UART_RX_DMA_CHANNEL[pUartDevice->Port], (UINT32)(pRxData), RxLength );
-	#endif
-}
+//UART3  |	BA：00(选0) 		BA：01(选1)			BA：10(选2)    	BA：11(选3)
+//		 |	外置：USB扫码枪   	外置：RS232扫码枪	 内置：扫码模组   外置：打印模组
 
-///**
-//* @brief  UART重新启动DMA接收
-//* @param  pUartDevice: 要操作的串口设备
-//* @retval 无
-//*/
-//void hal_uart_dma_rx_restart( UartDeviceType *pUartDevice )
-//{
-//    *pUartDevice->pRxFinishFlag = 0;
-//    *pUartDevice->pRxLength = 0;
-//
-//    // 重新设置接收地址和长度，并启动DMA接收
-//    drv_dma_set_mem_addr_length( UART_RX_DMA_CHANNEL[pUartDevice->Port], (UINT32)pUartDevice->pRxBuffer, pUartDevice->RxBytesMax );
-//    drv_dma_stream_enable( UART_RX_DMA_CHANNEL[pUartDevice->Port] );
-//}
+//UART5  |	BA：00(选0) 		BA：01(选1)			BA：10(选2)    	BA：11(选3)	
+//		 |	内置：无线WIFI		外置：RS232扫码枪	 内置：扫码模组	  外置：打印模组
 
-/**
-* @brief  串口接收中断使能
-* @note   在主任务进行关键数据计算的时候使用
-* @param  pUartDevice: 要操作的串口设备
-* @retval 无
-*/
-void hal_uart_rx_irq_enable( UartDeviceType *pUartDevice )
-{
-	#if 0 
-	if( pUartDevice->RxTxMode == UART_RX_TX_MODE_INTERRUPT )
+//USART6 |	A：00(选0) 			BA：01(选1)			BA：10(选2)    	BA：11(选3)
+//		 |	内置：无线WIFI		外置：USB扫码枪		 内置：扫码模组	  外置：打印模组
+	//	
+	switch(pUartDevice->Port)
 	{
-		// 使能串口接收中断
-		drv_uart_it_enable( UART_PORT[pUartDevice->Port], USART_IT_RXNE );
-	}
-	else if( pUartDevice->RxTxMode == UART_RX_TX_MODE_DMA )
-	{
-		drv_uart_it_enable( UART_PORT[pUartDevice->Port], USART_IT_RTO );
-	}
-	#endif
-}
-
-/**
-* @brief  串口接收中断禁止
-* @note   在主任务进行关键数据计算的时候使用
-* @param  pUartDevice: 要操作的串口设备
-* @retval 无
-*/
-void hal_uart_rx_irq_disable( UartDeviceType *pUartDevice )
-{
-	#if 0 
-	if( pUartDevice->RxTxMode == UART_RX_TX_MODE_INTERRUPT )
-	{
-		// 使能串口接收中断
-		drv_uart_it_disable( UART_PORT[pUartDevice->Port], USART_IT_RXNE );
-	}
-	else if( pUartDevice->RxTxMode == UART_RX_TX_MODE_DMA )
-	{
-		drv_uart_it_disable( UART_PORT[pUartDevice->Port], USART_IT_RTO );
-	}
-	#endif
-}
-
-///**
-//* @brief  串口等待方式接收一个字节
-//* @param  pUartDevice: 要操作的串口设备
-//* @param  pDat: 接收的字节
-//* @param  TimeOut: 超时时间，单位us
-//* @retval 0：成功 1：失败
-//*/
-//UINT8 hal_uart_get_byte_with_timeout( UartDeviceType *pUartDevice, UINT8 *pDat, UINT32 TimeOut )
-//{
-//	UsartIsrType Sr;
-//	while (TimeOut--)
-//	{
-//		Sr.all = UART_PORT[pUartDevice->Port]->ISR.all;
-//		if (Sr.bit.RXNE != RESET)
-//		{
-//			*pDat = (UINT8)(UART_PORT[pUartDevice->Port]->RDR.all & 0xFF);
-//			return 0;
-//		}
-//		hal_delay_us(1);
-//	}
-//	return 1;
-//}
-
-
-
-#if 0 //中断服务函数在生成工具里面有了 不需要重定向
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////																													////////
-/////////										/** 中断服务函数 */															////////
-/////////																													////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-/**
-* @brief  串口1 DMA发送中断服务函数
-* @retval 无
-*/
-void uart_com_tx_dma_isr()
-{
-	if( drv_dma_stream_get_it_status( UART_TX_DMA_CHANNEL[UART_COM], UART_TX_DMA_IT_TCIF[UART_COM] ) )
-	{
-		drv_dma_stream_disable( UART_TX_DMA_CHANNEL[UART_COM] );
-		drv_uart_it_enable( UART_PORT[UART_COM], USART_IT_TC );
-		drv_dma_stream_clear_it_pending_bit( UART_TX_DMA_IT_TCIF[UART_COM] );
-	}
-}
-
-/**
-* @brief  串口1中断服务函数
-* @retval 无
-*/
-void uart_com_isr( void )
-{
-	UsartIsrType l_Sr;
-	l_Sr.all = UART_PORT[UART_COM]->ISR.all;
-
-	if( l_Sr.bit.RTOF == 1 )		//接收超时中断
-	{
-		drv_uart_clear_it_pending_bit( UART_PORT[UART_COM], USART_IT_RTO );
-		drv_dma_stream_disable( UART_RX_DMA_CHANNEL[UART_COM] );
-
-		// 处理数据
-		*g_UartDevice[UART_COM].pRxLength = g_UartDevice[UART_COM].RxBytesMax - drv_dma_stream_get_left_length( UART_RX_DMA_CHANNEL[UART_COM] );
-		*(g_UartDevice[UART_COM].pRxFinishFlag) = 1;
-		//      hal_3048_msg_packet_process( &g_UartDevice[UART_COM] );
-			  //*g_UartDevice[ UART_COM ].pRxFinishFlag = 0;
-			  //*g_UartDevice[ UART_COM ].pRxLength = 0;
-
-			  // 重新设置接收地址和长度，并启动DMA接收
-		drv_dma_set_mem_addr_length( UART_RX_DMA_CHANNEL[UART_COM], (UINT32)g_UartDevice[UART_COM].pRxBuffer, g_UartDevice[UART_COM].RxBytesMax );
-		drv_dma_stream_enable( UART_RX_DMA_CHANNEL[UART_COM] );
-	}
-	else if( l_Sr.bit.RXNE == 1 )	// 接收数据中断
-	{
-		drv_uart_clear_it_pending_bit( UART_PORT[UART_COM], USART_IT_RXNE );
-		g_UartDevice[UART_COM].pRxBuffer[*g_UartDevice[UART_COM].pRxLength++] = drv_uart_rx_byte( UART_PORT[UART_COM] );
-
-		//drv_uart_it_enable(UART_PORT[ UART_COM ], USART_IT_RTO );
-	}
-	else if( (l_Sr.bit.TXE == 1) || (l_Sr.bit.TC == 1) )
-	{
-		if( l_Sr.bit.TC == 1 )
-		{
-			drv_uart_clear_it_pending_bit( UART_PORT[UART_COM], USART_IT_TC );
-			g_UartDevice[UART_COM].TxBusyFlag = 0;
-			// 方式完成，根据配置切换到接收模式
-			if( (g_UartDevice[UART_COM].LinkType == UART_LINK_RX_TX_HALF) || (g_UartDevice[UART_COM].LinkType == UART_LINK_RX_TX_HALF_ENABE) )
+		case UART3_CHANNEL_XX:
+			switch(ba_Vlu)
 			{
-				hal_uart_set_rx_mode( &(g_UartDevice[UART_COM]) );
+				case 0x00:
+					HAL_GPIO_WritePin(MCU_UART4_C_B_GPIO_Port, MCU_UART4_C_B_Pin, GPIO_PIN_RESET);
+					HAL_GPIO_WritePin(MCU_UART4_C_A_GPIO_Port, MCU_UART4_C_A_Pin, GPIO_PIN_RESET);
+				break;
+				case 0x01:
+					HAL_GPIO_WritePin(MCU_UART4_C_B_GPIO_Port, MCU_UART4_C_B_Pin, GPIO_PIN_RESET);
+					HAL_GPIO_WritePin(MCU_UART4_C_A_GPIO_Port, MCU_UART4_C_A_Pin, GPIO_PIN_SET);
+				break;
+				case 0x10:
+					HAL_GPIO_WritePin(MCU_UART4_C_B_GPIO_Port, MCU_UART4_C_B_Pin, GPIO_PIN_SET);
+					HAL_GPIO_WritePin(MCU_UART4_C_A_GPIO_Port, MCU_UART4_C_A_Pin, GPIO_PIN_RESET);
+				break;
+				case 0x11:
+					HAL_GPIO_WritePin(MCU_UART4_C_B_GPIO_Port, MCU_UART4_C_B_Pin, GPIO_PIN_SET);
+					HAL_GPIO_WritePin(MCU_UART4_C_A_GPIO_Port, MCU_UART4_C_A_Pin, GPIO_PIN_SET);
+				break;
+				default:
+					HAL_GPIO_WritePin(MCU_UART4_C_B_GPIO_Port, MCU_UART4_C_B_Pin, GPIO_PIN_SET);
+					HAL_GPIO_WritePin(MCU_UART4_C_A_GPIO_Port, MCU_UART4_C_A_Pin, GPIO_PIN_RESET);
+				break;
 			}
-		}
-		else if( l_Sr.bit.TXE == 1 )
-		{
-			drv_uart_clear_it_pending_bit( UART_PORT[UART_COM], USART_IT_TXE );
-			if( g_UartDevice[UART_COM].TxCounter >= g_UartDevice[UART_COM].TxLength )
+		break;
+		case UART5_CHANNEL_YY:
+			switch(ba_Vlu)
 			{
-				drv_uart_it_disable( UART_PORT[UART_COM], USART_IT_TXE );
-				// 清发送完成中断标志，并打开发送完成中断
-				drv_uart_clear_it_pending_bit( UART_PORT[UART_COM], USART_IT_TC );
-				drv_uart_it_enable( UART_PORT[UART_COM], USART_IT_TC );
+				case 0x00:
+					HAL_GPIO_WritePin(MCU_UART5_C_B_GPIO_Port, MCU_UART5_C_B_Pin, GPIO_PIN_RESET);
+					HAL_GPIO_WritePin(MCU_UART5_C_A_GPIO_Port, MCU_UART5_C_A_Pin, GPIO_PIN_RESET);
+				break;
+				case 0x01:
+					HAL_GPIO_WritePin(MCU_UART5_C_B_GPIO_Port, MCU_UART5_C_B_Pin, GPIO_PIN_RESET);
+					HAL_GPIO_WritePin(MCU_UART5_C_A_GPIO_Port, MCU_UART5_C_A_Pin, GPIO_PIN_SET);
+				break;
+				case 0x10:
+					HAL_GPIO_WritePin(MCU_UART5_C_B_GPIO_Port, MCU_UART5_C_B_Pin, GPIO_PIN_SET);
+					HAL_GPIO_WritePin(MCU_UART5_C_A_GPIO_Port, MCU_UART5_C_A_Pin, GPIO_PIN_RESET);
+				break;
+				case 0x11:
+					HAL_GPIO_WritePin(MCU_UART5_C_B_GPIO_Port, MCU_UART5_C_B_Pin, GPIO_PIN_SET);
+					HAL_GPIO_WritePin(MCU_UART5_C_A_GPIO_Port, MCU_UART5_C_A_Pin, GPIO_PIN_SET);
+				break;
+				default:
+					HAL_GPIO_WritePin(MCU_UART5_C_B_GPIO_Port, MCU_UART5_C_B_Pin, GPIO_PIN_RESET);
+					HAL_GPIO_WritePin(MCU_UART5_C_A_GPIO_Port, MCU_UART5_C_A_Pin, GPIO_PIN_RESET);
+				break;
 			}
-			else
+		break;
+		case UART6_CHANNEL_ZZ:
+			switch(ba_Vlu)
 			{
-				drv_uart_tx_byte( UART_PORT[UART_COM], g_UartDevice[UART_COM].pTxBuffer[g_UartDevice[UART_COM].TxCounter++] );
+				case 0x00:
+					HAL_GPIO_WritePin(MCU_USART6_C_B_GPIO_Port, MCU_USART6_C_B_Pin, GPIO_PIN_RESET);
+					HAL_GPIO_WritePin(MCU_USART6_C_A_GPIO_Port, MCU_USART6_C_A_Pin, GPIO_PIN_RESET);
+				break;
+				case 0x01:
+					HAL_GPIO_WritePin(MCU_USART6_C_B_GPIO_Port, MCU_USART6_C_B_Pin, GPIO_PIN_RESET);
+					HAL_GPIO_WritePin(MCU_USART6_C_A_GPIO_Port, MCU_USART6_C_A_Pin, GPIO_PIN_SET);
+				break;
+				case 0x10:
+					HAL_GPIO_WritePin(MCU_USART6_C_B_GPIO_Port, MCU_USART6_C_B_Pin, GPIO_PIN_SET);
+					HAL_GPIO_WritePin(MCU_USART6_C_A_GPIO_Port, MCU_USART6_C_A_Pin, GPIO_PIN_RESET);
+				break;
+				case 0x11:
+					HAL_GPIO_WritePin(MCU_USART6_C_B_GPIO_Port, MCU_USART6_C_B_Pin, GPIO_PIN_SET);
+					HAL_GPIO_WritePin(MCU_USART6_C_A_GPIO_Port, MCU_USART6_C_A_Pin, GPIO_PIN_SET);
+				break;
+				default:
+					HAL_GPIO_WritePin(MCU_USART6_C_B_GPIO_Port, MCU_USART6_C_B_Pin, GPIO_PIN_SET);
+					HAL_GPIO_WritePin(MCU_USART6_C_A_GPIO_Port, MCU_USART6_C_A_Pin, GPIO_PIN_SET);
+				break;
 			}
-		}
-	}
-	else if( (l_Sr.bit.PE == 1) || (l_Sr.bit.FE == 1) || (l_Sr.bit.NF == 1) || (l_Sr.bit.ORE == 1) || (l_Sr.bit.LBDF == 1) )
-	{
-		//错误处理
-		hal_uart_port_init( &g_UartDevice[UART_COM] );
+		break;
+		default :
+		break;
 	}
 }
-
 
 /**
-* @brief  串口 触摸屏 DMA发送中断服务函数
-* @retval 无
+* @brief  UART物理通道选择
+* @param  void
+* @retval void
 */
-void uart_TouchSreen_tx_dma_isr()
+void USART_HW_Choice(void)
 {
-	if( drv_dma_stream_get_it_status( UART_TX_DMA_CHANNEL[UART_EXTERN], UART_TX_DMA_IT_TCIF[UART_EXTERN] ) )
-	{
-		drv_dma_stream_disable( UART_TX_DMA_CHANNEL[UART_EXTERN] );
-		drv_uart_it_enable( UART_PORT[UART_EXTERN], USART_IT_TC );
-		drv_dma_stream_clear_it_pending_bit( UART_TX_DMA_IT_TCIF[UART_EXTERN] );
-	}
+	UartDeviceType *pUartDevice;
+	//UART3_CHANNEL_XX 默认为 内置：扫码模组
+	pUartDevice = &g_UartDevice[UART3_CHANNEL_XX];
+	pUartDevice->uart_choice(pUartDevice,pUartDevice->uartChoice_baVlu);
+	//UART5_CHANNEL_YY 默认为 内置：无线WIFI
+	pUartDevice = &g_UartDevice[UART5_CHANNEL_YY];
+	pUartDevice->uart_choice(pUartDevice,pUartDevice->uartChoice_baVlu);
+	//UART6_CHANNEL_ZZ 默认为 外置：打印模组
+	pUartDevice = &g_UartDevice[UART6_CHANNEL_ZZ];
+	pUartDevice->uart_choice(pUartDevice,pUartDevice->uartChoice_baVlu);
 }
-
-/**
-* @brief  串口 触摸屏 中断服务函数
-* @retval 无
-*/
-void uart_TouchSreen_isr( void )
-{
-	volatile UsartIsrType l_Sr;
-	UsartCr1Type l_Cr1;
-
-	l_Sr.all = UART_PORT[UART_EXTERN]->ISR.all;
-	l_Cr1.all = UART_PORT[UART_EXTERN]->CR1.all;
-
-	if( l_Sr.bit.RTOF == 1 )		//接收超时中断
-	{
-		if( l_Cr1.bit.RTOIE == 1 )
-		{
-			drv_uart_clear_it_pending_bit( UART_PORT[UART_EXTERN], USART_IT_RTO );
-			drv_dma_stream_disable( UART_RX_DMA_CHANNEL[UART_EXTERN] );
-
-			// 处理数据
-			*g_UartDevice[UART_EXTERN].pRxLength = g_UartDevice[UART_EXTERN].RxBytesMax - drv_dma_stream_get_left_length( UART_RX_DMA_CHANNEL[UART_EXTERN] );
-			*(g_UartDevice[UART_EXTERN].pRxFinishFlag) = 1;
-			app_uart_extern_msg_packet_process( &g_UartDevice[UART_EXTERN] );
-			// 重新设置接收地址和长度，并启动DMA接收
-			drv_dma_set_mem_addr_length( UART_RX_DMA_CHANNEL[UART_EXTERN], (UINT32)g_UartDevice[UART_EXTERN].pRxBuffer, g_UartDevice[UART_EXTERN].RxBytesMax );
-			drv_dma_stream_enable( UART_RX_DMA_CHANNEL[UART_EXTERN] );
-		}
-	}
-	//else if (l_Sr.bit.RXNE == 1)	// 接收数据中断
-	//{
- //       if( l_Cr1.bit.RXNEIE == 1 )
- //       {
- //           drv_uart_clear_it_pending_bit( UART_PORT[UART_EXTERN], USART_IT_RXNE );
- //           g_UartDevice[UART_EXTERN].pRxBuffer[*g_UartDevice[UART_EXTERN].pRxLength++] = drv_uart_rx_byte( UART_PORT[UART_EXTERN] );
-	//	    //drv_uart_it_enable(UART_PORT[ UART_COM ], USART_IT_RTO );
- //       }
-	//}
-//	else if( ( l_Sr.bit.TXE == 1 ) || ( l_Sr.bit.TC == 1 ) )
-//	{
-	if( l_Cr1.bit.TCIE == 1 )
-	{
-		if( l_Sr.bit.TC == 1 )
-		{
-			drv_uart_clear_it_pending_bit( UART_PORT[UART_EXTERN], USART_IT_TC );
-			g_UartDevice[UART_EXTERN].TxBusyFlag = 0;
-			// 方式完成，根据配置切换到接收模式
-			if( (g_UartDevice[UART_EXTERN].LinkType == UART_LINK_RX_TX_HALF) || (g_UartDevice[UART_EXTERN].LinkType == UART_LINK_RX_TX_HALF_ENABE) )
-			{
-				hal_uart_set_rx_mode( &(g_UartDevice[UART_EXTERN]) );
-			}
-		}
-	}
-	//		else if( l_Sr.bit.TXE == 1 )
-	//		{
-	//            if( l_Cr1.bit.TXEIE == 1 )
-	//            {
-	//                drv_uart_clear_it_pending_bit( UART_PORT[UART_EXTERN], USART_IT_TXE );
-	//                if( g_UartDevice[UART_EXTERN].TxCounter >= g_UartDevice[UART_EXTERN].TxLength )
-	//                {
-	//                    drv_uart_it_disable( UART_PORT[UART_EXTERN], USART_IT_TXE );
-	//                    // 清发送完成中断标志，并打开发送完成中断
-	//                    drv_uart_clear_it_pending_bit( UART_PORT[UART_EXTERN], USART_IT_TC );
-	//                    drv_uart_it_enable( UART_PORT[UART_EXTERN], USART_IT_TC );
-	//                }
-	//                else
-	//                {
-	//                    drv_uart_tx_byte( UART_PORT[UART_EXTERN], g_UartDevice[UART_EXTERN].pTxBuffer[g_UartDevice[UART_EXTERN].TxCounter++] );
-	//                }
-	//            }
-	//		}		
-	//	}
-
-	if( (l_Sr.bit.PE == 1) || (l_Sr.bit.FE == 1) || (l_Sr.bit.NF == 1) || (l_Sr.bit.ORE == 1) || (l_Sr.bit.LBDF == 1) )
-	{
-		//错误处理
-		hal_uart_port_init( &g_UartDevice[UART_EXTERN] );
-	}
-}
-#endif
-
-

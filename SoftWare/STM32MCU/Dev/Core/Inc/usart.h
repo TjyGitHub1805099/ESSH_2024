@@ -73,7 +73,6 @@ typedef struct
 }USART_RECEIVETYPE;  
    
 extern USART_RECEIVETYPE Usart1AsScreen1Type;
-extern uint8_t u_SprintfBuf[256];//閿熸枻鎷烽敓鏂ゆ嫹sprintf閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹鍧€閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓锟�
 /* USER CODE END Private defines */
 
 void MX_UART4_Init(void);
@@ -84,12 +83,11 @@ void MX_USART3_UART_Init(void);
 void MX_USART6_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-void Usart1AsScreen1SendData_DMA(uint8_t *pdata, uint16_t Length);
 void Usart1AsScreen1Receive_IDLE(UART_HandleTypeDef *huart);
 void Usart2AsScreen2Receive_IDLE(UART_HandleTypeDef *huart);
+void Usart3WithXXReceive_IDLE(UART_HandleTypeDef *huart);
 void Usart4WithRS485Receive_IDLE(UART_HandleTypeDef *huart);
-void Usart5WithXXReceive_IDLE(UART_HandleTypeDef *huart);
-void Usart3WithYYReceive_IDLE(UART_HandleTypeDef *huart);
+void Usart5WithYYReceive_IDLE(UART_HandleTypeDef *huart);
 void Usart6WithZZReceive_IDLE(UART_HandleTypeDef *huart);
 
 /* USER CODE END Prototypes */

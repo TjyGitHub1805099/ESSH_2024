@@ -32,6 +32,8 @@ typedef signed      int         INT32;      /**< 带符号32位整数 */
 typedef unsigned    long long   UINT64;     /**< 无符号64位整数 */
 typedef signed      long long   INT64;      /**< 带符号64位整数 */
 
+#define NULL_PTR                    (0)
+
 typedef union
 {
 	UINT32 U32;

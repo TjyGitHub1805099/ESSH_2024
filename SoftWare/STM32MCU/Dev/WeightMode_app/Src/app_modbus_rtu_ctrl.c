@@ -22,19 +22,15 @@ ModbusRtuType g_ModbusRtu = ModbusRtuDefault;
 //==ModbusRtu initial
 void ModbusRtu_init(void)
 {
-	//
-	g_ModbusRtu.pUartDevice = &g_UartDevice[UART_COM];
+	g_ModbusRtu.pUartDevice = &g_UartDevice[UART_MODBUS];
 	//
 	g_ModbusRtu.pUartDevice->pRxLength = &g_ModbusRtu.RxLength;
 	g_ModbusRtu.pUartDevice->pRxFinishFlag = &g_ModbusRtu.RxFinishFlag;
 	g_ModbusRtu.pUartDevice->pTxBuffer = &g_ModbusRtu.txData[0];
 	g_ModbusRtu.pUartDevice->pRxBuffer = &g_ModbusRtu.rxDataUart[0];
 	//
-	//
 	g_ModbusRtu.RxLength = 0;					/**< 接收字节数 */
 	g_ModbusRtu.RxFinishFlag = FALSE;			/**< 接收完成标志 */
-	//
-	g_ModbusRtu.pUartDevice->init(g_ModbusRtu.pUartDevice);
 }
 
 

@@ -37,7 +37,7 @@
 #include "app_modbus_rtu_ctrl.h"
 #include "app_t5l_ctrl.h"
 #include "app_syspara.h"
-
+#include "hal_uart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -150,6 +150,7 @@ int main(void)
   #endif
 
 #if 1
+    USART_HW_Choice();
 	key_init();
 	led_init();
 	hx711_init();

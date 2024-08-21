@@ -95,9 +95,9 @@ typedef enum SlaveStateType
 typedef struct structModbusRtuType
 {
 	UartDeviceType *pUartDevice;        /**< 串口设备 */
-	UINT8 	rxData[MODBUS_RTU_UART_DATA_LEN];
-	UINT8 	txData[MODBUS_RTU_UART_DATA_LEN];
-	UINT8 	rxDataUart[MODBUS_RTU_UART_DATA_LEN];
+	UINT8 	rxData[MODBUS_RTU_UART_DATA_LEN];/**< 接收到总线的数据CRC过了copy的数据 */
+	UINT8 	txData[MODBUS_RTU_UART_DATA_LEN];/**< 发送到总线的数据 */
+	UINT8 	rxDataUart[MODBUS_RTU_UART_DATA_LEN];/**< UART总线数据 */
 	UINT16	RxLength;					/**< 接收字节数 */
 	UINT8 	RxFinishFlag;				/**< 接收完成标志 */	
 	UINT32	sysTick;
@@ -126,29 +126,29 @@ typedef struct structModbusRtuType
 #define SLAVE_DATA_VALID (0XA5)
 /** ModbusRtu设备默认配置 */
 #define ModbusRtuDefault   { \
-	&g_UartDevice[UART_COM], \
-	{0}, \
-	{0}, \
-	{0}, \
-	0,\
-	0,\
-	0,\
-	{{0}},\
-	MasterState_Idle,\
-	MasterEvent_Tx_IDLE,\
-	MasterEvent_Rx_IDLE,\
-	0,\
-	0,\
-	SlaveState_Idle,\
-	SlaveEvent_Tx_IDLE,\
-	SlaveEvent_Rx_Idle,\
-	0,\
-	0,\
-	0,\
-	FALSE,\
-	FALSE,\
-	0,\
-	}
+	.pUartDevice = &g_UartDevice[UART_MODBUS], \
+	.rxData = {0}, \
+	.txData = {0}, \
+	.rxDataUart = {0}, \
+	.RxLength = 0,\
+	.RxFinishFlag = 0,\
+	.sysTick = 0,\
+	.MultWeightData = {{0}},\
+	.masterState = MasterState_Idle,\
+	.masterTxMask = MasterEvent_Tx_IDLE,\
+	.masterRxMask = MasterEvent_Rx_IDLE,\
+	.masterTxDiffTick = 0,\
+	.masterMaxWaitRxTick = 0,\
+	.slaveState = SlaveState_Idle,\
+	.slaveTxMask = SlaveEvent_Tx_IDLE,\
+	.slaveRxMask = SlaveEvent_Rx_Idle,\
+	.slaveTxDiffTick = 0,\
+	.needSendLen = 0,\
+	.slaveID = 0,\
+	.removeWeight_Slef = FALSE,\
+	.removeWeight_Other = FALSE,\
+	.dataValid = 0,\
+}
 	
 extern ModbusRtuType g_ModbusRtu;
 

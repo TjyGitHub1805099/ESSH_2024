@@ -440,8 +440,8 @@ typedef struct structSdweType
 	0,/**/\
 	0,/**/\
 	\
-	UART_EXTERN,/**< uartIndex ： 串口的序号 */\
-	&g_UartDevice[UART_EXTERN],/**< pUartDevice：串口设备 */\
+	UART_INNER_SCREEN,/**< uartIndex ： 串口的序号 */\
+	&g_UartDevice[UART_INNER_SCREEN],/**< pUartDevice：串口设备 */\
 	\
 	0,/**< version：屏幕的版本值 */\
 	\
@@ -505,8 +505,8 @@ typedef struct structSdweType
 	0,/**/\
 	0,/**/\
 	\
-	UART_EXTERN2,/**< uartIndex ： 串口的序号 */\
-	&g_UartDevice[UART_EXTERN2],/**< pUartDevice：串口设备 */\
+	UART_EXTERNAL_SCREEN,/**< uartIndex ： 串口的序号 */\
+	&g_UartDevice[UART_EXTERNAL_SCREEN],/**< pUartDevice：串口设备 */\
 	\
 	0,/**< version：屏幕的版本值 */\
 	\

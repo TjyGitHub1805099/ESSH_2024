@@ -453,7 +453,7 @@ static void screenPrivate_Init(T5LType *t5lCtx)
 		g_i16ColorOtherChanel[i]=T5L_CHANEL_WEIGHT_NOT_EQUAL;
 	}
 	//
-	t5lCtx->pUartDevice->init(t5lCtx->pUartDevice);
+	//t5lCtx->pUartDevice->init(t5lCtx->pUartDevice);
 }
 
 //所有屏幕（内屏+外屏）初始化

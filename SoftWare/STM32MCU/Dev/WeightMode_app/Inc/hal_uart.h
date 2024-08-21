@@ -19,75 +19,15 @@
 #include "typedefine.h"
 #include "stm32f4xx.h"
 
-/* 硬件端口资源定义 */
-// UART1 接485总线 , 实际是 STM32F303 UASRT3 , 带DMA功能
-#define UART1_PORT							USART3
-#define UART1_PORT_IRQn						USART3_IRQn
-#define UART1_PORT_GPIO_AF					GPIO_AF7_USART3
-
-#define UART1_TX_GPIO_PORT					GPIOB
-#define UART1_TX_GPIO_PIN					GPIO_PIN_10
-#define UART1_TX_PIN_SOURCE					GPIO_PINSOURCE10
-
-#define UART1_RX_GPIO_PORT					GPIOB
-#define UART1_RX_GPIO_PIN					GPIO_PIN_11
-#define UART1_RX_PIN_SOURCE					GPIO_PINSOURCE11
-
-#define UART1_TX_DMA						DMA1
-#define UART1_TX_DMA_CHANNEL            	DMA1_Channel2
-#define UART1_TX_DMA_IRQn              	 	DMA1_Channel2_IRQn
-#define UART1_TX_DMA_IT_TCIF				DMA1_IT_TC2
-
-#define UART1_RX_DMA						DMA1
-#define UART1_RX_DMA_CHANNEL            	DMA1_Channel3
-
-/** RS485总线使能口线定义 */
-#define UART1_DEA_GPIO_PORT					GPIOA
-#define UART1_DEA_GPIO_PIN					GPIO_PIN_10
-
-
-// UART2 接DIWEN显示屏 , 实际是 STM32F303 UASRT1 , 带DMA功能
-#define UART2_PORT							USART1
-#define UART2_PORT_IRQn						USART1_IRQn
-#define UART2_PORT_GPIO_AF					GPIO_AF7_USART1
-
-#define UART2_TX_GPIO_PORT					GPIOC
-#define UART2_TX_GPIO_PIN					GPIO_PIN_4
-#define UART2_TX_PIN_SOURCE					GPIO_PINSOURCE4
-
-#define UART2_RX_GPIO_PORT					GPIOC
-#define UART2_RX_GPIO_PIN					GPIO_PIN_5
-#define UART2_RX_PIN_SOURCE					GPIO_PINSOURCE5
-
-#define UART2_TX_DMA						DMA1
-#define UART2_TX_DMA_CHANNEL            	DMA1_Channel4
-#define UART2_TX_DMA_IRQn              	 	DMA1_Channel4_IRQn
-#define UART2_TX_DMA_IT_TCIF				DMA1_IT_TC4
-
-#define UART2_RX_DMA						DMA1
-#define UART2_RX_DMA_CHANNEL            	DMA1_Channel5
-
-/** RS485总线使能口线定义 */
-#define UART2_DEA_GPIO_PORT					(0)//GPIOB
-#define UART2_DEA_GPIO_PIN					(0)//GPIO_PIN_10
-
-#if 0//因为采用DMA+IDLE接收，处理在UART中断中处理 
-/** 重新定义中断 */
-//#define uart_com_isr						USART3_IRQHandler
-//#define uart_com_tx_dma_isr				DMA1_Channel2_IRQHandler
-
-/** 重新定义中断 ：接触摸屏的串口*/
-/** RX中断 和 DMA TX中断 */
-//#define uart_TouchSreen_isr				USART1_IRQHandler
-//#define uart_TouchSreen_tx_dma_isr		DMA1_Channel4_IRQHandler
-#endif
-
 /** UART硬件端口定义 */
 typedef enum UartPortType
 {
-	UART_COM = 0,//RS485的串口通信 UART4
-	UART_EXTERN,//显示屏的串口通信 UART1
-	UART_EXTERN2,//显示屏的串口通信 UART2
+	UART_MODBUS = 0,//RS485的串口通信 UART4
+	UART_INNER_SCREEN = 1,//内部显示屏的串口通信  USART1
+	UART_EXTERNAL_SCREEN = 2,//外部显示屏的串口通信 USART2
+	UART3_CHANNEL_XX = 3,//USART3外部接口选择
+	UART5_CHANNEL_YY = 4,//USART5外部接口选择
+	UART6_CHANNEL_ZZ = 5,//USART6外部接口选择
 	UART_NUMBER
 }enumUartPortType;
 
@@ -152,7 +92,7 @@ typedef struct structUartDeviceType
 	enumUartBaudType		Baudrate;					/**< 串口比特率 */
 	enumUartDataBitType		DataBit;					/**< 串口数据位 */
 	enumUartStopBitType		StopBit;					/**< 串口停止位 */
-	uint32_t	Parity;						/**< 串口奇偶校验 */
+	uint32_t	Parity;									/**< 串口奇偶校验 */
 	enumUartRxTxModeType	RxTxMode;					/**< 串口接收发送方式 */
 	UINT8                   TxBusyFlag;					/**< 发送忙标志 */
 	UINT16                  TxLength;					/**< 发送字节数 */
@@ -162,165 +102,141 @@ typedef struct structUartDeviceType
 	UINT8                   *pTxBuffer;					/**< 发送缓冲区 */
 	UINT8                   *pRxBuffer;					/**< 接收缓冲区 */
 	UINT16					RxBytesMax;					/**< 最多接收字节数，用在DMA接收模式下计算实际接收字节数量 */
-	void( *init )( struct structUartDeviceType *pUartDevice );
-	void( *set_braudrate )( struct structUartDeviceType *pUartDevice, enumUartBaudType Baudrate );
-	void( *set_timeout )( struct structUartDeviceType *pUartDevice );
-	UINT8( *tx_bytes )( struct structUartDeviceType *pUartDevice, UINT8 *pTxData, UINT16 TxLength );
-	void( *irq_enable )( struct structUartDeviceType *pUartDevice );
-	void( *irq_disable )( struct structUartDeviceType *pUartDevice );
+	UINT8( *tx_bytes )( struct structUartDeviceType *pUartDevice, UINT8 *pTxData, UINT16 TxLength );/**< 发送函数 */
+	void( *uart_choice )( struct structUartDeviceType *pUartDevice, UINT8 ba_Vlu );/**< 物理端口选择函数 */
+	UINT8 uartChoice_baVlu;/**< 物理端口选择 */
 }UartDeviceType;
 
-#define UartDevice1Default { \
-    UART_COM, \
-	UART_LINK_RX_TX_HALF_ENABE, \
-	UART_BAUD_115200, \
-	UART_DATABIT_8, \
-	UART_STOPBIT_1, \
-	UART_PARITY_NONE, \
-	UART_RX_TX_MODE_DMA, \
-	0, \
-	0, \
-	0, \
-	0, \
-	0, \
-	0, \
-	0, \
-	4096, \
-	hal_uart_port_init, \
-	hal_uart_set_braudrate, \
-	hal_uart_set_timeout, \
-	hal_uart_tx_bytes, \
-	hal_uart_rx_irq_enable, \
-	hal_uart_rx_irq_disable \
-}
-
-#define UartDevice2Default { \
-    UART_EXTERN, \
-	UART_LINK_RX_TX_FULL, \
-	UART_BAUD_115200, \
-	UART_DATABIT_8, \
-	UART_STOPBIT_1, \
-	UART_PARITY_NONE, \
-	UART_RX_TX_MODE_DMA, \
-	0, \
-	0, \
-	0, \
-	0, \
-	0, \
-	0, \
-	0, \
-	4096, \
-	hal_uart_port_init, \
-	hal_uart_set_braudrate, \
-	hal_uart_set_timeout, \
-	hal_uart_tx_bytes, \
-	hal_uart_rx_irq_enable, \
-	hal_uart_rx_irq_disable \
-}
-#define UartDevice3Default { \
-    UART_EXTERN2, \
-	UART_LINK_RX_TX_FULL, \
-	UART_BAUD_115200, \
-	UART_DATABIT_8, \
-	UART_STOPBIT_1, \
-	UART_PARITY_NONE, \
-	UART_RX_TX_MODE_DMA, \
-	0, \
-	0, \
-	0, \
-	0, \
-	0, \
-	0, \
-	0, \
-	4096, \
-	hal_uart_port_init, \
-	hal_uart_set_braudrate, \
-	hal_uart_set_timeout, \
-	hal_uart_tx_bytes, \
-	hal_uart_rx_irq_enable, \
-	hal_uart_rx_irq_disable \
-}
-extern USART_TypeDef* UART_PORT[];
-extern GPIO_TypeDef* UART_DEA_GPIO_PORT[];
-extern const UINT16 UART_DEA_GPIO_PIN[];
-//extern GPIO_TypeDef* UART_REA_GPIO_PORT[];
-//extern const UINT16 UART_REA_GPIO_PIN[];
-
-/**
-* @brief  设置串口为发送模式
-* @param  UartPort: UART设备端口号
-* @retval 无
-*/
-void __INLINE hal_uart_set_tx_mode( UartDeviceType *pUartDevice )
-{
-	#if 0
-	//drv_gpio_set_pins_high( UART_REA_GPIO_PORT[ pUartDevice->Port ], UART_REA_GPIO_PIN[ pUartDevice->Port ] );
-	drv_gpio_set_pins_high( UART_DEA_GPIO_PORT[ pUartDevice->Port ], UART_DEA_GPIO_PIN[ pUartDevice->Port ] );
-	#endif
-}
-
-/**
-* @brief  设置串口为接收模式
-* @param  UartPort: UART设备端口号
-* @retval 无
-*/
-void __INLINE hal_uart_set_rx_mode( UartDeviceType *pUartDevice )
-{
-	#if 0
-	//drv_gpio_set_pins_low( UART_REA_GPIO_PORT[ pUartDevice->Port ], UART_REA_GPIO_PIN[ pUartDevice->Port ] );
-	drv_gpio_set_pins_low( UART_DEA_GPIO_PORT[ pUartDevice->Port ], UART_DEA_GPIO_PIN[ pUartDevice->Port ] );
-	#endif
-}
-
-/**
-* @brief  设置串口为同时接收和发送模式
-* @param  UartPort: UART设备端口号
-* @retval 无
-*/
-void __INLINE hal_uart_set_rx_tx_mode( UartDeviceType *pUartDevice )
-{
-	#if 0
-	//drv_gpio_set_pins_low( UART_REA_GPIO_PORT[ pUartDevice->Port ], UART_REA_GPIO_PIN[ pUartDevice->Port ] );
-	drv_gpio_set_pins_high( UART_DEA_GPIO_PORT[ pUartDevice->Port ], UART_DEA_GPIO_PIN[ pUartDevice->Port ] );
-	#endif
-}
-
-/**
-* @brief  串口接收使能
-* @param  pUartDevice: 要操作的串口设备
-* @retval 无
-*/
-__INLINE void hal_uart_rx_enable( UartDeviceType *pUartDevice )
-{
-	#if 0
-    drv_uart_rx_enable( UART_PORT[pUartDevice->Port] );
-	#endif
-}
-
-/**
-* @brief  串口接收禁止
-* @param  pUartDevice: 要操作的串口设备
-* @retval 无
-*/
-__INLINE void hal_uart_rx_disable( UartDeviceType *pUartDevice )
-{	
-	#if 0
-    drv_uart_rx_disable( UART_PORT[pUartDevice->Port] );
-	#endif
-}
-
-
 extern UartDeviceType	g_UartDevice[];
-
-extern void hal_uart_init( void );
-extern void hal_uart_port_init( UartDeviceType *pUartDevice );
-extern void hal_uart_set_braudrate( UartDeviceType *pUartDevice, enumUartBaudType Baudrate );
 extern UINT8 hal_uart_tx_bytes( UartDeviceType *pUartDevice, UINT8 *pTxData, UINT16 TxLength );
-extern void hal_uart_dma_rx_start( UartDeviceType *pUartDevice, UINT8 *pRxData, UINT16 RxLength );
-//extern void hal_uart_dma_rx_restart( UartDeviceType *pUartDevice );
-extern void hal_uart_rx_irq_enable(UartDeviceType *pUartDevice);
-extern void hal_uart_rx_irq_disable(UartDeviceType *pUartDevice);
-extern UINT8 hal_uart_get_byte_with_timeout(UartDeviceType *pUartDevice, UINT8 *pDat, UINT32 TimeOut);
-extern void hal_uart_set_timeout( UartDeviceType *pUartDevice );
+extern void hal_uart_choice( UartDeviceType *pUartDevice, UINT8 ba_Vlu );
+#define UartDeviceModbusDefault { \
+    .Port = UART_MODBUS, \
+	.LinkType = UART_LINK_RX_TX_HALF_ENABE, \
+	.Baudrate = UART_BAUD_115200, \
+	.DataBit = UART_DATABIT_8, \
+	.StopBit = UART_STOPBIT_1, \
+	.Parity = UART_PARITY_NONE, \
+	.RxTxMode = UART_RX_TX_MODE_DMA, \
+	.TxBusyFlag = 0, \
+	.TxLength = 0, \
+	.TxCounter = 0, \
+	.pRxLength = 0, \
+	.pRxFinishFlag = 0, \
+	.pTxBuffer = 0, \
+	.pRxBuffer = 0, \
+	.RxBytesMax = 4096, \
+	.tx_bytes = hal_uart_tx_bytes, \
+	.uart_choice = hal_uart_choice,\
+	.uartChoice_baVlu = 0xFF,\
+}
+
+#define UartDeviceInnerScreenDefault { \
+    .Port = UART_INNER_SCREEN, \
+	.LinkType = UART_LINK_RX_TX_HALF_ENABE, \
+	.Baudrate = UART_BAUD_115200, \
+	.DataBit = UART_DATABIT_8, \
+	.StopBit = UART_STOPBIT_1, \
+	.Parity = UART_PARITY_NONE, \
+	.RxTxMode = UART_RX_TX_MODE_DMA, \
+	.TxBusyFlag = 0, \
+	.TxLength = 0, \
+	.TxCounter = 0, \
+	.pRxLength = 0, \
+	.pRxFinishFlag = 0, \
+	.pTxBuffer = 0, \
+	.pRxBuffer = 0, \
+	.RxBytesMax = 4096, \
+	.tx_bytes = hal_uart_tx_bytes, \
+	.uart_choice = hal_uart_choice,\
+	.uartChoice_baVlu = 0xFF,\
+}
+
+#define UartDeviceExternalScreenDefault { \
+    .Port = UART_EXTERNAL_SCREEN, \
+	.LinkType = UART_LINK_RX_TX_HALF_ENABE, \
+	.Baudrate = UART_BAUD_115200, \
+	.DataBit = UART_DATABIT_8, \
+	.StopBit = UART_STOPBIT_1, \
+	.Parity = UART_PARITY_NONE, \
+	.RxTxMode = UART_RX_TX_MODE_DMA, \
+	.TxBusyFlag = 0, \
+	.TxLength = 0, \
+	.TxCounter = 0, \
+	.pRxLength = 0, \
+	.pRxFinishFlag = 0, \
+	.pTxBuffer = 0, \
+	.pRxBuffer = 0, \
+	.RxBytesMax = 4096, \
+	.tx_bytes = hal_uart_tx_bytes, \
+	.uart_choice = hal_uart_choice,\
+	.uartChoice_baVlu = 0xFF,\
+}
+
+#define UartDeviceUSART3Default { \
+    .Port = UART3_CHANNEL_XX, \
+	.LinkType = UART_LINK_RX_TX_HALF_ENABE, \
+	.Baudrate = UART_BAUD_115200, \
+	.DataBit = UART_DATABIT_8, \
+	.StopBit = UART_STOPBIT_1, \
+	.Parity = UART_PARITY_NONE, \
+	.RxTxMode = UART_RX_TX_MODE_DMA, \
+	.TxBusyFlag = 0, \
+	.TxLength = 0, \
+	.TxCounter = 0, \
+	.pRxLength = 0, \
+	.pRxFinishFlag = 0, \
+	.pTxBuffer = 0, \
+	.pRxBuffer = 0, \
+	.RxBytesMax = 4096, \
+	.tx_bytes = hal_uart_tx_bytes, \
+	.uart_choice = hal_uart_choice,\
+	.uartChoice_baVlu = 0x10,\
+}
+
+#define UartDeviceUSART5Default { \
+    .Port = UART5_CHANNEL_YY, \
+	.LinkType = UART_LINK_RX_TX_HALF_ENABE, \
+	.Baudrate = UART_BAUD_115200, \
+	.DataBit = UART_DATABIT_8, \
+	.StopBit = UART_STOPBIT_1, \
+	.Parity = UART_PARITY_NONE, \
+	.RxTxMode = UART_RX_TX_MODE_DMA, \
+	.TxBusyFlag = 0, \
+	.TxLength = 0, \
+	.TxCounter = 0, \
+	.pRxLength = 0, \
+	.pRxFinishFlag = 0, \
+	.pTxBuffer = 0, \
+	.pRxBuffer = 0, \
+	.RxBytesMax = 4096, \
+	.tx_bytes = hal_uart_tx_bytes, \
+	.uart_choice = hal_uart_choice,\
+	.uartChoice_baVlu = 0x00,\
+}
+
+#define UartDeviceUSART6Default { \
+    .Port = UART6_CHANNEL_ZZ, \
+	.LinkType = UART_LINK_RX_TX_HALF_ENABE, \
+	.Baudrate = UART_BAUD_115200, \
+	.DataBit = UART_DATABIT_8, \
+	.StopBit = UART_STOPBIT_1, \
+	.Parity = UART_PARITY_NONE, \
+	.RxTxMode = UART_RX_TX_MODE_DMA, \
+	.TxBusyFlag = 0, \
+	.TxLength = 0, \
+	.TxCounter = 0, \
+	.pRxLength = 0, \
+	.pRxFinishFlag = 0, \
+	.pTxBuffer = 0, \
+	.pRxBuffer = 0, \
+	.RxBytesMax = 4096, \
+	.tx_bytes = hal_uart_tx_bytes, \
+	.uart_choice = hal_uart_choice,\
+	.uartChoice_baVlu = 0x11,\
+}
+
+
+extern void USART_HW_Choice(void);
 
 #endif

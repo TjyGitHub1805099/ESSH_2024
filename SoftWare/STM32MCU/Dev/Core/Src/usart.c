@@ -25,7 +25,6 @@
 #include "app_modbus_rtu_ctrl.h"
 
 USART_RECEIVETYPE Usart1AsScreen1Type;
-uint8_t u_SprintfBuf[256];
 uint8_t Rx_buff[50];
 /* USER CODE END 0 */
 
@@ -771,13 +770,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 }
 
 /* USER CODE BEGIN 1 */
-void Usart1AsScreen1SendData_DMA(uint8_t *pdata, uint16_t Length)  
-{  
-  while(Usart1AsScreen1Type.dmaSend_flag == USART_DMA_SENDING);
-  Usart1AsScreen1Type.dmaSend_flag = USART_DMA_SENDING;  
-  HAL_UART_Transmit_DMA(&huart1, pdata, Length);  
-}  
-  
+
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)  
 {  
   __HAL_DMA_DISABLE(huart->hdmatx);  
@@ -811,15 +804,9 @@ void Usart1AsScreen1Receive_IDLE(UART_HandleTypeDef *huart)
 				HAL_UART_DMAStop(&huart1); 
 			
 				temp = huart1.hdmarx->Instance->NDTR;  
-        #if 0
-				Usart1AsScreen1Type.rx_len =  RECEIVELEN - temp;
-				Usart1AsScreen1Type.receive_flag = 1;
-				HAL_UART_Receive_DMA(&huart1,Usart1AsScreen1Type.usartDMA_rxBuf,RECEIVELEN);  
-				#else
         g_T5LCtx[ScreenIndex_Smaller].RxFinishFlag = 1;
         g_T5LCtx[ScreenIndex_Smaller].RxLength = T5L_DMG_UART_DATA_LEN -temp; 
         HAL_UART_Receive_DMA(&huart1, g_T5LCtx[ScreenIndex_Smaller].rxData, T5L_DMG_UART_DATA_LEN);//锟斤拷锟斤拷1DMA
-        #endif
 		}  
 	}
 }  
@@ -836,15 +823,10 @@ void Usart2AsScreen2Receive_IDLE(UART_HandleTypeDef *huart)
 				HAL_UART_DMAStop(&huart2); 
 			
 				temp = huart2.hdmarx->Instance->NDTR;  
-        #if 0
-				Usart1AsScreen1Type.rx_len =  RECEIVELEN - temp;
-				Usart1AsScreen1Type.receive_flag = 1;
-				HAL_UART_Receive_DMA(&huart1,Usart1AsScreen1Type.usartDMA_rxBuf,RECEIVELEN);  
-				#else
+
         g_T5LCtx[ScreenIndex_Larger].RxFinishFlag = 1;
         g_T5LCtx[ScreenIndex_Larger].RxLength = T5L_DMG_UART_DATA_LEN -temp; 
         HAL_UART_Receive_DMA(&huart2, g_T5LCtx[ScreenIndex_Larger].rxData, T5L_DMG_UART_DATA_LEN);//锟斤拷锟斤拷2DMA
-        #endif
 		}  
 	}
 }  
@@ -861,15 +843,10 @@ void Usart4WithRS485Receive_IDLE(UART_HandleTypeDef *huart)
 				HAL_UART_DMAStop(&huart4); 
 			
 				temp = huart4.hdmarx->Instance->NDTR;  
-        #if 0
-				Usart1AsScreen1Type.rx_len =  RECEIVELEN - temp;
-				Usart1AsScreen1Type.receive_flag = 1;
-				HAL_UART_Receive_DMA(&huart1,Usart1AsScreen1Type.usartDMA_rxBuf,RECEIVELEN);  
-				#else
+
         g_ModbusRtu.RxFinishFlag = 1;
         g_ModbusRtu.RxLength = MODBUS_RTU_UART_DATA_LEN -temp; 
         HAL_UART_Receive_DMA(&huart4, g_ModbusRtu.rxDataUart, MODBUS_RTU_UART_DATA_LEN);//锟斤拷锟斤拷1DMA
-        #endif
 		} 
     else if((__HAL_UART_GET_FLAG(huart,UART_FLAG_TC) != RESET) || (__HAL_UART_GET_FLAG(huart,UART_FLAG_TXE) != RESET))  
 		{   
@@ -878,36 +855,7 @@ void Usart4WithRS485Receive_IDLE(UART_HandleTypeDef *huart)
 	}
 }
 
-void Usart5WithXXReceive_IDLE(UART_HandleTypeDef *huart)  
-{  
-    uint32_t temp;  
-  
-	if(huart->Instance == huart5.Instance)
-	{
-		if((__HAL_UART_GET_FLAG(huart,UART_FLAG_IDLE) != RESET))  
-		{   
-				__HAL_UART_CLEAR_IDLEFLAG(&huart5); 
-				HAL_UART_DMAStop(&huart5); 
-			
-				temp = huart5.hdmarx->Instance->NDTR;  
-        #if 0
-				Usart1AsScreen1Type.rx_len =  RECEIVELEN - temp;
-				Usart1AsScreen1Type.receive_flag = 1;
-				HAL_UART_Receive_DMA(&huart1,Usart1AsScreen1Type.usartDMA_rxBuf,RECEIVELEN);  
-				#else
-        g_ModbusRtu.RxFinishFlag = 1;
-        g_ModbusRtu.RxLength = MODBUS_RTU_UART_DATA_LEN -temp; 
-        HAL_UART_Receive_DMA(&huart5, g_ModbusRtu.rxDataUart, MODBUS_RTU_UART_DATA_LEN);//锟斤拷锟斤拷1DMA
-        #endif
-		} 
-    else if((__HAL_UART_GET_FLAG(huart,UART_FLAG_TC) != RESET) || (__HAL_UART_GET_FLAG(huart,UART_FLAG_TXE) != RESET))  
-		{   
-				__HAL_UART_CLEAR_IDLEFLAG(&huart5); 
-    }
-	}
-}
-
-void Usart3WithYYReceive_IDLE(UART_HandleTypeDef *huart)  
+void Usart3WithXXReceive_IDLE(UART_HandleTypeDef *huart)  
 {  
     uint32_t temp;  
   
@@ -919,19 +867,38 @@ void Usart3WithYYReceive_IDLE(UART_HandleTypeDef *huart)
 				HAL_UART_DMAStop(&huart3); 
 			
 				temp = huart3.hdmarx->Instance->NDTR;  
-        #if 0
-				Usart1AsScreen1Type.rx_len =  RECEIVELEN - temp;
-				Usart1AsScreen1Type.receive_flag = 1;
-				HAL_UART_Receive_DMA(&huart1,Usart1AsScreen1Type.usartDMA_rxBuf,RECEIVELEN);  
-				#else
+
         g_ModbusRtu.RxFinishFlag = 1;
         g_ModbusRtu.RxLength = MODBUS_RTU_UART_DATA_LEN -temp; 
         HAL_UART_Receive_DMA(&huart3, g_ModbusRtu.rxDataUart, MODBUS_RTU_UART_DATA_LEN);//锟斤拷锟斤拷1DMA
-        #endif
 		} 
     else if((__HAL_UART_GET_FLAG(huart,UART_FLAG_TC) != RESET) || (__HAL_UART_GET_FLAG(huart,UART_FLAG_TXE) != RESET))  
 		{   
 				__HAL_UART_CLEAR_IDLEFLAG(&huart3); 
+    }
+	}
+}
+
+void Usart5WithYYReceive_IDLE(UART_HandleTypeDef *huart)  
+{  
+    uint32_t temp;  
+  
+	if(huart->Instance == huart5.Instance)
+	{
+		if((__HAL_UART_GET_FLAG(huart,UART_FLAG_IDLE) != RESET))  
+		{   
+				__HAL_UART_CLEAR_IDLEFLAG(&huart5); 
+				HAL_UART_DMAStop(&huart5); 
+			
+				temp = huart5.hdmarx->Instance->NDTR;  
+
+        g_ModbusRtu.RxFinishFlag = 1;
+        g_ModbusRtu.RxLength = MODBUS_RTU_UART_DATA_LEN -temp; 
+        HAL_UART_Receive_DMA(&huart5, g_ModbusRtu.rxDataUart, MODBUS_RTU_UART_DATA_LEN);//锟斤拷锟斤拷1DMA
+		} 
+    else if((__HAL_UART_GET_FLAG(huart,UART_FLAG_TC) != RESET) || (__HAL_UART_GET_FLAG(huart,UART_FLAG_TXE) != RESET))  
+		{   
+				__HAL_UART_CLEAR_IDLEFLAG(&huart5); 
     }
 	}
 }
@@ -948,15 +915,10 @@ void Usart6WithZZReceive_IDLE(UART_HandleTypeDef *huart)
 				HAL_UART_DMAStop(&huart6); 
 			
 				temp = huart6.hdmarx->Instance->NDTR;  
-        #if 0
-				Usart1AsScreen1Type.rx_len =  RECEIVELEN - temp;
-				Usart1AsScreen1Type.receive_flag = 1;
-				HAL_UART_Receive_DMA(&huart1,Usart1AsScreen1Type.usartDMA_rxBuf,RECEIVELEN);  
-				#else
+
         g_ModbusRtu.RxFinishFlag = 1;
         g_ModbusRtu.RxLength = MODBUS_RTU_UART_DATA_LEN -temp; 
         HAL_UART_Receive_DMA(&huart6, g_ModbusRtu.rxDataUart, MODBUS_RTU_UART_DATA_LEN);//锟斤拷锟斤拷1DMA
-        #endif
 		} 
     else if((__HAL_UART_GET_FLAG(huart,UART_FLAG_TC) != RESET) || (__HAL_UART_GET_FLAG(huart,UART_FLAG_TXE) != RESET))  
 		{   
