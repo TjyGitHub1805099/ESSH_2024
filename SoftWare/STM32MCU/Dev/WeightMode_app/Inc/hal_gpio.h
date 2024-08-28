@@ -52,12 +52,20 @@
 //hx711 minus from 8->6,and add 2 len RUN 
 //=============================================SYS_RUN DO口线配置 (update to v1.1:2024.08.21)
 //SYS RUN0
-#define DO13_GPIO_PORT				GPIOD
+#define DO13_GPIO_PORT			GPIOD
 #define DO13_GPIO_PIN				GPIO_PIN_15
 
 //SYS STM32_I2C1_WP
-#define DO14_GPIO_PORT				GPIOB
+#define DO14_GPIO_PORT			GPIOB
 #define DO14_GPIO_PIN				GPIO_PIN_5
+
+//SYS SMMZ_TRIG
+#define DO15_GPIO_PORT			GPIOA
+#define DO15_GPIO_PIN				GPIO_PIN_6
+
+//SYS SMMZ_REST
+#define DO16_GPIO_PORT			GPIOA
+#define DO16_GPIO_PIN				GPIO_PIN_5
 
 //=============================================LED_QH3 DI口线配置 (update to v1.1:2024.08.21)
 //LED_QH3
@@ -75,8 +83,17 @@
 #define DI9_GPIO_PIN				GPIO_PIN_13
 
 //KEY2
-#define DI10_GPIO_PORT				GPIOD
+#define DI10_GPIO_PORT			GPIOD
 #define DI10_GPIO_PIN				GPIO_PIN_14
+
+//=============================================SMMZ (update to v1.1:2024.08.28)
+//SMMZ_BEEPER
+#define DI11_GPIO_PORT			GPIOA
+#define DI11_GPIO_PIN				GPIO_PIN_3
+
+//SMMZ_DLED
+#define DI12_GPIO_PORT			GPIOA
+#define DI12_GPIO_PIN				GPIO_PIN_4
 
 //output gpio type (update to v1.1:2024.08.21)
 typedef enum DoLineType
@@ -89,6 +106,8 @@ typedef enum DoLineType
 		HX711_CLK_1,
 		SYS_RUN0,
 		EX_EEPROM_I2C1_WP,
+    SYS_SMMZ_TRIG,
+    SYS_SMMZ_REST,
 		DO_GPIO_NUMBER
 }enumDoLineType;
 
@@ -99,6 +118,8 @@ typedef enum DiLineType
 		HX711_DATA_1,
 		SYS_KEY_1,//主页 配平模式
 		SYS_KEY_2,//去皮
+    SYS_SMMZ_BEEPER,//蜂鸣器提示
+    SYS_SMMZ_DLED,//解码成功提示
 		DI_GPIO_NUMBER
 }enumDiLineType;
 

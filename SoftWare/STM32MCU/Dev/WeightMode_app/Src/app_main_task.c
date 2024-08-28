@@ -10,6 +10,7 @@
 #include "app_modbus_rtu_ctrl.h"
 #include "app_t5l_ctrl.h"
 #include "app_i2c.h"
+#include "app_smmz.h"
 
 /*******************************************************************************
  * Definitions
@@ -70,5 +71,7 @@ void app_main_task(void)
 
 	//led contrl mainfunction
 	led_MainFunction();
+
+	SmmzHandle_Mainfunction();
 }
 

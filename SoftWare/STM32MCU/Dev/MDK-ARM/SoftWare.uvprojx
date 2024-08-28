@@ -796,6 +796,11 @@
               <FileType>1</FileType>
               <FilePath>..\WeightMode_app\Src\hal_uart.c</FilePath>
             </File>
+            <File>
+              <FileName>app_smmz.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\WeightMode_app\Src\app_smmz.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

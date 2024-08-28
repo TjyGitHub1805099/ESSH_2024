@@ -38,6 +38,7 @@
 #include "app_t5l_ctrl.h"
 #include "app_syspara.h"
 #include "hal_uart.h"
+#include "app_smmz.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -126,15 +127,19 @@ int main(void)
 //PB6 : USART1_TX_SCREEN1_RX
   //PB7 : USART1_RX_SCREEN1_TX
   //串口1 接显示屏
-  HAL_UART_Receive_DMA(&huart1, g_T5LCtx[ScreenIndex_Smaller].rxData, T5L_DMG_UART_DATA_LEN);//串口1DMA
+  HAL_UART_Receive_DMA(&huart1, g_T5LCtx[ScreenIndex_Smaller].rxData, T5L_DMG_UART_DATA_LEN);//串口1 DMA
   __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
   
   //串口2 接显示屏
-  HAL_UART_Receive_DMA(&huart2, g_T5LCtx[ScreenIndex_Larger].rxData, T5L_DMG_UART_DATA_LEN);//串口2DMA
+  HAL_UART_Receive_DMA(&huart2, g_T5LCtx[ScreenIndex_Larger].rxData, T5L_DMG_UART_DATA_LEN);//串口2 DMA
   __HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
 
-  //串口3 接RS485
-  HAL_UART_Receive_DMA(&huart4, g_ModbusRtu.rxDataUart, MODBUS_RTU_UART_DATA_LEN);//串口3DMA
+  //串口3 接内置扫码枪
+  HAL_UART_Receive_DMA(&huart3, SmmzHandleContex.rxDataUart, SMMZ_UART_MAX_LEN);//串口3 DMA
+  __HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);
+
+  //串口4 接RS485
+  HAL_UART_Receive_DMA(&huart4, g_ModbusRtu.rxDataUart, MODBUS_RTU_UART_DATA_LEN);//串口4 DMA
   __HAL_UART_ENABLE_IT(&huart4, UART_IT_IDLE);
 
   //PC6 : USART6_TX_WX_RX
@@ -150,7 +155,7 @@ int main(void)
   #endif
 
 #if 1
-    USART_HW_Choice();
+  USART_HW_Choice();
 	key_init();
 	led_init();
 	hx711_init();

@@ -23,6 +23,7 @@
 /* USER CODE BEGIN 0 */
 #include "app_t5l_ctrl.h"
 #include "app_modbus_rtu_ctrl.h"
+#include "app_smmz.h"
 
 USART_RECEIVETYPE Usart1AsScreen1Type;
 uint8_t Rx_buff[50];
@@ -854,7 +855,7 @@ void Usart4WithRS485Receive_IDLE(UART_HandleTypeDef *huart)
     }
 	}
 }
-
+//配置成内置扫码模块
 void Usart3WithXXReceive_IDLE(UART_HandleTypeDef *huart)  
 {  
     uint32_t temp;  
@@ -868,9 +869,9 @@ void Usart3WithXXReceive_IDLE(UART_HandleTypeDef *huart)
 			
 				temp = huart3.hdmarx->Instance->NDTR;  
 
-        g_ModbusRtu.RxFinishFlag = 1;
-        g_ModbusRtu.RxLength = MODBUS_RTU_UART_DATA_LEN -temp; 
-        HAL_UART_Receive_DMA(&huart3, g_ModbusRtu.rxDataUart, MODBUS_RTU_UART_DATA_LEN);//锟斤拷锟斤拷1DMA
+        SmmzHandleContex.RxFinishFlag = 1;
+        SmmzHandleContex.RxLength = SMMZ_UART_MAX_LEN -temp; 
+        HAL_UART_Receive_DMA(&huart3, SmmzHandleContex.rxDataUart, SMMZ_UART_MAX_LEN);
 		} 
     else if((__HAL_UART_GET_FLAG(huart,UART_FLAG_TC) != RESET) || (__HAL_UART_GET_FLAG(huart,UART_FLAG_TXE) != RESET))  
 		{   
