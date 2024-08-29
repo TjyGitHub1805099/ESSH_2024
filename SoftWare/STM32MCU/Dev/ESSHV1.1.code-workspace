@@ -36,7 +36,8 @@
 			"app_externalscreen_cfg.h": "c",
 			"app_balancingdatahandle.h": "c",
 			"stm32f4xx.h": "c",
-			"app_smmz.h": "c"
+			"app_smmz.h": "c",
+			"app_wzdyj.h": "c"
 		}
 	}
 }

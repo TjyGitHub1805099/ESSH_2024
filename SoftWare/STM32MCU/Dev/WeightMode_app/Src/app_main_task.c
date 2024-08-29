@@ -11,7 +11,7 @@
 #include "app_t5l_ctrl.h"
 #include "app_i2c.h"
 #include "app_smmz.h"
-
+#include "app_wzdyj.h"
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -64,14 +64,16 @@ void app_main_task(void)
 	#endif
 
 	//data comm contrl mainfunction
-	ModbusRtu_MainFunction();
+	//ModbusRtu_MainFunction();
 	
 	//T5L contrl mainfunction
-	sreenT5L_MainFunction();
+	//sreenT5L_MainFunction();
 
 	//led contrl mainfunction
-	led_MainFunction();
+	//led_MainFunction();
 
 	SmmzHandle_Mainfunction();
+
+	WzdyjHandle_Mainfunction();
 }
 

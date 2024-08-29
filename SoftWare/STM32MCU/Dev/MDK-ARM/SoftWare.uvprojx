@@ -801,6 +801,11 @@
               <FileType>1</FileType>
               <FilePath>..\WeightMode_app\Src\app_smmz.c</FilePath>
             </File>
+            <File>
+              <FileName>app_wzdyj.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\WeightMode_app\Src\app_wzdyj.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

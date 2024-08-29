@@ -39,6 +39,7 @@
 #include "app_syspara.h"
 #include "hal_uart.h"
 #include "app_smmz.h"
+#include "app_wzdyj.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -141,6 +142,10 @@ int main(void)
   //串口4 接RS485
   HAL_UART_Receive_DMA(&huart4, g_ModbusRtu.rxDataUart, MODBUS_RTU_UART_DATA_LEN);//串口4 DMA
   __HAL_UART_ENABLE_IT(&huart4, UART_IT_IDLE);
+
+  //串口6 接外置打印机
+  HAL_UART_Receive_DMA(&huart6, WzdyjHandleContex.rxDataUart, WZDYJ_UART_MAX_LEN);//串口4 DMA
+  __HAL_UART_ENABLE_IT(&huart6, UART_IT_IDLE);
 
   //PC6 : USART6_TX_WX_RX
   //PC7 : USART6_RX_WX_TX

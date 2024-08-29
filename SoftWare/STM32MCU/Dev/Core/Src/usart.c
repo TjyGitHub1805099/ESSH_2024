@@ -24,7 +24,7 @@
 #include "app_t5l_ctrl.h"
 #include "app_modbus_rtu_ctrl.h"
 #include "app_smmz.h"
-
+#include "app_wzdyj.h"
 USART_RECEIVETYPE Usart1AsScreen1Type;
 uint8_t Rx_buff[50];
 /* USER CODE END 0 */
@@ -904,10 +904,10 @@ void Usart5WithYYReceive_IDLE(UART_HandleTypeDef *huart)
 	}
 }
 
+//外置打印机
 void Usart6WithZZReceive_IDLE(UART_HandleTypeDef *huart)  
 {  
-    uint32_t temp;  
-  
+  uint32_t temp;  
 	if(huart->Instance == huart6.Instance)
 	{
 		if((__HAL_UART_GET_FLAG(huart,UART_FLAG_IDLE) != RESET))  
@@ -917,9 +917,10 @@ void Usart6WithZZReceive_IDLE(UART_HandleTypeDef *huart)
 			
 				temp = huart6.hdmarx->Instance->NDTR;  
 
-        g_ModbusRtu.RxFinishFlag = 1;
-        g_ModbusRtu.RxLength = MODBUS_RTU_UART_DATA_LEN -temp; 
-        HAL_UART_Receive_DMA(&huart6, g_ModbusRtu.rxDataUart, MODBUS_RTU_UART_DATA_LEN);//锟斤拷锟斤拷1DMA
+        WzdyjHandleContex.RxFinishFlag = 1;
+        WzdyjHandleContex.RxLength = WZDYJ_UART_MAX_LEN - temp; 
+          HAL_UART_Receive_DMA(&huart6, WzdyjHandleContex.rxDataUart, WZDYJ_UART_MAX_LEN);//串口6 DMA
+
 		} 
     else if((__HAL_UART_GET_FLAG(huart,UART_FLAG_TC) != RESET) || (__HAL_UART_GET_FLAG(huart,UART_FLAG_TXE) != RESET))  
 		{   
