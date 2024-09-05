@@ -1,0 +1,16 @@
+[INIT]
+PICFIX=1
+VARCount=64
+Version=-1
+ProVersion=646
+SCREENDSIZE=800X480
+SPADDRESS=5000
+[IMG]
+0=0-主页图片.bmp
+1=1-全键盘.bmp
+2=2-数字键盘.bmp
+3=3-返回.bmp
+4=4-系统参数.bmp
+5=5-应用参数.bmp
+6=6-数据中心.bmp
+7=7-秤重校准.bmp

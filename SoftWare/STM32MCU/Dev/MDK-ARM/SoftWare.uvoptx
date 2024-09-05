@@ -164,6 +164,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
+          <Name></Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -200,70 +201,35 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>3010</LineNumber>
+          <LineNumber>155</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134234066</Address>
+          <Address>134241350</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c</Filename>
+          <Filename>..\WeightMode_app\Src\app_InnerScreenRxHandle.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\SoftWare\../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c\3010</Expression>
+          <Expression>\\SoftWare\../WeightMode_app/Src/app_InnerScreenRxHandle.c\155</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>HX711Chanel,0x0A</ItemText>
+          <ItemText>g_T5LCtx[0]</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>SmmzHandleContex,0x0A</ItemText>
+          <ItemText>WzdyjHandleContex</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>g_T5LCtx</ItemText>
-        </Ww>
-        <Ww>
-          <count>3</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>temp</ItemText>
-        </Ww>
-        <Ww>
-          <count>4</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>huart3.hdmarx-&gt;Instance-&gt;NDTR,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>5</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>WzdyjHandleContex</ItemText>
-        </Ww>
-        <Ww>
-          <count>6</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>pTxData</ItemText>
-        </Ww>
-        <Ww>
-          <count>7</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>TxLength</ItemText>
-        </Ww>
-        <Ww>
-          <count>8</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>Size</ItemText>
-        </Ww>
-        <Ww>
-          <count>9</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>pData</ItemText>
+          <ItemText>TXDATA</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>

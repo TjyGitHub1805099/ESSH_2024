@@ -233,7 +233,7 @@ UINT8 externalScreenTxHandle_JumpToBanlingPage(T5LType *pSdwe)
 		{
 			pSdwe->screenBanlingPageNum = 2;
 		}
-		if(0 != screenPublic_PageJump(pSdwe,pSdwe->screenBanlingPageNum))
+		if(0 != screenPublic_PageJump(pSdwe,1))
 		{
 			pSdwe->sdweJumpToBanlingPage = FALSE;
 		}

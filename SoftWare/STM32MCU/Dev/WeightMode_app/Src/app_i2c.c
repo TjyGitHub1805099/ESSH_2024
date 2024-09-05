@@ -12,13 +12,15 @@ uint8_t app_i2cTxData[EXT_EEPROM_SLAVE_PADGE_NUM];
 
 #define APP_I2C_COMTEXT_DEFAULT \
 {\
-    &hi2c1,\
-    EXT_EEPROM_SLAVE_ADDRESS,\
-    &app_i2cTxData[0],\
-    &app_i2cRxData[0],\
-    0,\
-    100,\
-    0,\
+    .hi2c = &hi2c1,\
+    .handleType = EEPROM_HANDLE_INIT,\
+    .delayTimer = 5,\
+    .DevAddress = EXT_EEPROM_SLAVE_ADDRESS,\
+    .pDataWrite = &app_i2cTxData[0],\
+    .pDataRead = &app_i2cRxData[0],\
+    .Size = 0,\
+    .Timeout = 100,\
+    .handle_sts = 0,\
 }
 
 app_i2cComtextDef app_i2cComtext=APP_I2C_COMTEXT_DEFAULT; 
@@ -140,6 +142,7 @@ void app_i2c_test(void)
         }
         user_i2c_test_start_tick = get_SysTick_ByTimer();
 		ret = app_HAL_I2C_Master_Transmit(user_i2c_test_data_add,(uint8_t *)&user_i2cTxData[0],user_i2c_test_data_len);
+        user_i2c_test_end_tick = get_SysTick_ByTimer();
         if(HAL_OK == ret)
         {
             user_i2c_test_expend_tick = user_i2c_test_end_tick - user_i2c_test_start_tick;
@@ -172,6 +175,100 @@ void app_i2c_test(void)
 }
 
 #endif
+
+
+
+
+
+
+
+/**********************************************************************************************************************
+ *  app_EEPROM_IDLE()
+ *********************************************************************************************************************/
+/*!
+ * \brief       scan read or write
+ * \details     -
+ * \pre         -
+ * \context     ANY
+ * \reentrant   FALSE
+ * \synchronous TRUE
+ *********************************************************************************************************************/
+void app_EEPROM_IDLE(app_i2cComtextDef *comtext)
+{
+    HAL_StatusTypeDef ret = 0 ;
+    switch(comtext->order)
+    {
+        case EEPROM_ORDER_READ:/**< 读 */
+            if(comtext->orderRemainLen > 0)
+            {
+                if((comtext->orderRegAdd + comtext->orderRemainLen) < EXT_EEPROM_REG_ADDRESS_MAX)
+                {   
+                    //从当前地址单次读取最大长度
+                    comtext->orderCurLen = comtext->orderRegAdd % EXT_EEPROM_SLAVE_PADGE_NUM;
+                    comtext->orderCurLen = EXT_EEPROM_SLAVE_PADGE_NUM - comtext->orderCurLen;
+                    //如果读取长度超出剩余长度，用剩余长度来读取
+                    if(comtext->orderRemainLen < comtext->orderCurLen)
+                    {
+                        comtext->orderCurLen = comtext->orderRemainLen;
+                    }
+                    //触发同步读取：单次EXT_EEPROM_SLAVE_PADGE_NUM字节
+                    ret = HAL_I2C_Mem_Read(app_i2cComtext.hi2c,app_i2cComtext.DevAddress,comtext->orderRegAdd,
+                                                I2C_MEMADD_SIZE_16BIT,app_i2cComtext.pDataRead,comtext->orderCurLen,app_i2cComtext.Timeout);
+                    if(HAL_OK == ret)
+                    {
+                        comtext->orderRegAdd += comtext->orderCurLen;
+                        comtext->orderRemainLen -= comtext->orderCurLen;
+                    }
+                }                
+            }
+            else
+            {
+                comtext->order = EEPROM_ORDER_NONE;
+                comtext->orderRegAdd = 0 ;
+                comtext->orderRemainLen = 0 ;
+            }
+        break;
+        case EEPROM_ORDER_WRITE:/**< 写 */
+        break;
+        case EEPROM_ORDER_WRITE_READ:/**< 写读 */
+        break;
+        default:
+        break;
+    }
+}
+
+
+
+
+
+/**********************************************************************************************************************
+ *  app_EEPROM_MainFunction()
+ *********************************************************************************************************************/
+/*!
+ * \brief       Process EEPROM cycle handle
+ * \details     -
+ * \pre         -
+ * \context     ANY
+ * \reentrant   FALSE
+ * \synchronous TRUE
+ *********************************************************************************************************************/
+void app_EEPROM_MainFunction(void)
+{
+    app_i2cComtextDef *comtext = &app_i2cComtext;
+    switch(comtext->handleType)
+    {
+        case EEPROM_HANDLE_INIT:/**< 初始化 */
+        break;
+        case EEPROM_HANDLE_IDLE:/**< 空闲 */
+        break;
+        case EEPROM_HANDLE_DELAY:/**< 延时 */
+        break;
+        case EEPROM_HANDLE_RESET:/**< 复位 */
+        break;
+        default:
+        break;
+    }
+}
 
 #endif
 

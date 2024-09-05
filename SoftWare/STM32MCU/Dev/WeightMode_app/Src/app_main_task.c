@@ -67,10 +67,10 @@ void app_main_task(void)
 	//ModbusRtu_MainFunction();
 	
 	//T5L contrl mainfunction
-	//sreenT5L_MainFunction();
+	sreenT5L_MainFunction();
 
 	//led contrl mainfunction
-	//led_MainFunction();
+	led_MainFunction();
 
 	SmmzHandle_Mainfunction();
 

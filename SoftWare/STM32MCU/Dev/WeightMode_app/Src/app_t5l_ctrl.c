@@ -2868,11 +2868,11 @@ void sreenT5L_MainFunction(void)
  
 	//handle rx data from SDWE
 	screenT5L_RxFunction(&g_ScreenHandle[ScreenIndex_Smaller]);
-	screenT5L_RxFunction(&g_ScreenHandle[ScreenIndex_Larger]);
+	//screenT5L_RxFunction(&g_ScreenHandle[ScreenIndex_Larger]);
 	
 	//prepare data and send to SDWE
 	screenT5L_TxFunction(&g_ScreenHandle[ScreenIndex_Smaller]);//WeightAndColorAndVoice was handle at here
-	screenT5L_TxFunction(&g_ScreenHandle[ScreenIndex_Larger]);
+	//screenT5L_TxFunction(&g_ScreenHandle[ScreenIndex_Larger]);
  
 	//slave data valid
 	setModbusDataValid(SLAVE_DATA_VALID);

@@ -13,7 +13,7 @@ app_WzdyjComtextDef WzdyjHandleContex;
 //外置打印机：主函数
 void WzdyjHandle_Mainfunction(void)
 {
-    UINT8 TXDATA[0X10] = "12346";
+    static UINT8 TXDATA[0X10] = "1234567890";
     app_WzdyjComtextDef *contex = &WzdyjHandleContex;
     switch(contex->handleType)
     {

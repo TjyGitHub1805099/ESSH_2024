@@ -6,7 +6,7 @@
 #include "stm32f4xx_hal.h"
 
 //是否使能测试
-//#define EXT_EEPROM_TEST_EN
+#define EXT_EEPROM_TEST_EN
 
 //AT24C128C-SSHM-T相关信息
 #define EXT_EEPROM_SLAVE_SIZE       (128)//共可存储：128KBit = 16384 Byte
@@ -26,9 +26,35 @@
 #define EXT_EEPROM_WRITE_PROTECT_DISABLE    hal_gpio_set_do_low(EX_EEPROM_I2C1_WP);//关闭写保护：可写
 #define EXT_EEPROM_WRITE_PROTECT_ENABLE     hal_gpio_set_do_high(EX_EEPROM_I2C1_WP);//打开写保护：不可写
 
+
+typedef enum EEPROMHandleType
+{
+	EEPROM_HANDLE_INIT = 0,    /**< 初始化 */
+	EEPROM_HANDLE_IDLE = 1,    /**< 空闲 */
+	EEPROM_HANDLE_DELAY = 2,    /**< 延时 */
+	EEPROM_HANDLE_RESET = 3,    /**< 复位 */
+	EEPROM_HANDLE_MAX,
+}enumEEPROMHandleType;
+
+typedef enum EEPROMOrderType
+{
+	EEPROM_ORDER_NONE = 0,    /**< 空闲 */
+	EEPROM_ORDER_READ = 1,    /**< 读 */
+	EEPROM_ORDER_WRITE = 2,    /**< 写 */
+	EEPROM_ORDER_WRITE_READ = 3,    /**< 写读 */
+	EEPROM_ORDER_MAX,
+}enumEEPROMOrderType;
+
 typedef struct app_i2cComtextDef
 {
     I2C_HandleTypeDef *hi2c;
+    enumEEPROMHandleType handleType;
+    UINT16 delayTimer;
+    enumEEPROMOrderType order;
+    UINT16 orderRegAdd;
+    UINT16 orderTotalLen;
+    UINT16 orderRemainLen;
+    UINT16 orderCurLen;
     uint16_t DevAddress;
     uint8_t *pDataWrite;
     uint8_t *pDataRead;
