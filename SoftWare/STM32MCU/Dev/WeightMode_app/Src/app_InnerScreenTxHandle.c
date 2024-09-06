@@ -521,18 +521,11 @@ UINT8 innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle(T5LType *pSd
 screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM]=
 {
 	//priority index func_add
-	{0,0,&innerScreenTxHandle_JumpToBanlingPage},
-	{0,1,&innerScreenTxHandle_JumpToBalancingHomePage},
-	{0,2,&innerScreenTxHandle_JumpToBalancingCleanPage}
-	//{0,	0, &innerScreenTxHandle_ScreenInit},//==send initial data to DIWEN to display
-	//{0,	1, &innerScreenTxHandle_ChangeDisplayPosition},//==M7 event arrive:修改小数点
-	//{0,	2, &innerScreenTxHandle_JumpToHomePage},//==M1 event arrive:jump to HOME Page 
-	//{0,	3, &innerScreenTxHandle_JumpToBanlingPage},//==M2 event arrive:jump to BALANCING Page , Physical keying trigger
-	//{0,	4, &innerScreenTxHandle_JumpToCalibrationPage},//==M3 event arrive:jump to CALITRATION Page
-	//{0,	5, &innerScreenTxHandle_JumpToActivePage},//==M4 event arrive:jump to ACTIVE Page
-	//{0,	6, &innerScreenTxHandle_JumpToSysParaPage},//==M5 event arrive:jump to SYSPARA Page
-	//{0,	7, &innerScreenTxHandle_JumpToBanlingMainPage},//==配平模式的主要界面
-	//{0,	8, &innerScreenTxHandle_JumpToBalancingCleanPage},//==M2-2 event arrive:jump to BALANCING (clean)page
+	{0,	0, &screenPublic_ChanelChangedTrigerHandle},	//==C1 event arrive:At Calibration Page , chanel changed trigerd
+	{0,	1, &screenPublic_ResetCalibrationTrigerHandle},//==C2 event arrive:At Calibration Page , calibration reset trigerd 
+	{0,	2, &screenPublic_PointTrigerHandle},//==C3 event arrive:At Calibration Page , point trigerd
+	{0,	3, &innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle},//normaly weight color voice handle
+
 };
 
 #endif// end of _APP_INNER_SCREEN_TX_HANDLE_C_

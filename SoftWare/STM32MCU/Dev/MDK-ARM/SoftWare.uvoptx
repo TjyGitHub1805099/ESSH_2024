@@ -201,9 +201,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>155</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134241350</Address>
+          <LineNumber>303</LineNumber>
+          <EnabledFlag>0</EnabledFlag>
+          <Address>134240994</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -212,7 +212,55 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\WeightMode_app\Src\app_InnerScreenRxHandle.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\SoftWare\../WeightMode_app/Src/app_InnerScreenRxHandle.c\155</Expression>
+          <Expression>\\SoftWare\../WeightMode_app/Src/app_InnerScreenRxHandle.c\303</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>832</LineNumber>
+          <EnabledFlag>0</EnabledFlag>
+          <Address>134245306</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\WeightMode_app\Src\app_t5l_ctrl.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\SoftWare\../WeightMode_app/Src/app_t5l_ctrl.c\832</Expression>
+        </Bp>
+        <Bp>
+          <Number>2</Number>
+          <Type>0</Type>
+          <LineNumber>750</LineNumber>
+          <EnabledFlag>0</EnabledFlag>
+          <Address>134245772</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\WeightMode_app\Src\app_t5l_ctrl.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\SoftWare\../WeightMode_app/Src/app_t5l_ctrl.c\750</Expression>
+        </Bp>
+        <Bp>
+          <Number>3</Number>
+          <Type>0</Type>
+          <LineNumber>195</LineNumber>
+          <EnabledFlag>0</EnabledFlag>
+          <Address>134240872</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\WeightMode_app\Src\app_InnerScreenRxHandle.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\SoftWare\../WeightMode_app/Src/app_InnerScreenRxHandle.c\195</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -229,7 +277,17 @@
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>TXDATA</ItemText>
+          <ItemText>SmmzHandleContex</ItemText>
+        </Ww>
+        <Ww>
+          <count>3</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>avgSampleValue</ItemText>
+        </Ww>
+        <Ww>
+          <count>4</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>g_t5l_triger_data</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
