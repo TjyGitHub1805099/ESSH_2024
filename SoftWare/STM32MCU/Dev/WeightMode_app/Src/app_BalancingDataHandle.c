@@ -183,6 +183,19 @@ UINT16 BalancingData_WeightData_Handle_PrepareAndJudgeIfNotNeedSend(T5LType *pSd
 //20240623：【1.2】【重量】【发送】信息给屏幕（内屏外屏兼容）
 void BalancingData_WeightData_Handle_PrepareAndJudgeAndSendToScreen(T5LType *pSdwe)
 {
+	static UINT8 test_char[63]="A123B123456789012 2024/12/12 08:08:08 D123(ml)A [2222 ~ 3333]",char_test = 0 , i;
+	static INT16 test_charI16[32];
+	for(i=0;i<30;i++)
+	{
+		test_charI16[i] = 0 ;
+		test_charI16[i] += test_char[2*i + 0];
+		test_charI16[i] <<= 8;
+		test_charI16[i] &= 0xff00;
+		test_charI16[i] += test_char[2*i + 1];
+	}
+
+
+	#if 0
 	switch(pSdwe->screenWeightHandleStatus)
 	{
 		case 0://判断【重量】是否需要发送
@@ -235,6 +248,17 @@ void BalancingData_WeightData_Handle_PrepareAndJudgeAndSendToScreen(T5LType *pSd
 				pSdwe->screenWeightHandleStatus = 0;//【重量】：xx->判断
 		break;
 	}
+	#else
+	if(1 == char_test)
+	{
+		if(TRUE ==t5lWriteData(pSdwe,0x5000,test_charI16,32,0))
+		{
+			char_test = 0 ;
+		}		
+	}
+	#endif
+
+
 }
 
 //=====================================================================================================================

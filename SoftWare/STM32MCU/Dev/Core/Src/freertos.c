@@ -27,6 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include "usart.h"
 #include "app_main_task.h"
+#include "usb_host.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -46,7 +47,9 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-
+uint8_t test_test = 0 ;
+extern ApplicationTypeDef Appli_state;
+extern void MSC_Application(void);
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
 osThreadId appTask1MsHandle;
@@ -59,6 +62,7 @@ osThreadId appTask1MsHandle;
 void StartDefaultTask(void const * argument);
 void StartappTask1Ms(void const * argument);
 
+extern void MX_USB_HOST_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* GetIdleTaskMemory prototype (linked to static allocation support) */
@@ -127,11 +131,21 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void const * argument)
 {
+  /* init code for USB_HOST */
+  MX_USB_HOST_Init();
   /* USER CODE BEGIN StartDefaultTask */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
+    if(1 == test_test)
+    {
+      if(Appli_state == APPLICATION_READY)
+      {
+        test_test = 0 ;
+        MSC_Application();
+      }
+    }
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -150,7 +164,7 @@ void StartappTask1Ms(void const * argument)
   for(;;)
   {
     osDelay(1);
-	// 调用主任务函数
+	// 閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹
 	app_main_task();
   }
   

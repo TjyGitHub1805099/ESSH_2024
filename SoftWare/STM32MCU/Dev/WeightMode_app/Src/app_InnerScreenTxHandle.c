@@ -23,9 +23,10 @@ UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
 	UINT8 result = FALSE ;
 	static INT16 curPage = 0 ,  curPageDelay_offset = 80;
 	//
+	return TRUE;
 	switch(pSdwe->sendSysParaDataToDiwenIndex)
 	{
-		case 0x80://获取系统版本 若获取回则代表 屏已上电
+		case 0xF0://获取系统版本 若获取回则代表 屏已上电
 			if(FALSE == pSdwe->sdwePowerOn)
 			{
 				if(0 == (pSdwe->CurTick %100))//every 500ms send order to get version
@@ -104,13 +105,13 @@ UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
 				pSdwe->sendSysParaDataToDiwenIndex++;
 			}
 		break;
-		case 4://小数显示相关描述指针变量发送，托盘重量显示相关
+		case 0X80://小数显示相关描述指针变量发送，托盘重量显示相关
 			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
 				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
 			{		
 				if(0 != screenPublic_FreshDisplayPosition_Of_WeightVlu(pSdwe))//根据小数是否打开 发送相关数据
 				{
-					pSdwe->sendSysParaDataToDiwenIndex=41;
+					pSdwe->sendSysParaDataToDiwenIndex=0XFF;
 				}
 			}
 		break;
@@ -521,10 +522,11 @@ UINT8 innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle(T5LType *pSd
 screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM]=
 {
 	//priority index func_add
-	{0,	0, &screenPublic_ChanelChangedTrigerHandle},	//==C1 event arrive:At Calibration Page , chanel changed trigerd
-	{0,	1, &screenPublic_ResetCalibrationTrigerHandle},//==C2 event arrive:At Calibration Page , calibration reset trigerd 
-	{0,	2, &screenPublic_PointTrigerHandle},//==C3 event arrive:At Calibration Page , point trigerd
-	{0,	3, &innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle},//normaly weight color voice handle
+	{0,	0, &innerScreenTxHandle_ScreenInit},	//==C1 event arrive:At Calibration Page , chanel changed trigerd
+	{0,	1, &screenPublic_ChanelChangedTrigerHandle},	//==C1 event arrive:At Calibration Page , chanel changed trigerd
+	{0,	2, &screenPublic_ResetCalibrationTrigerHandle},//==C2 event arrive:At Calibration Page , calibration reset trigerd 
+	{0,	3, &screenPublic_PointTrigerHandle},//==C3 event arrive:At Calibration Page , point trigerd
+	{0,	4, &innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle},//normaly weight color voice handle
 
 };
 

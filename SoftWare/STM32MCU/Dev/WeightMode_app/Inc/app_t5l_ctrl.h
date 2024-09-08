@@ -581,7 +581,7 @@ typedef struct structScreenHandleType
 }ScreenHandleType;
 
 #define SCREEN_RX_HANDLE_TOTAL_NUM	(15)	/**< 屏幕RX数据处理事件数量 */
-#define SCREEN_TX_HANDLE_TOTAL_NUM	(4)	/**< 屏幕TX数据处理事件数量 */
+#define SCREEN_TX_HANDLE_TOTAL_NUM	(5)	/**< 屏幕TX数据处理事件数量 */
 extern screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM];
 extern screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM];
 

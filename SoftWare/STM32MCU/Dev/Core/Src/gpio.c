@@ -47,6 +47,8 @@
      PB11   ------> ETH_TX_EN
      PB12   ------> ETH_TXD0
      PB13   ------> ETH_TXD1
+     PB14   ------> USB_OTG_HS_DM
+     PB15   ------> USB_OTG_HS_DP
 */
 void MX_GPIO_Init(void)
 {
@@ -73,10 +75,10 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(EPS_BOOT_RUN_GPIO0_GPIO_Port, EPS_BOOT_RUN_GPIO0_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, SMMZ_REST_Pin|SMMZ_TRIG_Pin|PA8_ETH_RESET_Pin|STM32_RS485_EN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, SMMZ_REST_Pin|SMMZ_TRIG_Pin|STM32_RS485_EN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, LED_RUN0_Pin|BAT_CHARG_EN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11|LED_RUN0_Pin|BAT_CHARG_EN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(STM32_I2C1_WP_GPIO_Port, STM32_I2C1_WP_Pin, GPIO_PIN_SET);
@@ -114,10 +116,8 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(EPS_RST_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PAPin PAPin PAPin PAPin
-                           PAPin */
-  GPIO_InitStruct.Pin = EPS_BOOT_RUN_GPIO0_Pin|SMMZ_REST_Pin|SMMZ_TRIG_Pin|PA8_ETH_RESET_Pin
-                          |STM32_RS485_EN_Pin;
+  /*Configure GPIO pins : PAPin PAPin PAPin PAPin */
+  GPIO_InitStruct.Pin = EPS_BOOT_RUN_GPIO0_Pin|SMMZ_REST_Pin|SMMZ_TRIG_Pin|STM32_RS485_EN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -150,6 +150,21 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PB14 PB15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_14|GPIO_PIN_15;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF12_OTG_HS_FS;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PD11 */
+  GPIO_InitStruct.Pin = GPIO_PIN_11;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PDPin PDPin PDPin */
   GPIO_InitStruct.Pin = STM32_KEY_1_Pin|STM32_KEY_2_Pin|M_HX711_DATA_1_Pin;
