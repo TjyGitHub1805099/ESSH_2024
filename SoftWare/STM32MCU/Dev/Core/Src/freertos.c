@@ -47,7 +47,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-uint8_t test_test = 0 ;
+volatile uint16_t usb_handle_test = 0 ;
 extern ApplicationTypeDef Appli_state;
 extern void MSC_Application(void);
 /* USER CODE END Variables */
@@ -137,15 +137,15 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
-    if(1 == test_test)
+	  osDelay(1);
+    if(12 == usb_handle_test)
     {
       if(Appli_state == APPLICATION_READY)
       {
-        test_test = 0 ;
-        MSC_Application();
+          usb_handle_test = 0 ;
+          MSC_Application();
       }
-    }
+    }  
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -164,8 +164,7 @@ void StartappTask1Ms(void const * argument)
   for(;;)
   {
     osDelay(1);
-	// 锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷
-	app_main_task();
+	  app_main_task();
   }
   
   /* USER CODE END StartappTask1Ms */

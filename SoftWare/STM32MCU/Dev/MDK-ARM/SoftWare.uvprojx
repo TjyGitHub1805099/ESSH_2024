@@ -801,6 +801,16 @@
               <FileType>1</FileType>
               <FilePath>..\WeightMode_app\Src\app_wzdyj.c</FilePath>
             </File>
+            <File>
+              <FileName>app_AT24C.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\WeightMode_app\Src\app_AT24C.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_DataCenter.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\WeightMode_app\Src\app_DataCenter.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1163,6 +1173,11 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+            <File>
+              <FileName>usb_ESSH.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USB_HOST\App\usb_ESSH.c</FilePath>
             </File>
           </Files>
         </Group>

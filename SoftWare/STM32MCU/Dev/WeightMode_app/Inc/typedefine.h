@@ -23,14 +23,20 @@
 //#define CCMRAM  __attribute__((section("ccmram")))
 #define CCMRAM
 
+typedef unsigned    char        uint8;      /**< 无符号8位整数 */
 typedef unsigned    char        UINT8;      /**< 无符号8位整数 */
+typedef signed      char        int8;       /**< 带符号8位整数 */
 typedef signed      char        INT8;       /**< 带符号8位整数 */
+typedef unsigned    short       uint16;     /**< 无符号16位整数 */
 typedef unsigned    short       UINT16;     /**< 无符号16位整数 */
 typedef signed      short       INT16;      /**< 带符号16位整数 */
+typedef unsigned    int         uint32;     /**< 无符号32位整数 */
 typedef unsigned    int         UINT32;     /**< 无符号32位整数 */
 typedef signed      int         INT32;      /**< 带符号32位整数 */
 typedef unsigned    long long   UINT64;     /**< 无符号64位整数 */
+typedef signed      long long   sint64;      /**< 带符号64位整数 */
 typedef signed      long long   INT64;      /**< 带符号64位整数 */
+
 
 #define NULL_PTR                    (0)
 

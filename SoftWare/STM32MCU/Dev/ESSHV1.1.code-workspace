@@ -37,7 +37,10 @@
 			"app_balancingdatahandle.h": "c",
 			"stm32f4xx.h": "c",
 			"app_smmz.h": "c",
-			"app_wzdyj.h": "c"
+			"app_wzdyj.h": "c",
+			"usb_host.h": "c",
+			"app_datacenter.h": "c",
+			"app_utctimer.h": "c"
 		}
 	}
 }
