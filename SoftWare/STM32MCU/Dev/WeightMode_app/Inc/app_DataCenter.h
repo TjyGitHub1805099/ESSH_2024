@@ -1,22 +1,10 @@
 #ifndef _APP_DATACENTER_H
 #define _APP_DATACENTER_H
+#include "app_EEFLASH.h"
 
-#include "typedefine.h"
-#include "app_AT24C.h"
-#include "app_crc.h"
 
-typedef enum
-{
-    D_C_CLASSIFICATION_A = 0u,
-    D_C_CLASSIFICATION_B = 1u,
-    D_C_CLASSIFICATION_C = 2u,
-    D_C_CLASSIFICATION_D = 3u,
-    D_C_CLASSIFICATION_E = 4u,
-    D_C_CLASSIFICATION_F = 5u,
-    D_C_CLASSIFICATION_G = 6u,
-    D_C_CLASSIFICATION_H = 7u,
-    D_C_CLASSIFICATION_NUM
-}eDataCenterClassificationType;
+
+#define EXTFLASH_ORDER_BUZY (0x78)
 
 #define INNER_SCREEN_DATACENTER_START_ADD       (0x5000u)
 #define INNER_SCREEN_DATACENTER_LENOF_INDEX     (0x04u)// 4 ,Address[0x5000 ~ 0x5003] ,such as [0000]
@@ -26,10 +14,31 @@ typedef enum
 #define INNER_SCREEN_DATACENTER_LENOF_TYPE      (0x01u)// 1 ,Address[0x502C ~ 0x502C] ,such as [A]
 #define INNER_SCREEN_DATACENTER_LENOF_RANGE     (0x0Du)//13 ,Address[0x502D ~ 0x5039] ,such as [[1111 ~ 2222]]
 
+#define CLASSIFICATION_SEARCH_DISPLAY_NUM       (6)//at onepage the max display num
+
+typedef enum
+{
+    D_C_CLASSIFICATION_A = 0,
+    D_C_CLASSIFICATION_B = 1,
+    D_C_CLASSIFICATION_C = 2,
+    D_C_CLASSIFICATION_D = 3,
+    D_C_CLASSIFICATION_E = 4,
+    D_C_CLASSIFICATION_F = 5,
+    D_C_CLASSIFICATION_G = 6,
+    D_C_CLASSIFICATION_H = 7,
+    D_C_CLASSIFICATION_NUM
+}eDataCenterClassificationType;
+
+typedef struct sClassificationStruct
+{
+    float min;
+    float mid;
+    float max;
+    uint8 typeOutput;
+}tClassificationStruct;
+
 typedef struct sInnerScreenDataCenterStruct
 {
-    uint16 globalIndex;
-    uint16 startAdd;
     sint64 utctime;
     eDataCenterClassificationType classificationType;
     //
@@ -41,13 +50,8 @@ typedef struct sInnerScreenDataCenterStruct
     uint8 dc_range[INNER_SCREEN_DATACENTER_LENOF_RANGE];
 }tInnerScreenDataCenterStruct;
 
-typedef struct sClassificationStruct
-{
-    float min;
-    float mid;
-    float max;
-    const uint8 typeOutput;
-}tClassificationStruct;
+
+
 
 /*
 SYS	        para num byte	typebit	typetotalbit	typetotalbyte	CRC	addStart_dec	addStart_hex	addEnd_dec	addEnd_hex	percent	Size(kB)
@@ -70,52 +74,48 @@ DATA_INFO	stroenum	    barcode	date	        weight	        CRC	addStart_dec	addS
 ------------------------------------------------------------------------------------------------------------------------------------------------											
                                                                                                                         Total	93.7988 15.0078 
 */
-//Partition 1 : SYS PARA 
-#define EEFLASH_SYS_PARA_START_ADD          (0x0000u)
-#define EEFLASH_SYS_PARA_LEN                (1022u)
-#define EEFLASH_SYS_PARA_END_ADD            (EEFLASH_SYS_PARA_START_ADD + EEFLASH_SYS_PARA_LEN + 2)
+//SYS PARA REVERSE
+#define EEFLASH_SYS_PARA_START_ADD                  (0x0000u)
+#define EEFLASH_SYS_PARA_LEN                        (1022u)
+#define EEFLASH_SYS_PARA_END_ADD                    (EEFLASH_SYS_PARA_START_ADD + EEFLASH_SYS_PARA_LEN + 2)
 //STORE NUM
 #define CLASSIFICATION_STORE_MAX_NUM                ((512) / 2 * 2)
 #define CLASSIFICATION_STORE_CFG_TYPEBIT            (4)//4bit : 0000 as A, ~ 0111 as H , for 
 #define CLASSIFICATION_STORE_CFG_TIME_TYPEBYTE      (4)//4byte : utc time at 1970~2099
 #define CLASSIFICATION_STORE_CFG_CRCLEN             (2)//CRC16 
 #define EECRC16                                     cal_crc16
-//Partition 2 : cfg info use typebit*num + crc16[2byte]
+//cfg info use : typebit*num + crc16[2byte]
 #define CLASSIFICATION_STORE_CFG_START_ADD          (EEFLASH_SYS_PARA_END_ADD)
 #define CLASSIFICATION_STORE_CFG_LEN                (CLASSIFICATION_STORE_MAX_NUM*CLASSIFICATION_STORE_CFG_TYPEBIT/8) 
 #define CLASSIFICATION_STORE_CFG_END_ADD            (CLASSIFICATION_STORE_CFG_START_ADD + CLASSIFICATION_STORE_CFG_LEN + CLASSIFICATION_STORE_CFG_CRCLEN)
-//Partition 3 : cfg backup info use  typebit*num + crc16[2byte]
+//cfg backup info use : typebit*num + crc16[2byte]
 #define CLASSIFICATION_STORE_CFG_BU_START_ADD       (((CLASSIFICATION_STORE_CFG_END_ADD/EXT_FLASH_PROCESS_LEN)+1)*EXT_FLASH_PROCESS_LEN)
 #define CLASSIFICATION_STORE_CFG_BU_LEN             (CLASSIFICATION_STORE_CFG_LEN) 
 #define CLASSIFICATION_STORE_CFG_BU_END_ADD         (CLASSIFICATION_STORE_CFG_BU_START_ADD + CLASSIFICATION_STORE_CFG_BU_LEN + CLASSIFICATION_STORE_CFG_CRCLEN)
 
-//Partition 4 : cfg info use  time*num + crc16[2byte]
+//cfg info use : time*num + crc16[2byte]
 #define CLASSIFICATION_STORE_CFG_TIME_START_ADD     (((CLASSIFICATION_STORE_CFG_BU_END_ADD/EXT_FLASH_PROCESS_LEN)+1)*EXT_FLASH_PROCESS_LEN)
 #define CLASSIFICATION_STORE_CFG_TIME_LEN           (CLASSIFICATION_STORE_MAX_NUM*CLASSIFICATION_STORE_CFG_TIME_TYPEBYTE) 
 #define CLASSIFICATION_STORE_CFG_TIME_END_ADD       (CLASSIFICATION_STORE_CFG_TIME_START_ADD + CLASSIFICATION_STORE_CFG_TIME_LEN + CLASSIFICATION_STORE_CFG_CRCLEN)
-//Partition 5 : cfg backup info use  time*num + crc16[2byte]
+//cfg backup info use : time*num + crc16[2byte]
 #define CLASSIFICATION_STORE_CFG_TIME_BU_START_ADD  (((CLASSIFICATION_STORE_CFG_TIME_END_ADD/EXT_FLASH_PROCESS_LEN)+1)*EXT_FLASH_PROCESS_LEN)
 #define CLASSIFICATION_STORE_CFG_TIME_BU_LEN        (CLASSIFICATION_STORE_CFG_TIME_LEN) 
 #define CLASSIFICATION_STORE_CFG_TIME_BU_END_ADD    (CLASSIFICATION_STORE_CFG_TIME_BU_START_ADD + CLASSIFICATION_STORE_CFG_TIME_BU_LEN + CLASSIFICATION_STORE_CFG_CRCLEN)
 
-//Partition 6 : data info ( barcode[13byte] + date[0byte] + weight[4byte] + CRC16[2byte]) * num
+//data info:( barcode[13byte] + date[0byte] + weight[4byte] + CRC16[2byte]) * num
 #define CLASSIFICATION_STORE_DATA_START_ADD         (((CLASSIFICATION_STORE_CFG_TIME_BU_END_ADD/EXT_FLASH_PROCESS_LEN)+1)*EXT_FLASH_PROCESS_LEN)
 #define CLASSIFICATION_STORE_DATA_SINGLE_LEN        (13+0+4+2)
 #define CLASSIFICATION_STORE_DATA_END_ADD           (CLASSIFICATION_STORE_DATA_START_ADD + CLASSIFICATION_STORE_MAX_NUM*(CLASSIFICATION_STORE_DATA_SINGLE_LEN))
-
-typedef struct sClassificationStoreStruct
-{
-    uint16 totalNum;
-    uint16 type;
-    uint16 index;
-}tClassificationStoreStruct;
-
-#define DATACENTER_SINGLE_PAGE_MAX_DISPLAY_NUM             (6)//max num of datacenter display
+#define CLASSIFICATION_STORE_DATA_TOTAL_LEN         (CLASSIFICATION_STORE_DATA_END_ADD - CLASSIFICATION_STORE_DATA_START_ADD)
+//local data center handle
 typedef struct sInnerScreenDataCenterHandleStruct
 {
-    //store in extern e2
-    uint8 cfgInfo_weightType[CLASSIFICATION_STORE_CFG_LEN+2];
-    uint8 cfgInfo_utcTime[CLASSIFICATION_STORE_CFG_TIME_LEN+2];
+    //cfg info store in extern e2
+    uint8 cfgInfo_weightType[CLASSIFICATION_STORE_CFG_LEN + 2];
+    uint8 cfgInfo_utcTime[CLASSIFICATION_STORE_CFG_TIME_LEN];
+    uint8 dataCenterPayload[CLASSIFICATION_STORE_DATA_TOTAL_LEN];
+    //use cfg info caculate each type total num
+    uint16 totalStoreNum_EachType[D_C_CLASSIFICATION_NUM + 2];
 
     //for data center display
     uint16 targetPageNum;
@@ -129,21 +129,22 @@ typedef struct sInnerScreenDataCenterHandleStruct
     sint64 searchUseUTCTimeEnd;
     uint16 searchOutIndex_CheckedBy_UTCTime;
     //search out buffer
-    uint16 searchOutIndexArry[DATACENTER_SINGLE_PAGE_MAX_DISPLAY_NUM]; 
+    uint16 searchOutIndexArry[CLASSIFICATION_SEARCH_DISPLAY_NUM]; 
     
-    //for cfg caculate total num
-    uint16 totalStoreNum_EachType[D_C_CLASSIFICATION_NUM];
     //used for execute store 
+    uint8 needToStore;
     uint16 userDataStoreIndex;
-    uint16 userDataStoreAddress;
     uint8 userDataStoreData[CLASSIFICATION_STORE_DATA_SINGLE_LEN];
-    uint16 userDataTimeStoreAddress;
-    uint8 userDataTimeStoreData[CLASSIFICATION_STORE_CFG_TIME_TYPEBYTE];
 
-    tClassificationStruct *pClassificationCfg;
     //real time data
-    tInnerScreenDataCenterStruct *pEntryData;
-
+    uint8 newDataEntryFlag;//when start entry data set this flag , when I2C complete and callback executed clear this flag
+    uint8 jobStatus[E_F_HANDLE_JOBID_WR_MAX][2];
+    tInnerScreenDataCenterStruct *pRealTimeData;
 }tInnerScreenDataCenterHandleStruct;
 
+
+
+extern tDataCenterExtFlashCallbackStruct dataCenterCallbackRegisterList[E_F_HANDLE_JOBID_WR_MAX];
+
+extern void InnerScreenDataCenterHandle_MainFunction(void);
 #endif

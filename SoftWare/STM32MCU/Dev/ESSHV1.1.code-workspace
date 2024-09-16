@@ -40,7 +40,10 @@
 			"app_wzdyj.h": "c",
 			"usb_host.h": "c",
 			"app_datacenter.h": "c",
-			"app_utctimer.h": "c"
+			"app_utctimer.h": "c",
+			"app_eeflash.h": "c",
+			"stm32f4xx_hal_i2c.h": "c",
+			"app_crc.h": "c"
 		}
 	}
 }

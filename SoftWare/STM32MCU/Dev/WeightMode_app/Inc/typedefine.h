@@ -25,6 +25,7 @@
 
 typedef unsigned    char        uint8;      /**< 无符号8位整数 */
 typedef unsigned    char        UINT8;      /**< 无符号8位整数 */
+typedef signed      char        sint8;       /**< 带符号8位整数 */
 typedef signed      char        int8;       /**< 带符号8位整数 */
 typedef signed      char        INT8;       /**< 带符号8位整数 */
 typedef unsigned    short       uint16;     /**< 无符号16位整数 */

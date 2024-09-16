@@ -24,12 +24,31 @@
  * DO NOT CHANGE THIS COMMENT!           << Start of include and declaration area >>        DO NOT CHANGE THIS COMMENT!
  *********************************************************************************************************************/
 #include "app_AT24C.h"
-#include "time.h"
+#include "app_DataCenter.h"
+#include "i2c.h"
+
 /**********************************************************************************************************************
  * DO NOT CHANGE THIS COMMENT!           << End of include and declaration area >>          DO NOT CHANGE THIS COMMENT!
  *********************************************************************************************************************/
 
-tExtFlashHandleStruct ExtFlashHandleContex;
+tExtFlashHandleStruct ExtFlashHandleContex = {
+    .curTicks = 0,
+    .entryTicks = 0 ,
+    .handleType = E_F_HANDLE_INIT,
+
+    //order inpur info
+    .orderQueueLock = 0,
+    .orderQueuePushIndex = 0,
+    .orderQueuePopIndex = 0,
+    .orderQueue = {{0}},
+
+    //process handle info
+    .process = {0},
+    .onGoingOrder = E_F_ORDER_N,
+    .processDelayTime = 0,
+
+    .pDataCenterCallbackList = &dataCenterCallbackRegisterList[0],
+};
 
 /**********************************************************************************************************************
  *
@@ -47,88 +66,174 @@ tExtFlashHandleStruct ExtFlashHandleContex;
  * DO NOT CHANGE THIS COMMENT!           << Start of documentation area >>                  DO NOT CHANGE THIS COMMENT!
  * Symbol: IIC_Bus_MainFunction_doc
  *********************************************************************************************************************/
-void ExFlash_Async_Read_Complete(uint8 sts)
+//order push
+static sint8 ExtFlash_Order_Push(tExtFlashHandleStruct *contex , tExtFlashOrderStruct *pPushOrder)
 {
-
-}
-
-uint8 ExFlash_Async_Read(ExtFlashDevAddType devAdd,ExtFlashRegAddType regAdd,uint16 len, ExtFlashRegVluType *dataPtr ,uint32 timeout)
-{
-    uint8 ret = 0 ;
-    tExtFlashHandleStruct *contex = &ExtFlashHandleContex;
-    if((regAdd + len) <= EXT_FLASH_MAX_LOGIC_ADD)
+    sint8 ret = 0 ;
+    if(0 == contex->orderQueueLock)
     {
-        if(E_F_ORDER_N == contex->order.Order)
+        contex->orderQueueLock = 1;
+        if(1 == contex->orderQueueLock)
         {
-            contex->order.Order = E_F_ORDER_R;
-            contex->order.DevAddress = devAdd;
-            contex->order.RegAddress = regAdd;
-            contex->order.totalLen = len;
-            contex->order.readPtr = dataPtr;
-            contex->order.writePtr = 0;
-            contex->order.timeout = timeout;
-            contex->order.callback = ExFlash_Async_Read_Complete;
-            //
-            ret = 1;
+            contex->orderQueuePushIndex = contex->orderQueuePushIndex%EXTFLASH_ORDER_QUEUE_MAX_NUM;
+            if( E_F_ORDER_N == contex->orderQueue[contex->orderQueuePushIndex].Order)
+            {
+                contex->orderQueue[contex->orderQueuePushIndex] = *pPushOrder;
+                contex->orderQueuePushIndex++;
+                contex->orderQueuePushIndex = contex->orderQueuePushIndex%EXTFLASH_ORDER_QUEUE_MAX_NUM;
+                ret = 1;
+            }
         }
+        contex->orderQueueLock = 0;
     }
     //
     return ret;
 }
 
-void ExFlash_Async_Write_Complete(uint8 sts)
+//order clear
+static void ExFlash_Order_Clear(tExtFlashOrderStruct *pClearOrder)
 {
-
+    pClearOrder->Order = E_F_ORDER_N;
+    pClearOrder->DevAddress = EXT_EEPROM_SLAVE_ADDRESS;
+    pClearOrder->RegAddress = 0;
+    pClearOrder->totalLen = 0;
+    pClearOrder->remainLen = 0;
+    pClearOrder->readPtr = 0;
+    pClearOrder->timeout = 0;
+    pClearOrder->jobId = E_F_HANDLE_JOBID_WR_MAX;
+    pClearOrder->extFlashIfCallback = 0;
 }
-uint8 ExFlash_Async_Write(ExtFlashDevAddType devAdd,ExtFlashRegAddType regAdd,uint16 len, ExtFlashRegVluType *dataPtr ,uint32 timeout)
+
+//order pop
+static sint8 ExtFlash_Order_Pop(tExtFlashHandleStruct *contex , tExtFlashOrderStruct *pPopOrder)
 {
-    uint8 ret = 0 ;
-    tExtFlashHandleStruct *contex = &ExtFlashHandleContex;
-    if((regAdd + len) <= EXT_FLASH_MAX_LOGIC_ADD)
+    sint8 ret = 0 ;
+    contex->orderQueuePopIndex = contex->orderQueuePopIndex%EXTFLASH_ORDER_QUEUE_MAX_NUM;
+    if( E_F_ORDER_N != contex->orderQueue[contex->orderQueuePopIndex].Order)
     {
-        if(E_F_ORDER_N == contex->order.Order)
-        {
-            contex->order.Order = E_F_ORDER_R;
-            contex->order.DevAddress = devAdd;
-            contex->order.RegAddress = regAdd;
-            contex->order.totalLen = len;
-            contex->order.readPtr = 0;
-            contex->order.writePtr = dataPtr;
-            contex->order.timeout = timeout;
-            contex->order.callback = ExFlash_Async_Write_Complete;
-            //
-            ret = 1;
-        }
+        *pPopOrder = contex->orderQueue[contex->orderQueuePopIndex];
+        ExFlash_Order_Clear(&contex->orderQueue[contex->orderQueuePopIndex]);
+        //
+        contex->orderQueuePopIndex++;
+        contex->orderQueuePopIndex = contex->orderQueuePopIndex%EXTFLASH_ORDER_QUEUE_MAX_NUM;
+        ret = 1;
     }
     //
     return ret;
 }
 
-uint8 ExFlash_OrderOnGoing(tExtFlashHandleStruct *contex)
+//order handle done IF layer callback notification uplayer
+static void ExFlashIf_SyncWriteRead_Complete(eExtFlashHandleJobIdType jobId, uint8 sts)
+{
+    tExtFlashHandleStruct *pContex = &ExtFlashHandleContex;
+    if(jobId == pContex->pDataCenterCallbackList[jobId].jobId)
+    {
+        if(0 != pContex->pDataCenterCallbackList[jobId].pDataCenterCallback)
+        {
+            pContex->pDataCenterCallbackList[jobId].pDataCenterCallback(jobId,sts);
+        }
+    }
+}
+
+//ExeFlashIf sync read
+sint8 ExFlashIf_Sync_Read(eExtFlashHandleJobIdType jobId,tExtFlashOrderStruct *pOrder)
+{
+    sint8 ret = 0 ;
+    tExtFlashHandleStruct *contex = &ExtFlashHandleContex;
+    tExtFlashOrderStruct pushOrder;
+    if((pOrder->RegAddress + pOrder->totalLen) <= EXT_FLASH_MAX_LOGIC_ADD)
+    {
+        pushOrder.Order = E_F_ORDER_R;
+        pushOrder.DevAddress = pOrder->DevAddress;
+        pushOrder.RegAddress = pOrder->RegAddress;
+        pushOrder.totalLen = pOrder->totalLen;
+        pushOrder.remainLen = pOrder->remainLen;
+        pushOrder.readPtr = pOrder->readPtr;
+        pushOrder.writePtr = 0;
+        pushOrder.timeout = pOrder->timeout;
+        pushOrder.jobId = jobId;
+        pushOrder.extFlashIfCallback = ExFlashIf_SyncWriteRead_Complete;       
+        ret = ExtFlash_Order_Push(contex,&pushOrder);
+    }
+    else
+    {
+        ret = -1;
+    }
+    //
+    return ret;
+}
+
+//inner ExeFlashIf sync write
+sint8 ExFlashIf_Sync_Write(eExtFlashHandleJobIdType jobId,tExtFlashOrderStruct *pOrder)
+{
+    sint8 ret = 0 ;
+    tExtFlashHandleStruct *contex = &ExtFlashHandleContex;
+    tExtFlashOrderStruct pushOrder;
+    if((pOrder->RegAddress + pOrder->totalLen) <= EXT_FLASH_MAX_LOGIC_ADD)
+    {
+        if(E_F_ORDER_N == contex->orderQueue[contex->orderQueuePushIndex].Order)
+        {
+            pushOrder.Order = E_F_ORDER_W;
+            pushOrder.DevAddress = pOrder->DevAddress;
+            pushOrder.RegAddress = pOrder->RegAddress;
+            pushOrder.totalLen = pOrder->totalLen;
+            pushOrder.remainLen = pOrder->remainLen;
+            pushOrder.readPtr = 0;
+            pushOrder.writePtr = pOrder->writePtr;
+            pushOrder.timeout = pOrder->timeout;
+            pushOrder.jobId = jobId;
+            pushOrder.extFlashIfCallback = ExFlashIf_SyncWriteRead_Complete;
+            ret = ExtFlash_Order_Push(contex,&pushOrder);
+        }
+    }
+    else
+    {
+        ret = -1;
+    }
+    //
+    return ret;
+}
+
+//sync read/write
+static uint8 ExtFlash_OrderOnGoing(tExtFlashHandleStruct *contex)
 {
     uint8 ret = 0 ;
     uint16 handleLen = 0 ;
-
+    //
     if(contex->process.remainLen > 0 )
     {
-        ret = 0 ;
         handleLen = EXT_FLASH_PROCESS_LEN - contex->process.RegAddress%EXT_FLASH_PROCESS_LEN;
         if(handleLen > contex->process.remainLen)
         {
             handleLen = contex->process.remainLen;
-        }
+        }        
         //i2c aync order start
         switch(contex->process.Order)
         {
-            case E_F_ORDER_R://read order
-                //i2c async read
+            case E_F_ORDER_R://read order , read each page[64byte] need 64*8/400000 = 1.28ms
+                //i2c sync read
+                ret = HAL_I2C_Mem_Read(&hi2c1,//app_i2cComtext.hi2c
+                                contex->process.DevAddress,
+                                contex->process.RegAddress,
+                                I2C_MEMADD_SIZE_16BIT,
+                                &contex->process.readPtr[contex->process.totalLen - contex->process.remainLen],
+                                handleLen,//contex->process.totalLen,
+                                contex->process.timeout);
 
-                ret = 0x10 ;
+                ret = EXTFLASH_ORDER_BUZY ;
             break;
-            case E_F_ORDER_W://write order
-                //i2c async write
-
-                ret = 0x10 ;
+            case E_F_ORDER_W://write order ,write each page[64byte] need 64*8/400000 = 1.28ms + min[5ms] = 6.28ms
+                //i2c sync write
+                #if 1
+                ret = HAL_I2C_Mem_Write(&hi2c1,//app_i2cComtext.hi2c
+                                contex->process.DevAddress,
+                                contex->process.RegAddress,
+                                I2C_MEMADD_SIZE_16BIT,
+                                &contex->process.writePtr[contex->process.totalLen - contex->process.remainLen],
+                                handleLen,//contex->process.totalLen,
+                                contex->process.timeout);
+                #endif
+                ret = EXTFLASH_ORDER_BUZY ;
             break;
             default:
             break;
@@ -141,81 +246,59 @@ uint8 ExFlash_OrderOnGoing(tExtFlashHandleStruct *contex)
     {
         //handle done
         ret = 1;
+        //exe callout
+        if(0 != contex->process.extFlashIfCallback)
+        {
+            contex->process.extFlashIfCallback(contex->process.jobId,ret);
+        }    
     }
     //
-    if(contex->curTicks >= contex->process.timeout)
+    if((contex->curTicks - contex->entryTicks) >= contex->process.timeout)
     {
         //timeout
         ret = 0x80;
     }
+
     return ret;
 }
 
-void ExFlash_OrderClear(tExtFlashHandleStruct *contex)
-{
-    contex->order.Order = E_F_ORDER_N;
-    contex->order.DevAddress = 0;
-    contex->order.RegAddress = 0;
-    contex->order.totalLen = 0;
-    contex->order.readPtr = 0;
-    contex->order.writePtr = 0;
-    contex->order.timeout = 0;
-    contex->order.callback = 0;
-    //
-    contex->process.Order = E_F_ORDER_N;
-    contex->process.DevAddress = 0;
-    contex->process.RegAddress = 0;
-    contex->process.totalLen = 0;
-    contex->process.remainLen = 0;
-    contex->process.readPtr = 0;
-    contex->process.timeout = 0;
-    contex->process.callback = 0;
-    //
-    contex->onGoingOrder = E_F_ORDER_N;
-}
-void ExFlash_OrderUpgrade(tExtFlashHandleStruct *contex)
-{
-    contex->process.Order = contex->order.Order;
-    contex->process.DevAddress = contex->order.DevAddress;
-    contex->process.RegAddress = contex->order.RegAddress;
-    contex->process.totalLen = contex->order.totalLen;
-    contex->process.remainLen = contex->process.totalLen;
-    contex->process.readPtr = contex->order.readPtr;
-    contex->process.writePtr = contex->order.writePtr;
-    contex->process.timeout = contex->order.timeout + contex->curTicks;//
-    contex->process.callback = contex->order.callback;
-
-}
-void ExFlash_CycleHandle(tExtFlashHandleStruct *contex)
+//cycle handle
+static void ExFlash_CycleHandle(tExtFlashHandleStruct *contex)
 {
     uint8 ret = 0 ;
+    tExtFlashOrderStruct tempOrder;
     switch(contex->process.Order)
     {
         case E_F_ORDER_N:
-            if(E_F_ORDER_N != contex->order.Order)
+            if(1 == ExtFlash_Order_Pop(contex,&tempOrder))
             {
-                if((contex->order.RegAddress + contex->order.totalLen) <= EXT_FLASH_MAX_LOGIC_ADD)
+                contex->process = tempOrder;
+                contex->entryTicks = contex->curTicks;
+                if((E_F_ORDER_W == contex->process.Order) || (E_F_ORDER_WR == contex->process.Order))
                 {
-                    ExFlash_OrderUpgrade(contex);
-                }                
+                    //EXT_EEPROM_WRITE_PROTECT_DISABLE;
+                }
+                else
+                {
+                    //EXT_EEPROM_WRITE_PROTECT_ENABLE;
+                }
             }
         break;
 
         case E_F_ORDER_R://read order
         case E_F_ORDER_W://write order
-            ret = ExFlash_OrderOnGoing(contex);
+            ret = ExtFlash_OrderOnGoing(contex);
             if(1 == ret)//all compete
             {
-                ExFlash_OrderClear(contex);
-                contex->process.Order = E_F_ORDER_N;
+                ExFlash_Order_Clear(&contex->process);
             }
-            else if(0x10 == ret)//interval between two orders 
+            else if(EXTFLASH_ORDER_BUZY == ret)//interval between two orders 
             {
-                if(E_F_ORDER_R == contex->onGoingOrder)
+                if(E_F_ORDER_R == contex->process.Order)
                 {
                     contex->processDelayTime = EXT_FLASH_INTERVAL_READ;
                 }
-                else if(E_F_ORDER_W == contex->onGoingOrder)
+                else if (E_F_ORDER_W == contex->process.Order)
                 {
                     contex->processDelayTime = EXT_FLASH_INTERVAL_WRITE;
                 }
@@ -253,9 +336,11 @@ void ExFlash_CycleHandle(tExtFlashHandleStruct *contex)
     }
 }
 
-
+//mainfunction
 void ExFlash_MainFunction(void)
 {
+    tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
+    tExtFlashOrderStruct pushOrder;
     tExtFlashHandleStruct *contex = &ExtFlashHandleContex;
     contex->curTicks++;
     //
@@ -268,6 +353,9 @@ void ExFlash_MainFunction(void)
         case E_F_HANDLE_CYCLE:
             ExFlash_CycleHandle(contex);
             contex->handleType = E_F_HANDLE_CYCLE;
+        break;
+        //
+        default:
         break;
     }
 }

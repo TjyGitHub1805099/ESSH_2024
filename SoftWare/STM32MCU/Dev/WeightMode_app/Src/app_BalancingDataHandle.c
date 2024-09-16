@@ -195,7 +195,7 @@ void BalancingData_WeightData_Handle_PrepareAndJudgeAndSendToScreen(T5LType *pSd
 	}
 
 
-	#if 0
+	#if 1
 	switch(pSdwe->screenWeightHandleStatus)
 	{
 		case 0://判断【重量】是否需要发送

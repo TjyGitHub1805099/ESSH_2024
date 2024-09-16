@@ -71,5 +71,7 @@ void app_i2c_test(void);
 #endif
 
 
+extern app_i2cComtextDef app_i2cComtext;
+
 #endif
 

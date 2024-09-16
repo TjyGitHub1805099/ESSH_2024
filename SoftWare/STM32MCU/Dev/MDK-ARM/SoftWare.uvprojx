@@ -811,6 +811,11 @@
               <FileType>1</FileType>
               <FilePath>..\WeightMode_app\Src\app_DataCenter.c</FilePath>
             </File>
+            <File>
+              <FileName>app_UTCTimer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\WeightMode_app\Src\app_UTCTimer.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

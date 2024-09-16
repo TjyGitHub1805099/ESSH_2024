@@ -12,6 +12,7 @@
 #include "app_i2c.h"
 #include "app_smmz.h"
 #include "app_wzdyj.h"
+#include "app_DataCenter.h"
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -50,7 +51,7 @@ void app_main_task(void)
 	
 	//i2c test
 	#ifdef EXT_EEPROM_TEST_EN
-		app_i2c_test();
+		//app_i2c_test();
 	#endif
 
 	//T5L Screen Voice Pritf test
@@ -75,5 +76,9 @@ void app_main_task(void)
 	SmmzHandle_Mainfunction();
 
 	WzdyjHandle_Mainfunction();
+
+	InnerScreenDataCenterHandle_MainFunction();
+
+	ExFlash_MainFunction();
 }
 

@@ -1,19 +1,13 @@
 #ifndef _AT24C_FLASH_H
 #define _AT24C_FLASH_H
-#include "typedefine.h"
-#include <string.h>
+#include "app_EEFLASH.h"
+#include "app_DataCenter.h"
 
 
-//AT24C discription
-#define EXT_FLASH_MAX_LOGIC_ADD     (0x4000)//128kbit = 16k = 0x4000
-#define EXT_FLASH_PROCESS_LEN       (64)//each page max handle len
-#define EXT_FLASH_INTERVAL_READ     (1)//1ms
-#define EXT_FLASH_INTERVAL_WRITE    (5)//1ms
 
 typedef uint8   ExtFlashDevAddType;
 typedef uint16  ExtFlashRegAddType;
 typedef uint8   ExtFlashRegVluType;
-typedef void (*ExtFlashCallbackPtr)(uint8); 
 
 typedef enum
 {
@@ -40,6 +34,8 @@ typedef struct sExtFlashInfoStruct
     const uint16 len;//endAdd - startAdd
 } tExtFlashInfoStruct;
 
+typedef void (*ExtFlashCallbackPtr)(eExtFlashHandleJobIdType, uint8); 
+
 typedef struct sExtFlashOrderStruct
 {
     eExtFlashOrderType Order;
@@ -50,24 +46,33 @@ typedef struct sExtFlashOrderStruct
     ExtFlashRegVluType *writePtr;
     ExtFlashRegVluType *readPtr;
     uint32 timeout;
-    ExtFlashCallbackPtr callback;
+    eExtFlashHandleJobIdType jobId;
+    ExtFlashCallbackPtr extFlashIfCallback;
 } tExtFlashOrderStruct;
 
 typedef struct sExtFlashHandleStruct
 {
     uint32 curTicks;
+    uint32 entryTicks;
     eExtFlashHandleType handleType;
-    tExtFlashInfoStruct *initInfo;
 
     //order inpur info
-    tExtFlashOrderStruct order;
+    uint8 orderQueueLock;
+    uint8 orderQueuePushIndex;
+    uint8 orderQueuePopIndex;
+    tExtFlashOrderStruct orderQueue[EXTFLASH_ORDER_QUEUE_MAX_NUM];
 
     //process handle info
     tExtFlashOrderStruct process;
     eExtFlashOrderType onGoingOrder;
-    uint32 processStartTicks; 
     uint32 processDelayTime;
-    uint8 processRepeatCnt;
+
+    //datacenter callback
+    tDataCenterExtFlashCallbackStruct *pDataCenterCallbackList;
 }tExtFlashHandleStruct;
+
+extern tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle;
+
+extern void ExFlash_MainFunction(void);
 
 #endif
