@@ -15,6 +15,7 @@
 #include "app_password.h"
 #include "app_t5l_cfg.h"
 #include "app_BalancingDataHandle.h"
+#include "app_DataCenter.h"
 
 //0.0内屏初始化
 UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
@@ -23,7 +24,6 @@ UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
 	UINT8 result = FALSE ;
 	static INT16 curPage = 0 ,  curPageDelay_offset = 80;
 	//
-	return TRUE;
 	switch(pSdwe->sendSysParaDataToDiwenIndex)
 	{
 		case 0xF0://获取系统版本 若获取回则代表 屏已上电
@@ -39,34 +39,32 @@ UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
 				pSdwe->sendSysParaDataToDiwenIndex = 0x81;
 			}
 		break;
-		case 0x81:
-			if(0 == (pSdwe->CurTick %curPageDelay_offset))//every 500ms send order to get version
-			{	
-				if(TRUE ==screenPublic_PageJump(pSdwe,curPage))//触发屏幕播放开机动画
+		case 80://小数显示相关描述指针变量发送，托盘重量显示相关
+			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
+				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
+			{		
+				if(0 != screenPublic_FreshDisplayPosition_Of_WeightVlu(pSdwe))//根据小数是否打开 发送相关数据
 				{
-					if(curPage++ >= 25)
-					{
-						pSdwe->sendSysParaDataToDiwenIndex = 0x82;
-					}				
-				}			
+					pSdwe->sendSysParaDataToDiwenIndex=0x81;
+				}
 			}
 		break;
-		case 0x82://发送配平页面的数据 规整为0 等待HX711采集到一轮完整数据后在继续往后
+
+		case 0x81://获取RTC YM
+			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
+				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
+			{
+				screenPublic_ScreenRTCGet_YMDHMS(pSdwe);
+				pSdwe->sendSysParaDataToDiwenIndex = 0x84;
+			}
+		break;
+		case 0x84://发送配平页面的数据 规整为0 等待HX711采集到一轮完整数据后在继续往后
 			if(TRUE == pSdwe->sdweHX711FirstSampleCoplt)
 			{
 				pSdwe->sendSysParaDataToDiwenIndex = 0 ;//准备配平页面的数据 后在发送相关参数
 			}
 		break;
-		case 0://send screen light
-			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
-				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
-			{
-				len=0;
-				screenPublic_ScreenLight(pSdwe);
-				pSdwe->sendSysParaDataToDiwenIndex++;
-			}
-		break;
-		case 1://send weight data to DW
+		case 0://send weight data to DW
 			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
 				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
 			{
@@ -76,118 +74,9 @@ UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
 					sendData[len] = 0;
 				}
 				t5lWriteVarible(pSdwe,DMG_FUNC_ASK_CHANEL_WEIGHT_ADDRESS,sendData,len,0);/**< 通道重量 */
-				pSdwe->sendSysParaDataToDiwenIndex++;
+				pSdwe->sendSysParaDataToDiwenIndex = 7;
 			}
 		break;
-		case 2://send back color to DW
-			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
-				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
-			{
-				len=0;
-				for(len=0;len<T5L_MAX_CHANEL_LEN;len++)
-				{
-					sendData[len] = 0;
-				}
-				t5lWriteVarible(pSdwe,DMG_FUNC_ASK_CHANEL_COLOR_ADDRESS,sendData,len,0);/**< 通道背景色 */  //3100
-				pSdwe->sendSysParaDataToDiwenIndex++;
-			}
-		break;
-		case 3://send help data to DW
-			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
-				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
-			{
-				len=0;
-				for(len=0;len<DIFF_TO_DIWEN_DATA_LEN;len++)
-				{
-					sendData[len] = 0;
-				}
-				t5lWriteVarible(pSdwe,DMG_FUNC_HELP_TO_JUDGE_SET_ADDRESS,sendData,len,0);/**< 通道差值，帮助信息 */  //1201
-				pSdwe->sendSysParaDataToDiwenIndex++;
-			}
-		break;
-		case 0X80://小数显示相关描述指针变量发送，托盘重量显示相关
-			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
-				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
-			{		
-				if(0 != screenPublic_FreshDisplayPosition_Of_WeightVlu(pSdwe))//根据小数是否打开 发送相关数据
-				{
-					pSdwe->sendSysParaDataToDiwenIndex=0XFF;
-				}
-			}
-		break;
-		case 41://小数显示相关描述指针变量发送，帮组信息相关
-			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
-				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
-			{		
-				if(0 != screenPublic_FreshDisplayPosition_Of_HelpVlu(pSdwe))//根据小数是否打开 发送相关数据
-				{
-					pSdwe->sendSysParaDataToDiwenIndex = 42;
-				}
-			}
-		break;
-		case 42://背景色
-			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
-				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
-			{		
-				if(0 != screenPublic_FreshDisplayPosition_Of_WeightColor(pSdwe))
-				{
-					pSdwe->sendSysParaDataToDiwenIndex = 5;
-				}
-			}
-		break;
-		case 5://changed at 20220119 , FuncA Module special , send num
-			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
-				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
-			{
-				#if 0
-				switch(gSystemPara.isCascade)
-				{
-					case 0://1-8
-						for(len = 0 ; len < HX711_CHANEL_NUM ; len++)
-						{
-							sendData[len] = len + 1;
-						}	
-						t5lWriteVarible(pSdwe,(0x3901),sendData,len,0);						
-					break;
-
-					case ModbusAdd_Master://1-8
-						for(len = 0 ; len < HX711_CHANEL_NUM ; len++)
-						{
-							sendData[len] = len + 1;
-						}	
-						t5lWriteVarible(pSdwe,(0x3901),sendData,len,0);						
-					break;
-
-					case ModbusAdd_Slave_1://9-16
-						for(len = 0 ; len < HX711_CHANEL_NUM ; len++)
-						{
-							sendData[len] = HX711_CHANEL_NUM + len + 1;
-						}		
-						t5lWriteVarible(pSdwe,(0x3909),sendData,len,0);						
-					break;
-					default:
-					break;
-				}
-				#else
-					for(len = 0 ; len < 2*HX711_CHANEL_NUM ; len++)
-					{
-						sendData[len] = len + 1;
-					}		
-					t5lWriteVarible(pSdwe,(0x3901),sendData,len,0);						
-				#endif
-				//
-				pSdwe->sendSysParaDataToDiwenIndex++;
-			}
-		break;
-		case 6://jump to Banling page
-			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
-				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
-			{
-				len=0;
-				screenPublic_PageJump(pSdwe,pSdwe->screenBanlingPageNum);
-				pSdwe->sendSysParaDataToDiwenIndex++;
-			}
-		break;	
 		case 7://send 0x1000 单位
 			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
 				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
@@ -244,25 +133,6 @@ UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
 				sendData[len++] = pSdwe->CalibrateChanel;
 				t5lWriteVarible(pSdwe,DMG_FUNC_SET_CHANEL_NUM,sendData,len,0);/**< 校准的通道号 */  //2100
 				pSdwe->sendSysParaDataToDiwenIndex++;
-			}
-		break;
-		case 10://send voice info to DW
-			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
-				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
-			{
-				len=0;
-				screenT5L_OutputVoice(pSdwe,VoiceTypeMax);
-				pSdwe->sendSysParaDataToDiwenIndex++;
-			}
-		break;
-		case 11://序号显示相关描述指针变量发送
-			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
-				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
-			{		
-				if(0 != screenPublic_FreshDisplayPosition_Of_WeightIndex(pSdwe))
-				{
-					pSdwe->sendSysParaDataToDiwenIndex++;
-				}
 			}
 		break;
 		default:
@@ -495,6 +365,43 @@ UINT8 innerScreenTxHandle_IsCascadTriggerHandle(T5LType *pSdwe)
 	return matched;
 }
 
+
+
+void innerScreenTxHandle_ScreenBcCode_Upgrade(T5LType *pSdwe , UINT8 *pData , UINT8 len)
+{
+	UINT8 i = 0 ;
+	pSdwe->bcCodeTriger = 1;
+	if(len <= INNER_SCREEN_DATACENTER_LENOF_BARCODE)
+	{
+		pSdwe->bcCodeLen = (len+1)/2;
+	}
+	else
+	{
+		pSdwe->bcCodeLen = 1;
+	}
+	for(i=0;i<len;i++)
+	{
+		pSdwe->bcCodeVlu[i] = 0 ;
+		pSdwe->bcCodeVlu[i] = pData[2*i + 0];
+		pSdwe->bcCodeVlu[i] <<= 8;
+		pSdwe->bcCodeVlu[i] &= 0xff00;
+		pSdwe->bcCodeVlu[i] += pData[2*i + 1];
+	}
+
+}
+
+
+void innerScreenTxHandle_ScreenBcCode(T5LType *pSdwe)
+{
+	if(1 == pSdwe->bcCodeTriger)
+	{
+		if(TRUE ==t5lWriteData(pSdwe,DMG_FUNC_BC_CODE_ADDRESS,&pSdwe->bcCodeVlu[0],pSdwe->bcCodeLen,0));//2*chanel_len:because each data type was 4 byte
+		{
+			pSdwe->bcCodeTriger = 0;
+		}
+	}
+}
+
 //
 UINT8 innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle(T5LType *pSdwe)
 {
@@ -508,9 +415,10 @@ UINT8 innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle(T5LType *pSd
 			screenPublic_VoicePrintfMainfunction(pSdwe);
 		#else
 			BalancingData_WeightData_Handle_PrepareAndJudgeAndSendToScreen(pSdwe);
-			BalancingData_ColorData_Handle_PrepareAndJudgeAndSendToScreen(pSdwe);
-			BalancingData_HelpData_Handle_PrepareAndJudgeAndSendToScreen(pSdwe);
-			screenPublic_VoicePrintfMainfunction(pSdwe);
+			//BalancingData_ColorData_Handle_PrepareAndJudgeAndSendToScreen(pSdwe);
+			//BalancingData_HelpData_Handle_PrepareAndJudgeAndSendToScreen(pSdwe);
+			//screenPublic_VoicePrintfMainfunction(pSdwe);
+			innerScreenTxHandle_ScreenBcCode(pSdwe);
 		#endif
 	}	
 	return matched;
@@ -526,7 +434,8 @@ screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM]=
 	{0,	1, &screenPublic_ChanelChangedTrigerHandle},	//==C1 event arrive:At Calibration Page , chanel changed trigerd
 	{0,	2, &screenPublic_ResetCalibrationTrigerHandle},//==C2 event arrive:At Calibration Page , calibration reset trigerd 
 	{0,	3, &screenPublic_PointTrigerHandle},//==C3 event arrive:At Calibration Page , point trigerd
-	{0,	4, &innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle},//normaly weight color voice handle
+	{0,	4, &screenPublic_RemoveWeightTrigerHandle},//==C3 event arrive:At Calibration Page , point trigerd
+	{0,	5, &innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle},//normaly weight color voice handle
 
 };
 

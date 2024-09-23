@@ -76,10 +76,10 @@ DATA_INFO	stroenum	    barcode	date	        weight	        CRC	addStart_dec	addS
 */
 //SYS PARA REVERSE
 #define EEFLASH_SYS_PARA_START_ADD                  (0x0000u)
-#define EEFLASH_SYS_PARA_LEN                        (1022u)
+#define EEFLASH_SYS_PARA_LEN                        (2046u)
 #define EEFLASH_SYS_PARA_END_ADD                    (EEFLASH_SYS_PARA_START_ADD + EEFLASH_SYS_PARA_LEN + 2)
 //STORE NUM
-#define CLASSIFICATION_STORE_MAX_NUM                ((512) / 2 * 2)
+#define CLASSIFICATION_STORE_MAX_NUM                ((256) / 2 * 2)
 #define CLASSIFICATION_STORE_CFG_TYPEBIT            (4)//4bit : 0000 as A, ~ 0111 as H , for 
 #define CLASSIFICATION_STORE_CFG_TIME_TYPEBYTE      (4)//4byte : utc time at 1970~2099
 #define CLASSIFICATION_STORE_CFG_CRCLEN             (2)//CRC16 

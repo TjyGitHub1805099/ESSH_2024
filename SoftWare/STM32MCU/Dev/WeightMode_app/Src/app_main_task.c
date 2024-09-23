@@ -13,6 +13,8 @@
 #include "app_smmz.h"
 #include "app_wzdyj.h"
 #include "app_DataCenter.h"
+#include "time.h"
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -26,6 +28,9 @@ UINT32 g_sys_ms_tick = 0 ;
 void app_main_init(void)
 {
 }
+extern struct tm localtm;
+struct tm *pTm=&localtm;
+extern 	sint64 g64Time;
 //==sys main function
 void app_main_task(void)
 {
@@ -80,5 +85,12 @@ void app_main_task(void)
 	InnerScreenDataCenterHandle_MainFunction();
 
 	ExFlash_MainFunction();
+
+	if(g_sys_ms_tick % 1000 == 0)
+	{
+		g64Time++;
+		pTm = mygmtime(&g64Time);
+	}
+
 }
 

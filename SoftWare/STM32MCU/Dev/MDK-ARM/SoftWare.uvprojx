@@ -1128,6 +1128,11 @@
           </GroupOption>
           <Files>
             <File>
+              <FileName>usb_ESSH.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USB_HOST\App\usb_ESSH.c</FilePath>
+            </File>
+            <File>
               <FileName>usb_host.c</FileName>
               <FileType>1</FileType>
               <FilePath>../USB_HOST/App/usb_host.c</FilePath>
@@ -1178,11 +1183,6 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
-            </File>
-            <File>
-              <FileName>usb_ESSH.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\USB_HOST\App\usb_ESSH.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -212,8 +212,8 @@ void BalancingData_WeightData_Handle_PrepareAndJudgeAndSendToScreen(T5LType *pSd
 				{
 					pSdwe->screenWeightHandleHoldOn = 0;
 					//
-					pSdwe->screenWeightHandleStatus = 0XFE;//【重量】：判断->等待
-					pSdwe->screenColorHandleStatus = 0;//【背景色】：等待->判断
+					pSdwe->screenWeightHandleStatus = 0;//【重量】：判断->等待
+					pSdwe->screenColorHandleStatus = 0xFE;//【背景色】：等待->判断
 					pSdwe->screenHelpHandleStatus = 0xFE;//【帮助信息】：等待
 				}
 			}
@@ -227,19 +227,6 @@ void BalancingData_WeightData_Handle_PrepareAndJudgeAndSendToScreen(T5LType *pSd
 				//继续跳回判断数据是否相等
 				pSdwe->screenWeightHandleHoldOn = 0 ;
 				pSdwe->screenWeightHandleStatus = 0;//【重量】：发送->判断
-			}
-		break;
-
-		case 0xFE://等待【颜色】 【帮组信息】都已处理
-			pSdwe->screenWeightHandleHoldOn++;
-			if(pSdwe->screenWeightHandleHoldOn >= DMG_WAIT_COLOR_HELP_SEND_TIME)
-			{
-				//超时等待
-				pSdwe->screenWeightHandleHoldOn = 0;
-				//
-				pSdwe->screenWeightHandleStatus = 0;//【重量】：等待->判断
-				pSdwe->screenColorHandleStatus = 0xFE;//【背景色】：等待
-				pSdwe->screenHelpHandleStatus = 0xFE;//【帮助信息】：等待
 			}
 		break;
 

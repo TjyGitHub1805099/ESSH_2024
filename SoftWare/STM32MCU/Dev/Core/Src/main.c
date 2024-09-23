@@ -122,7 +122,6 @@ int main(void)
   MX_UART4_Init();
   MX_USART3_UART_Init();
   MX_FATFS_Init();
-  EXT_EEPROM_WRITE_PROTECT_DISABLE;
   /* USER CODE BEGIN 2 */
 
 

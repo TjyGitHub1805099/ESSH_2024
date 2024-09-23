@@ -15,6 +15,11 @@
 #include "app_t5l_ctrl.h"
 #include "app_password.h"
 #include "app_t5l_cfg.h"
+#include "app_UTCTimer.h"
+#include "time.h"
+
+struct tm localtm;
+sint64 g64Time;
 
 //屏幕语音播报状态
 UINT8 g_u8InnerScreenVoicePrintfStatus = 0XFF;
@@ -31,6 +36,69 @@ UINT8 innerScreenRxHandle_Version(T5LType *pSdwe)
 	}
 	return matched;
 }
+
+
+
+UINT8 innerScreenRxHandle_RTC_YMDHMS(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	INT32 tempBuf = 0 ;
+	if(DMG_SYS_RTC_GET_YM_ADD == pSdwe->SetAdd)
+	{
+		tempBuf = pSdwe->SetData;
+		tempBuf <<= 16;
+		tempBuf &= 0xFFFF0000;
+		gSystemPara.RTC_YMD &= 0x0000FFFF;
+		gSystemPara.RTC_YMD |= tempBuf;
+		matched = TRUE;
+	}
+	else if((DMG_SYS_RTC_GET_YM_ADD+1) == pSdwe->SetAdd)
+	{
+		tempBuf = pSdwe->SetData;
+		tempBuf &= 0x0000FFFF;
+		gSystemPara.RTC_YMD &= 0xFFFF0000;
+		gSystemPara.RTC_YMD |= tempBuf;
+		matched = TRUE;
+	}
+	else if((DMG_SYS_RTC_GET_YM_ADD+2) == pSdwe->SetAdd)
+	{
+		tempBuf = pSdwe->SetData;
+		tempBuf <<= 16;
+		tempBuf &= 0xFFFF0000;
+		gSystemPara.RTC_HMS &= 0x0000FFFF;
+		gSystemPara.RTC_HMS |= tempBuf;
+		matched = TRUE;
+	}
+	else if((DMG_SYS_RTC_GET_YM_ADD+3) == pSdwe->SetAdd)
+	{
+		tempBuf = pSdwe->SetData;
+		tempBuf &= 0x0000FFFF;
+		gSystemPara.RTC_HMS &= 0xFFFF0000;
+		gSystemPara.RTC_HMS |= tempBuf;
+		matched = TRUE;
+		//
+
+		localtm.tm_year = (gSystemPara.RTC_YMD>>24)&0x000000FF;
+		localtm.tm_mon  = (gSystemPara.RTC_YMD>>16)&0x000000FF;
+		localtm.tm_mday = (gSystemPara.RTC_YMD>>8)&0x000000FF;
+		localtm.tm_hour = (gSystemPara.RTC_HMS>>24)&0x000000FF;
+		localtm.tm_min  = (gSystemPara.RTC_HMS>>16)&0x000000FF;
+		localtm.tm_sec  = (gSystemPara.RTC_HMS>>8)&0x000000FF;
+
+
+		localtm.tm_year = (gSystemPara.RTC_YMD>>24)&0xFF + 2000 - 1900;
+		localtm.tm_mon  = (gSystemPara.RTC_YMD>>16)&0xFF + 1;
+		localtm.tm_mday = (gSystemPara.RTC_YMD>>8)&0xFF;
+		localtm.tm_hour = (gSystemPara.RTC_HMS>>24)&0xFF;
+		localtm.tm_min  = (gSystemPara.RTC_HMS>>16)&0xFF;
+		localtm.tm_sec  = (gSystemPara.RTC_HMS>>8)&0xFF;
+
+		g64Time = mymktime(&localtm);
+
+	}
+	return matched;
+}
+
 
 //1
 UINT8 innerScreenRxHandle_SysPassWord(T5LType *pSdwe)
@@ -379,6 +447,8 @@ screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM]=
 	{0,	12,&innerScreenRxHandle_CalibratePointSampleAndSet},//校准界面，校准点采样及设置
 	{0,	13,&innerScreenRxHandle_VoicePrintfStatusFromScreen},//屏幕语音控制后状态返回
 	{0,	14,&innerScreenRxHandle_SystemReset},//屏幕语音控制后状态返回
+	{0,	15,&innerScreenRxHandle_RTC_YMDHMS},//屏幕RTC获取状态返回
+	
 };
 
 #endif//end of _APP_INNER_SCREEN_RX_HANDLE_C_

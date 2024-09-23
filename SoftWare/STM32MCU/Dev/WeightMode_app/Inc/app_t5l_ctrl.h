@@ -7,7 +7,7 @@
 #include "app_InnerScreen_Cfg.h"
 #include "app_ExternalScreen_Cfg.h"
 #include "app_modbus_rtu_ctrl.h"
-
+#include "app_DataCenter.h"
 
 
 
@@ -103,6 +103,11 @@
 
 #define DMG_FUNC_HELP_TO_JUDGE_SET_ADDRESS	(0X1201)//0x1201
 
+#define DMG_FUNC_SAVE_FILE_NAME_SET_ADDRESS	(0X1300)//0x1200
+#define DMG_FUNC_SAVE_FILE_NAME_SET_LEN		(20)//20个字符
+
+#define DMG_FUNC_BC_CODE_ADDRESS			(0x1990)
+
 #define DMG_SYS_STATUS_OF_VOICE_PRINTF_00A1	(0X00A1)
 
 #define DMG_SYS_CUR_PAGE_GET_ADD			(0X0014)
@@ -110,6 +115,17 @@
 
 #define SYS_SOFTWARE_RESET_ADD				(0x6666)
 #define SYS_SOFTWARE_RESET_VLU				(0xA55A)
+
+#define DMG_SYS_RTC_SET_ADD					(0X009C)
+#define DMG_SYS_RTC_SET_LEN					(0X0004)//5AA5 + Y-M-D H:M:S
+
+#define DMG_SYS_RTC_GET_YM_ADD				(0X0010)//(0X009D)
+#define DMG_SYS_RTC_GET_YM_LEN				(0X0001)//Y-M-D H:M:S
+#define DMG_SYS_RTC_GET_DH_ADD				(0X009E)
+#define DMG_SYS_RTC_GET_DH_LEN				(0X0001)//Y-M-D H:M:S
+#define DMG_SYS_RTC_GET_MS_ADD				(0X009F)
+#define DMG_SYS_RTC_GET_MS_LEN				(0X0001)//Y-M-D H:M:S
+
 
 //at BALANCING Page , auto to judge the remaining chanel weight minus
 //to help user to caculate
@@ -398,6 +414,9 @@ typedef struct structSdweType
 	UINT16 	freshDP;/**< 刷新描述指针*/
 	UINT16  isCascadTrigger;/**< 级联触发*/
 	UINT16  isWriteWeightIndexTrigger;/**< 写序号触发*/
+	UINT16 	bcCodeVlu[INNER_SCREEN_DATACENTER_LENOF_BARCODE+1/2];
+	UINT8 	bcCodeTriger;
+	UINT8 	bcCodeLen;
 	
 }T5LType;
 
@@ -480,7 +499,7 @@ typedef struct structSdweType
 	0,/**/\
 	0,/**/\
 	0,/**/\
-	0x80,/**< sendSysParaDataToDiwenIndex：(事件)初始化屏幕时的序号*/\
+	0xF0,/**< sendSysParaDataToDiwenIndex：(事件)初始化屏幕时的序号*/\
 	DMG_FUNC_HomePage,\
 	INNER_SCREEN_Balancing_6_HOME_PAGE,\
 	DMG_FUNC_CalibrationPage,\
@@ -491,6 +510,9 @@ typedef struct structSdweType
 	.freshDP=0,\
 	.isCascadTrigger=0,\
 	.isWriteWeightIndexTrigger=0,\
+	.bcCodeVlu = {0},\
+	.bcCodeTriger = 0,\
+	.bcCodeLen = 0 ,\
 }
 
 /** ModbusRtu设备默认配置 */
@@ -556,7 +578,10 @@ typedef struct structSdweType
 	.freshDP=0,\
 	.isCascadTrigger=0,\
 	.isWriteWeightIndexTrigger=0,\
-	}
+	.bcCodeVlu = {0},\
+	.bcCodeTriger = 0,\
+	.bcCodeLen = 0,\
+}
 //================================================================================================
 
 
@@ -580,8 +605,8 @@ typedef struct structScreenHandleType
 	screenRxTxHandleType *sendScreenHadlleCtx;
 }ScreenHandleType;
 
-#define SCREEN_RX_HANDLE_TOTAL_NUM	(15)	/**< 屏幕RX数据处理事件数量 */
-#define SCREEN_TX_HANDLE_TOTAL_NUM	(5)	/**< 屏幕TX数据处理事件数量 */
+#define SCREEN_RX_HANDLE_TOTAL_NUM	(16)	/**< 屏幕RX数据处理事件数量 */
+#define SCREEN_TX_HANDLE_TOTAL_NUM	(6)	/**< 屏幕TX数据处理事件数量 */
 extern screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM];
 extern screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM];
 

@@ -250,7 +250,8 @@ void readSysDataFromFlash_3030(void)
 		gSystemPara.daPinXianShi = readflashDataBuf[start_i++].i_value;/**< 大屏显示 0x101e*/
 
 		gSystemPara.weightNum = readflashDataBuf[start_i++].i_value;/**< 单台数量 */
-
+		gSystemPara.RTC_YMD = readflashDataBuf[start_i++].i_value;/**< RTC时间 */
+		gSystemPara.RTC_HMS = readflashDataBuf[start_i++].i_value;/**< RTC时间 */
 
 
 
@@ -449,6 +450,22 @@ void storeSysDataToFlash_3030(void)
 	{
 		pWordInt32Float[start_i].i_value = *pInt32++;
 	}
+	//24
+	start_i = end_i ;
+	end_i = start_i+1;
+	pInt32 = (INT32 *)&(gSystemPara.RTC_YMD);/**< RTC时间 */
+	for(;start_i<end_i;start_i++)
+	{
+		pWordInt32Float[start_i].i_value = *pInt32++;
+	}
+	//25
+	start_i = end_i ;
+	end_i = start_i+1;
+	pInt32 = (INT32 *)&(gSystemPara.RTC_HMS);/**< RTC时间 */
+	for(;start_i<end_i;start_i++)
+	{
+		pWordInt32Float[start_i].i_value = *pInt32++;
+	}	
 
 	//
 	pChar = (UINT8 *)(&pWordInt32Float[0].u_value[0]);

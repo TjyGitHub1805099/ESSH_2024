@@ -224,6 +224,11 @@ static uint8 InnerScreenDataCenterHandle_EntryData_Prepare_dc_index(tInnerScreen
 static uint8 InnerScreenDataCenterHandle_EntryData_Prepare_dc_barCode(tInnerScreenDataCenterHandleStruct *pContex,char *pChar,uint8 len)
 {
     uint8 ret = 0 ;
+    if(len >= INNER_SCREEN_DATACENTER_LENOF_BARCODE)
+    {
+        len = INNER_SCREEN_DATACENTER_LENOF_BARCODE;
+    }
+
     if(len <= INNER_SCREEN_DATACENTER_LENOF_BARCODE)
     {
         memcpy(&pContex->pRealTimeData->dc_barCode[0],pChar,len);

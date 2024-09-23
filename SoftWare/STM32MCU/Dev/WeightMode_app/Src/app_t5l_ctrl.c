@@ -469,6 +469,11 @@ void screenPublic_ScreenVersionGet(T5LType *pSdwe)
 	t5lReadVarible(pSdwe,DMG_SYS_VERSION_GET_ADD,1,0);//get version
 }
 
+//公共函数：获取屏幕的软件版本号
+void screenPublic_ScreenRTCGet_YMDHMS(T5LType *pSdwe)
+{
+	t5lReadVarible(pSdwe,DMG_SYS_RTC_GET_YM_ADD,4,0);//get RTC
+}
 //公共函数：获取屏幕的当前页面序号
 void screenPublic_CurPageGet(T5LType *pSdwe)
 {

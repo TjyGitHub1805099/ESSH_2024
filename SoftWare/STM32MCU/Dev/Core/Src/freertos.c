@@ -28,6 +28,7 @@
 #include "usart.h"
 #include "app_main_task.h"
 #include "usb_host.h"
+#include "usb_ESSH.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -138,14 +139,8 @@ void StartDefaultTask(void const * argument)
   for(;;)
   {
 	  osDelay(1);
-    if(12 == usb_handle_test)
-    {
-      if(Appli_state == APPLICATION_READY)
-      {
-          usb_handle_test = 0 ;
-          MSC_Application();
-      }
-    }  
+    //
+    USBIf_Mainfunction(Appli_state);
   }
   /* USER CODE END StartDefaultTask */
 }
