@@ -106,6 +106,10 @@ typedef enum HX711SystemParaType
 //
 typedef struct SystemParaType
 {
+	INT32	paraKBStartAdd; 
+	INT32	paraKBEndAdd; 
+	INT32	sparaSYSStartAdd; 
+	INT32	sparaSYSEndAdd; 
 	//store in flash
 	INT32	uint;/**< 单位 */
 	INT32	minWeight;/**< 最小量程 */
@@ -136,6 +140,10 @@ typedef struct SystemParaType
 } gSystemParaType;
 //
 #define gSystemParaDefault {\
+EXT_EEPROM_FLASH_STORE_ADDRESS_START,\
+(EXT_EEPROM_FLASH_STORE_ADDRESS_START+FLASH_STORE_MAX_LEN*4),\
+EXT_EEPROM_FLASH_SYS_PARA_STORE_ADDRESS_START,\
+(EXT_EEPROM_FLASH_SYS_PARA_STORE_ADDRESS_START+FLASH_SYS_PARA_STORE_MAX_LEN*4),\
 0, \
 0, \
 5000, \

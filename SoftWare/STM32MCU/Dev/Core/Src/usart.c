@@ -25,6 +25,8 @@
 #include "app_modbus_rtu_ctrl.h"
 #include "app_smmz.h"
 #include "app_wzdyj.h"
+#include "app_usbsmq.h"
+
 USART_RECEIVETYPE Usart1AsScreen1Type;
 uint8_t Rx_buff[50];
 /* USER CODE END 0 */
@@ -869,9 +871,9 @@ void Usart3WithXXReceive_IDLE(UART_HandleTypeDef *huart)
 			
 				temp = huart3.hdmarx->Instance->NDTR;  
 
-        SmmzHandleContex.RxFinishFlag = 1;
-        SmmzHandleContex.RxLength = SMMZ_UART_MAX_LEN -temp; 
-        HAL_UART_Receive_DMA(&huart3, SmmzHandleContex.rxDataUart, SMMZ_UART_MAX_LEN);
+        sUSBSMQHandleContex.RxFinishFlag = 1;
+        sUSBSMQHandleContex.RxLength = USBSMQ_KEYBORD_SINGLE_LEN -temp; 
+        HAL_UART_Receive_DMA(&huart3, sUSBSMQHandleContex.rxDataUart, USBSMQ_KEYBORD_SINGLE_LEN);
 		} 
     else if((__HAL_UART_GET_FLAG(huart,UART_FLAG_TC) != RESET) || (__HAL_UART_GET_FLAG(huart,UART_FLAG_TXE) != RESET))  
 		{   

@@ -22,7 +22,6 @@ UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
 {
 	INT16 sendData[64],len=0;
 	UINT8 result = FALSE ;
-	static INT16 curPage = 0 ,  curPageDelay_offset = 80;
 	//
 	switch(pSdwe->sendSysParaDataToDiwenIndex)
 	{

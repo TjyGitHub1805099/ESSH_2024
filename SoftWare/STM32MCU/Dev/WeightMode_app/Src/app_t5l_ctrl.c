@@ -126,8 +126,8 @@ void t5lWriteVarible(T5LType *t5lCtx,UINT16 varAdd, INT16 *pData ,UINT16 varlen 
 			if(((varAdd+varlen)>0)&&((varAdd+varlen)<0xFFFF))
 			{
 				//head
-				t5lCtx->txData[cmdPosHead1]=T5L_RX_FUN_HEAD1;
-				t5lCtx->txData[cmdPosHead2]=T5L_RX_FUN_HEAD2;
+				t5lCtx->txData[cmdPosHead1]=t5lCtx->frameHeadH;
+				t5lCtx->txData[cmdPosHead2]=t5lCtx->frameHeadL;
 				//data len
 				t5lCtx->txData[cmdPosDataLen]=0X03+2*varlen;
 				//order:write
@@ -181,8 +181,8 @@ void t5lReadVarible(T5LType *t5lCtx,UINT16 varAdd,UINT16 varlen ,UINT8 crcEn)
 			if(((varAdd+varlen)>0)&&((varAdd+varlen)<0xFFFF))
 			{
 				//head
-				t5lCtx->txData[cmdPosHead1]=T5L_RX_FUN_HEAD1;
-				t5lCtx->txData[cmdPosHead2]=T5L_RX_FUN_HEAD2;
+				t5lCtx->txData[cmdPosHead1]=t5lCtx->frameHeadH;
+				t5lCtx->txData[cmdPosHead2]=t5lCtx->frameHeadL;
 				//data len
 				t5lCtx->txData[cmdPosDataLen]=0X04;
 				//order:write
@@ -251,8 +251,8 @@ FF00
 		((t5lCtx->LastSendTick < t5lCtx->CurTick)&&((t5lCtx->CurTick - t5lCtx->LastSendTick) >= DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
 	{
 		//head
-		t5lCtx->txData[cmdPosHead1]=T5L_RX_FUN_HEAD1;
-		t5lCtx->txData[cmdPosHead2]=T5L_RX_FUN_HEAD2;
+		t5lCtx->txData[cmdPosHead1]=t5lCtx->frameHeadH;
+		t5lCtx->txData[cmdPosHead2]=t5lCtx->frameHeadL;
 		//order:write
 		t5lCtx->txData[cmdPosCommand]=cmdWriteSWDEVariable;
 		//varAdd color
@@ -320,8 +320,8 @@ UINT8 t5lWriteData(T5LType *t5lCtx,UINT16 varAdd, INT16 *pData ,UINT16 varlen ,U
 			if(((varAdd+varlen)>0)&&((varAdd+varlen)<0xFFFF))
 			{
 				//head
-				t5lCtx->txData[cmdPosHead1]=T5L_RX_FUN_HEAD1;
-				t5lCtx->txData[cmdPosHead2]=T5L_RX_FUN_HEAD2;
+				t5lCtx->txData[cmdPosHead1]=t5lCtx->frameHeadH;
+				t5lCtx->txData[cmdPosHead2]=t5lCtx->frameHeadL;
 				//data len
 				t5lCtx->txData[cmdPosDataLen]=0X03+2*varlen;
 				//order:write
@@ -360,6 +360,65 @@ UINT8 t5lWriteData(T5LType *t5lCtx,UINT16 varAdd, INT16 *pData ,UINT16 varlen ,U
 	}
 	return ret;
 }
+
+//==read reg data from SDWE thought UART
+UINT8 innerScreenReadReg(T5LType *t5lCtx,UINT8 varAdd,UINT8 varlen ,UINT8 crcEn)
+{
+	//连续读取寄存器寄存器0x03和0x04单元
+	//发送：0xA5 0x5A 0x03 0x81 0x03 0x02 
+	//返回：0xA5 0x5A 0x05 0x81 0x03 0x02 0x00 0x01
+	UINT16 total_len = 0 , crc = 0 , ret = FALSE;
+	if(((t5lCtx->LastSendTick > t5lCtx->CurTick)&&((t5lCtx->LastSendTick-t5lCtx->CurTick) >= DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
+		((t5lCtx->LastSendTick < t5lCtx->CurTick)&&((t5lCtx->CurTick - t5lCtx->LastSendTick) >= DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
+	{
+		if(varAdd <= 0xFF)
+		{
+			if(((varAdd+varlen)>0)&&((varAdd+varlen)<=0xFF))
+			{
+				//head
+				t5lCtx->txData[cmdPosHead1]=t5lCtx->frameHeadH;
+				t5lCtx->txData[cmdPosHead2]=t5lCtx->frameHeadL;
+				//data len
+				//data len
+				if(TRUE == crcEn)
+				{
+					t5lCtx->txData[cmdPosDataLen]=0X03+02;
+				}
+				else
+				{
+					t5lCtx->txData[cmdPosDataLen]=0X03;
+				}
+				//order:write
+				t5lCtx->txData[cmdPosCommand]=cmdReadSWDERegister;
+				//varAdd
+				t5lCtx->txData[cmdPosRegReadAddress]=0xff&(varAdd);
+				//len
+				t5lCtx->txData[cmdPosRegReadLen]=varlen&0xff;
+				//crc
+				if(TRUE == crcEn)
+				{
+					crc = cal_crc16(&t5lCtx->txData[cmdPosCommand],3);
+					t5lCtx->txData[cmdPosRegReadLen+1+0] = 0xff&(crc>>0);
+					t5lCtx->txData[cmdPosRegReadLen+1+1] = 0xff&(crc>>8);
+					//total len
+					total_len = 6+2;
+				}
+				else
+				{
+					//total len
+					total_len = 6;
+				}
+				//send
+				t5lCtx->pUartDevice->tx_bytes(t5lCtx->pUartDevice,&t5lCtx->txData[0],total_len);
+				t5lCtx->LastSendTick = t5lCtx->CurTick;
+			}
+		}
+		//
+		ret = TRUE;
+	}
+	return ret;
+}
+
 
 //屏幕相关变量初始化
 static void screenPrivate_Init(T5LType *t5lCtx)
@@ -466,13 +525,13 @@ void screenPublic_Init(void)
 //公共函数：获取屏幕的软件版本号
 void screenPublic_ScreenVersionGet(T5LType *pSdwe)
 {
-	t5lReadVarible(pSdwe,DMG_SYS_VERSION_GET_ADD,1,0);//get version
+	innerScreenReadReg(pSdwe,INNER_SCREEN_VERSION_GET_ADD,INNER_SCREEN_VERSION_GET_LEN,0);//get version
 }
 
 //公共函数：获取屏幕的软件版本号
 void screenPublic_ScreenRTCGet_YMDHMS(T5LType *pSdwe)
 {
-	t5lReadVarible(pSdwe,DMG_SYS_RTC_GET_YM_ADD,4,0);//get RTC
+	innerScreenReadReg(pSdwe,INNER_SCREEN_RTC_GET_ADD,7,0);//get RTC
 }
 //公共函数：获取屏幕的当前页面序号
 void screenPublic_CurPageGet(T5LType *pSdwe)
@@ -1544,6 +1603,7 @@ UINT8 sdweAskRegData(ScreenHandleType  *screenHandlePtr,UINT8 regAdd, UINT8 regD
 	{
 		pSdwe->version = regData;
 		pSdwe->readSdweInit = TRUE;
+		pSdwe->sdwePowerOn = TRUE;
 	}
 	return needStore;
 }
@@ -2775,8 +2835,7 @@ void screenT5L_RxFunction(ScreenHandleType  *screenHandlePtr)
 	//
 	if(TRUE == t5lCtx->RxFinishFlag)
 	{
-		//A5 5A
-		if((T5L_RX_FUN_HEAD1 == t5lCtx->rxData[cmdPosHead1]) && (T5L_RX_FUN_HEAD2 == t5lCtx->rxData[cmdPosHead2]))
+		if((t5lCtx->frameHeadH == t5lCtx->rxData[cmdPosHead1]) && (t5lCtx->frameHeadL == t5lCtx->rxData[cmdPosHead2]))
 		{
 			//2 head + 1 len + last 3(cmd:1 add:1-2 data:1-n) data 
 			if(( t5lCtx->RxLength >= 6 ) && ((t5lCtx->RxLength-3) == t5lCtx->rxData[cmdPosDataLen]) )

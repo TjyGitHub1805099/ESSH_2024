@@ -48,6 +48,8 @@ typedef struct sInnerScreenDataCenterStruct
     uint8 dc_weight[INNER_SCREEN_DATACENTER_LENOF_WEIGHT];
     uint8 dc_type[INNER_SCREEN_DATACENTER_LENOF_TYPE];
     uint8 dc_range[INNER_SCREEN_DATACENTER_LENOF_RANGE];
+    //
+    uint8 barCodeLen;
 }tInnerScreenDataCenterStruct;
 
 
@@ -97,6 +99,8 @@ DATA_INFO	stroenum	    barcode	date	        weight	        CRC	addStart_dec	addS
 #define CLASSIFICATION_STORE_CFG_TIME_START_ADD     (((CLASSIFICATION_STORE_CFG_BU_END_ADD/EXT_FLASH_PROCESS_LEN)+1)*EXT_FLASH_PROCESS_LEN)
 #define CLASSIFICATION_STORE_CFG_TIME_LEN           (CLASSIFICATION_STORE_MAX_NUM*CLASSIFICATION_STORE_CFG_TIME_TYPEBYTE) 
 #define CLASSIFICATION_STORE_CFG_TIME_END_ADD       (CLASSIFICATION_STORE_CFG_TIME_START_ADD + CLASSIFICATION_STORE_CFG_TIME_LEN + CLASSIFICATION_STORE_CFG_CRCLEN)
+#define CLASSIFICATION_STORE_CFG_TIME_TOTAL_LEN     (CLASSIFICATION_STORE_CFG_TIME_LEN+CLASSIFICATION_STORE_CFG_CRCLEN) 
+
 //cfg backup info use : time*num + crc16[2byte]
 #define CLASSIFICATION_STORE_CFG_TIME_BU_START_ADD  (((CLASSIFICATION_STORE_CFG_TIME_END_ADD/EXT_FLASH_PROCESS_LEN)+1)*EXT_FLASH_PROCESS_LEN)
 #define CLASSIFICATION_STORE_CFG_TIME_BU_LEN        (CLASSIFICATION_STORE_CFG_TIME_LEN) 
@@ -110,9 +114,10 @@ DATA_INFO	stroenum	    barcode	date	        weight	        CRC	addStart_dec	addS
 //local data center handle
 typedef struct sInnerScreenDataCenterHandleStruct
 {
+    uint8 trigerStroreFromScreen;
     //cfg info store in extern e2
     uint8 cfgInfo_weightType[CLASSIFICATION_STORE_CFG_LEN + 2];
-    uint8 cfgInfo_utcTime[CLASSIFICATION_STORE_CFG_TIME_LEN];
+    uint8 cfgInfo_utcTime[CLASSIFICATION_STORE_CFG_TIME_LEN+2];
     uint8 dataCenterPayload[CLASSIFICATION_STORE_DATA_TOTAL_LEN];
     //use cfg info caculate each type total num
     uint16 totalStoreNum_EachType[D_C_CLASSIFICATION_NUM + 2];
@@ -133,6 +138,7 @@ typedef struct sInnerScreenDataCenterHandleStruct
     
     //used for execute store 
     uint8 needToStore;
+    uint8 dataStoreCplt;
     uint16 userDataStoreIndex;
     uint8 userDataStoreData[CLASSIFICATION_STORE_DATA_SINGLE_LEN];
 

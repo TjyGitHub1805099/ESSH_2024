@@ -276,11 +276,11 @@ static void ExFlash_CycleHandle(tExtFlashHandleStruct *contex)
                 contex->entryTicks = contex->curTicks;
                 if((E_F_ORDER_W == contex->process.Order) || (E_F_ORDER_WR == contex->process.Order))
                 {
-                    //EXT_EEPROM_WRITE_PROTECT_DISABLE;
+                    EXT_EEPROM_WRITE_PROTECT_DISABLE;
                 }
                 else
                 {
-                    //EXT_EEPROM_WRITE_PROTECT_ENABLE;
+                    EXT_EEPROM_WRITE_PROTECT_ENABLE;
                 }
             }
         break;

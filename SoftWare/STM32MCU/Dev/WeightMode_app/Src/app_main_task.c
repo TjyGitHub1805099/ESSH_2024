@@ -14,6 +14,7 @@
 #include "app_wzdyj.h"
 #include "app_DataCenter.h"
 #include "time.h"
+#include "app_usbsmq.h"
 
 /*******************************************************************************
  * Definitions
@@ -31,6 +32,10 @@ void app_main_init(void)
 extern struct tm localtm;
 struct tm *pTm=&localtm;
 extern 	sint64 g64Time;
+
+uint8 test_daaa[20][120],test_daaa_i;
+
+
 //==sys main function
 void app_main_task(void)
 {
@@ -70,17 +75,17 @@ void app_main_task(void)
 	#endif
 
 	//data comm contrl mainfunction
-	//ModbusRtu_MainFunction();
+	ModbusRtu_MainFunction();
 	
 	//T5L contrl mainfunction
 	sreenT5L_MainFunction();
 
 	//led contrl mainfunction
-	led_MainFunction();
+	//led_MainFunction();
 
 	SmmzHandle_Mainfunction();
 
-	WzdyjHandle_Mainfunction();
+	//WzdyjHandle_Mainfunction();
 
 	InnerScreenDataCenterHandle_MainFunction();
 
@@ -92,5 +97,36 @@ void app_main_task(void)
 		pTm = mygmtime(&g64Time);
 	}
 
+	USB_SMQ_Handle_MainFunction();
+
+	#if 0
+	if(SmmzHandleContex.RxFinishFlag == 1)
+	{
+		if((SmmzHandleContex.rxDataUart[0] == 0x57) && 
+		(SmmzHandleContex.rxDataUart[1] == 0xAB) &&
+		(SmmzHandleContex.rxDataUart[2] == 0x82))
+		{
+			SmmzHandleContex.txData[0] = 0X57;
+			SmmzHandleContex.txData[1] = 0XAB;
+			SmmzHandleContex.txData[2] = 0X12;
+			SmmzHandleContex.txData[3] = 0X00;
+			SmmzHandleContex.txData[4] = 0X00;
+			SmmzHandleContex.txData[5] = 0X00;
+			SmmzHandleContex.txData[6] = 0X00;
+			SmmzHandleContex.txData[7] = 0XFF;
+			SmmzHandleContex.txData[8] = 0X80;
+			SmmzHandleContex.txData[9] = 0X00;
+			SmmzHandleContex.txData[10] = 0X20;
+			g_UartDevice[UART3_CHANNEL_XX].tx_bytes(&g_UartDevice[UART3_CHANNEL_XX],SmmzHandleContex.txData,11);
+		}
+
+		SmmzHandleContex.RxFinishFlag = 0;
+		memcpy(test_daaa[test_daaa_i%20],&SmmzHandleContex.rxDataUart[0],SmmzHandleContex.RxLength);
+		test_daaa_i++;
+	}
+	#endif
+
 }
+//0x57 0xAB 0x12 0x00 0x00 0x00 0x00 0xFF 0x80 0x00 0x20
+//57 AB 12 00 00 00 00 FF 80 00 20
 

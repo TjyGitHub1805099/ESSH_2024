@@ -191,7 +191,7 @@ extern void hal_uart_choice( UartDeviceType *pUartDevice, UINT8 ba_Vlu );
 	.RxBytesMax = 4096, \
 	.tx_bytes = hal_uart_tx_bytes, \
 	.uart_choice = hal_uart_choice,\
-	.uartChoice_baVlu = 0x10,\
+	.uartChoice_baVlu = 0x00,\
 }
 
 #define UartDeviceUSART5Default { \

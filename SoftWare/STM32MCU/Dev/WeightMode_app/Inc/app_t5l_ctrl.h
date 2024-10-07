@@ -25,40 +25,48 @@
 #define DMG_MIN_DIFF_OF_TWO_SEND_ORDER			(20)//20ms 
 #define DMG_DATA_HOLD_TIME						(250)//250ms
 #define DMG_WAIT_COLOR_HELP_SEND_TIME			(1000)//当重量信息发给屏幕后颜色信息最长这个时间段内要发送给屏幕
-
+//================================================================================================
+//称重校准页面：相关
 //==(update:20210328):address of set chanel number : 0->all chanel set  ; (1~8)->single chanel set
-#define DMG_FUNC_SET_CHANEL_NUM					(0X2100)
+#define DMG_FUNC_SET_CHANEL_NUM					(0X2100)//2024-10-06
 //==(update:20210328):address of reset calibration of choice chanel number : 0->all chanel set  ; (1~x)->single chanel set
-#define DMG_FUNC_RESET_CALIBRATION_ADDRESS		(0X2101)
+#define DMG_FUNC_RESET_CALIBRATION_ADDRESS		(0X2101)//2024-10-06
 //==(update:20210328):value of reset calibration of choice chanel number:2021 reset calibration
 #define DMG_FUNC_RESET_CALIBRATION_VAL	 		(2021)
-
-//==(update:20210328):address of remove weight
-#define DMG_FUNC_REMOVE_WEIGHT_ADDRESS			(0X2102)
-#define DMG_FUNC_REMOVE_WEIGHT_VAL				(0XA55A)
-
 //==(update:20210428):address of remove weight
-#define DMG_FUNC_JUNPTO_CALIBRATION_ADDRESS		(0X2103)
+#define DMG_FUNC_JUNPTO_CALIBRATION_ADDRESS		(0X2103)//2024-10-06
 #define DMG_FUNC_JUNPTO_CALIBRATION_VAL			(2021)
 #define DMG_FUNC_JUNPTO_ACTIVE_VAL				(1202)
+//==(update:20210328):address of set point(weight value) of chanel : (0~9)-> point of chanel set (:g)
+#define DMG_FUNC_SET_CHANEL_POINT_ADDRESS					(0X2200)//0x2200~0x2209 2024-10-06
+//==(update:20210328):address of triger COLOR back to DMG : (0~9)-> COLOR of point of chanel set triger(val=0x00:white(not triger),val=0x01green(triger))
+#define DMG_FUNC_ASK_CHANEL_POINT_TRIG_BACK_COLOR_ADDRESS	(0X2300)//0x2300~0x2309 2024-10-06
+//==(update:20210328):address of triger sample back to DMG : (0~9)-> COLOR of point of chanel set triger(val=0x00:white(not triger),val=0x01green(triger))
+#define DMG_FUNC_ASK_CHANEL_POINT_TRIG_SAMPLE_DATA_ADDRESS	(0X2400)//0x2400~0x2409 2024-10-06
+//==(update:20210328):address of set point of chanel triger : (0~9)-> point of chanel set triger(val=0x12FE(DMG triger MCU))
+#define DMG_FUNC_SET_CHANEL_POINT_TRIG_ADDRESS	(0X2500)//0x2500~0x2509 2024-10-06
+#define DMG_FUNC_SET_CHANEL_POINT_TRIG_VAL		(0X12FE)
+
+//主页相关
+//==(update:20210328):address of remove weight
+#define DMG_FUNC_REMOVE_WEIGHT_ADDRESS			(0X0500)//2024-10-06
+#define DMG_FUNC_REMOVE_WEIGHT_VAL				(0X0011)
+
+
+
+
+
+
+
+
+
+
+
 
 //==(update:20211119):address of syspara entry
 #define DMG_FUNC_JUNPTO_SYSPAR_ADDRESS			(0X2104)
 #define DMG_FUNC_JUNPTO_SYSPAR_VAL				(1010)
 
-//==(update:20210328):address of set point(weight value) of chanel : (0~9)-> point of chanel set (:g)
-#define DMG_FUNC_SET_CHANEL_POINT_ADDRESS		(0X2200)//0x2200~0x2209
-
-//==(update:20210328):address of set point of chanel triger : (0~9)-> point of chanel set triger(val=0x12FE(DMG triger MCU))
-#define DMG_FUNC_SET_CHANEL_POINT_TRIG_ADDRESS	(0X2500)//0x2500~0x2509
-#define DMG_FUNC_SET_CHANEL_POINT_TRIG_VAL		(0X12FE)
-
-
-//==(update:20210328):address of triger COLOR back to DMG : (0~9)-> COLOR of point of chanel set triger(val=0x00:white(not triger),val=0x01green(triger))
-#define DMG_FUNC_ASK_CHANEL_POINT_TRIG_BACK_COLOR_ADDRESS	(0X2300)//0x2300~0x2309
-
-//==(update:20210328):address of triger sample back to DMG : (0~9)-> COLOR of point of chanel set triger(val=0x00:white(not triger),val=0x01green(triger))
-#define DMG_FUNC_ASK_CHANEL_POINT_TRIG_SAMPLE_DATA_ADDRESS	(0X2400)//0x2400~0x2409
 
 //==(update:20210328):address of weight back to DMG : (0~7)-> weight of chanel(val:g)
 #define DMG_FUNC_ASK_CHANEL_WEIGHT_ADDRESS		(0X3000)//0x3000~0x300F 4byte each chanel
@@ -66,27 +74,30 @@
 #define DMG_FUNC_ASK_CHANEL_COLOR_ADDRESS		(0X3100)//0x3100~0x3107
 
 
-//==(update:20210411):address of unit min max ...
-#define DMG_FUNC_SET_UNIT_ADDRESS				(0X1000)//0x1000
 
-#define DMG_FUNC_SET_MIN_RANGE_ADDRESS			(0X100A)//0x100A
-#define DMG_FUNC_SET_MAX_RANGE_ADDRESS			(0X100B)//0x100B
+
+
+
+//==(update:20210411):address of unit min max ...
+#define DMG_FUNC_SET_UNIT_ADDRESS				(0X1000)//0x1000 2024-10-06
+#define DMG_FUNC_SET_MIN_RANGE_ADDRESS			(0X100A)//0x100A 2024-10-06
+#define DMG_FUNC_SET_MAX_RANGE_ADDRESS			(0X100B)//0x100B 2024-10-06
 #define DMG_FUNC_SET_ERR_RANGE_ADDRESS			(0X100C)//0x100C
 #define DMG_FUNC_SET_isCascade_ADDRESS			(0X100D)//0x100D
 #define DMG_FUNC_SET_isLedIndicate_ADDRESS		(0X100E)//0x100E
 #define DMG_FUNC_SET_COLOR_START_ADDRESS		(0X100F)//0x100F
 #define DMG_FUNC_SET_COLOR_END_ADDRESS			(0X1012)//0x1012
-#define DMG_FUNC_SET_ZERO_RANGE_ADDRESS			(0X1013)//0x1013
+#define DMG_FUNC_SET_ZERO_RANGE_ADDRESS			(0X1013)//0x1013 2024-10-06
 #define DMG_FUNC_SET_SCREEN_LIGHT_ADDRESS		(0X1014)//0x1014
 #define DMG_FUNC_SET_VOICE_NUM_TOUCH_ADDRESS 	(0X1015)//0x1015
 #define DMG_FUNC_SET_VOICE_NUM_ADDRESS			(0X1016)//0x1016
 #define DMG_FUNC_SET_VOICE_SWITCH_ADDRESS		(0X1017)//0x1017
 #define DMG_FUNC_SET_CAST_SWITCH_ADDRESS		(0X1018)//0x1018
 #define DMG_FUNC_SET_FLASH_ERASEE_TIMES_ADDRESS	(0X1019)//0x1019
-#define DMG_FUNC_MCU_VERSION_ADDRESS			(0X101A)//0x101A
-#define DMG_FUNC_DIWEN_VERSION_ADDRESS			(0X101B)//0x101B
-#define DMG_FUNC_DIWEN_XIAOSHU_ADDRESS			(0X101C)//0X101C 小数使能
-#define DMG_FUNC_DIWEN_BILV_ADDRESS				(0X101D)//0X101D ml/g比率
+#define DMG_FUNC_MCU_VERSION_ADDRESS			(0X101A)//0x101A 2024-10-06
+#define DMG_FUNC_DIWEN_VERSION_ADDRESS			(0X101B)//0x101B 2024-10-06
+#define DMG_FUNC_DIWEN_XIAOSHU_ADDRESS			(0X101C)//0X101C 小数使能 2024-10-06
+#define DMG_FUNC_DIWEN_BILV_ADDRESS				(0X101D)//0X101D ml/g比率 2024-10-06
 #define DMG_FUNC_DIWEN_DAPING_ADDRESS			(0X101E)//0X101E 大屏显示
 #define DMG_FUNC_DIWEN_WEIGHTNUM_ADDRESS		(0X101F)//0X101F 单台数量
 
@@ -126,6 +137,12 @@
 #define DMG_SYS_RTC_GET_MS_ADD				(0X009F)
 #define DMG_SYS_RTC_GET_MS_LEN				(0X0001)//Y-M-D H:M:S
 
+#define INNER_SCREEN_VERSION_GET_ADD		(0X00)//读取版本信息，串口下发指令 A5 5A 03 81 00 01
+#define INNER_SCREEN_VERSION_GET_LEN		(0X01)
+
+#define INNER_SCREEN_RTC_GET_ADD			(0X20)//读取日历（YY:MM:DD:WW:HH:MM:SS）：A5 5A 03 81 20 07
+#define INNER_SCREEN_RTC_GET_LEN			(0X07)
+
 
 //at BALANCING Page , auto to judge the remaining chanel weight minus
 //to help user to caculate
@@ -162,7 +179,7 @@ typedef enum DMGPageType
 	DMG_FUNC_Balancing_12_PAGE = 55,
 	DMG_FUNC_Balancing_12_HOME_PAGE =58,
 	DMG_FUNC_Help_PAGE =59,
-	DMG_FUNC_CalibrationPage = 53,
+	DMG_FUNC_CalibrationPage = 7,//称重校准界面 2024-10-06
 	DMG_FUNC_HomePage = 54,
 	DMG_FUNC_ActivePage = 56,
 	DMG_FUNC_SysParaPage = 52,
@@ -246,8 +263,8 @@ typedef enum
 //迪文屏幕通信协议：数据位置含义
 typedef enum
 {
-	cmdPosHead1  = 0 ,//A5
-	cmdPosHead2  = 1 ,//5A
+	cmdPosHead1  = 0 ,//screen frame head hight byte
+	cmdPosHead2  = 1 ,//screen frame head low byte
 	cmdPosDataLen= 2 ,//last data len
 	cmdPosCommand= 3 ,//command position
 
@@ -345,6 +362,9 @@ typedef struct structScreenCycleType
 /** 定义从机串口设备类型 */
 typedef struct structSdweType
 {
+	UINT8 frameHeadH;/**< 与屏幕通信帧头 高字节 */
+	UINT8 frameHeadL;/**< 与屏幕通信帧头 低字节 */
+
 	enumSDWEStatusType status;				/**< status ：sdwe 状态 */
 
 	UINT8 screenWeightHandleStatus;			/*给屏幕发送重量数据的状态机*/
@@ -352,9 +372,6 @@ typedef struct structSdweType
 
 	UINT8 screenColorHandleStatus;			/*给屏幕发送背景色数据的状态机*/
 	UINT8 screenHelpHandleStatus;			/*给屏幕发送帮助数据的状态机*/
-
-//
-
 
 	ScreenCycleType screenCycle;
 	appScreenCfg_Type *screenCfg;
@@ -414,7 +431,7 @@ typedef struct structSdweType
 	UINT16 	freshDP;/**< 刷新描述指针*/
 	UINT16  isCascadTrigger;/**< 级联触发*/
 	UINT16  isWriteWeightIndexTrigger;/**< 写序号触发*/
-	UINT16 	bcCodeVlu[INNER_SCREEN_DATACENTER_LENOF_BARCODE+1/2];
+	INT16 	bcCodeVlu[INNER_SCREEN_DATACENTER_LENOF_BARCODE+1/2];
 	UINT8 	bcCodeTriger;
 	UINT8 	bcCodeLen;
 	
@@ -449,6 +466,8 @@ typedef struct structSdweType
 
 /** ModbusRtu设备默认配置 */
 #define T5LDataDefault   { \
+	0xA5,\
+	0x5A,\
 	SCREEN_STATUS_GET_VERSION,/*status ：sdwe 状态*/\
 	0,\
 	0,\
@@ -517,6 +536,8 @@ typedef struct structSdweType
 
 /** ModbusRtu设备默认配置 */
 #define T5LDataDefault2   { \
+	0xA5,\
+	0x5A,\
 	SCREEN_STATUS_GET_VERSION,/*status ：sdwe 状态*/\
 	0,\
 	0,\
@@ -671,6 +692,7 @@ extern void t5lReadVarible(T5LType *t5lCtx,UINT16 varAdd,UINT16 varlen ,UINT8 cr
 
 extern UINT8 t5lWriteDataColor(T5LType *t5lCtx,UINT16 varAdd, UINT16 ColorOrder1,UINT16 ColorOrder2,INT16 *pData_X_Y_X_Y_Color);
 extern UINT8 t5lWriteData(T5LType *t5lCtx,UINT16 varAdd, INT16 *pData ,UINT16 varlen ,UINT8 crcEn);
+extern UINT8 innerScreenReadReg(T5LType *t5lCtx,UINT8 varAdd,UINT8 varlen ,UINT8 crcEn);
 
 extern void screenPublic_ScreenVersionGet(T5LType *pSdwe);
 extern UINT8 screenPublic_PageJump(T5LType *pSdwe,INT16 pageNum);
@@ -693,6 +715,7 @@ extern void clearLocalCalibrationKAndBAndSample(UINT8 sreen_chanel);
 extern void pointTrigerDataSet(UINT8 localChanel , UINT8 point , UINT8 value ,INT16 avgSampleValue);
 extern UINT8 screenPublic_IsCascadTriggerHandle(T5LType *pSdwe);
 extern UINT8 screenPublic_WriteIndexHandle(T5LType *pSdwe);
+extern void screenPublic_ScreenRTCGet_YMDHMS(T5LType *pSdwe);
 
 
 

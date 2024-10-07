@@ -36,6 +36,7 @@ static tInnerScreenDataCenterStruct InnerScreenDataCenter;
 
 tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle = 
 {
+    .trigerStroreFromScreen = 0,
     //store in extern e2
     .cfgInfo_weightType = {0},
     .cfgInfo_utcTime = {0},
@@ -58,6 +59,7 @@ tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle =
     
     //used for execute store
     .needToStore = 0x80 ,//INIT
+    .dataStoreCplt = 0 ,
     .userDataStoreIndex = 0,
     .userDataStoreData = {0},
 
@@ -735,7 +737,7 @@ void InnerScreenDataCenterHandle_Clear_CfgInfo_utcTime(tInnerScreenDataCenterHan
         crc16 = EECRC16(&pContex->cfgInfo_utcTime[0],CLASSIFICATION_STORE_CFG_TIME_LEN); 
         pContex->cfgInfo_utcTime[CLASSIFICATION_STORE_CFG_TIME_LEN+0] = ( (crc16 >> 8) & 0x00ff);
         pContex->cfgInfo_utcTime[CLASSIFICATION_STORE_CFG_TIME_LEN+1] = ( (crc16 >> 0) & 0x00ff);
-        //
+        //CLASSIFICATION_STORE_CFG_TIME_LEN
         pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
         pushOrder.RegAddress = CLASSIFICATION_STORE_CFG_TIME_START_ADD;
         pushOrder.totalLen = CLASSIFICATION_STORE_CFG_TIME_LEN + CLASSIFICATION_STORE_CFG_CRCLEN;
@@ -883,30 +885,77 @@ void InnerScreenDataCenterHandle_MainFunction(void)
         break;
         case 0:
             localWeight = hx711_getWeight(HX711Chanel_1);
-            if(localWeight > 5)
+            if(preWeight != localWeight)
             {
-                if(preWeight != localWeight)
-                {
-                    preWeight = localWeight;
-                }
-                else
-                {
-                    if(get_SysTick_ByTimer() - weightHoldOnTime >= 1000)
-                    {
-                        pContex->needToStore = 1;
-                    }
-                } 
+                preWeight = localWeight;
+                weightHoldOnTime = get_SysTick_ByTimer();
             }
             else
             {
-                weightHoldOnTime = get_SysTick_ByTimer();
+                if(get_SysTick_ByTimer() - weightHoldOnTime >= 1000)
+                {
+                    ret = 1;
+                }
             }
- 
+            //
+            if(1 == ret)//1.重量稳定
+            {
+                if(0 == pContex->dataStoreCplt)
+                {
+                    ret = 1;
+                }
+                else
+                {
+                    ret = 0 ;
+                }
+            }
+            //
+            if(1 == ret)//2.EE存储未执行
+            {
+                if(preWeight > 5)
+                {
+                    ret = 1;
+                }
+                else
+                {
+                    pContex->dataStoreCplt = 0 ;//重量在0点范围代表取下袋子
+                    pContex->trigerStroreFromScreen = 0 ;//清除屏幕执行存储动作
+                    ret = 0 ;
+                }
+            }
+            //
+            if(1 == ret)//3.重量大于零点
+            {
+                if(1 == pContex->trigerStroreFromScreen)
+                {
+                    ret = 1;
+                }
+                else
+                {
+                    ret = 0;
+                }
+            }
+            //
+            if(1 == ret)//4.屏幕触发存储
+            {
+                ret = InnerScreenDataCenterHandle_UseWeight_Classification(localWeight);
+            }            
+            //
+            if(0xFF != ret)//5.分类成功
+            {
+                ret = USB_SMQ_GetDecodeData(&pContex->pRealTimeData->dc_barCode[0],INNER_SCREEN_DATACENTER_LENOF_BARCODE,&pContex->pRealTimeData->barCodeLen);
+            }
+            //
+            if(1 == ret)//6.条码值获取成功
+            {
+                pContex->needToStore = 1;//执行存储
+            }
         break;
         //
         case 1:
             //分类成功 更新 weight_type
-            if(1 == InnerScreenDataCenterHandle_EntryData_Prepare_dc_weight_dc_type_and_dc_range(pContex,preWeight))
+            ret = InnerScreenDataCenterHandle_EntryData_Prepare_dc_weight_dc_type_and_dc_range(pContex,preWeight);
+            if(1 == ret)
             {
                 if(0 == pContex->newDataEntryFlag)
                 {
@@ -934,6 +983,10 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             if(1 == InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(pContex))
             {
                 //pContex->newDataEntryFlag = 0;
+                pContex->trigerStroreFromScreen = 0 ;
+                pContex->dataStoreCplt = 1;
+                USB_SMQ_ClearDecodeData();
+                //
                 pContex->needToStore = 0 ;
                 preWeight = -1000 ;
             }

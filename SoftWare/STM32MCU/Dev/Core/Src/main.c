@@ -41,6 +41,8 @@
 #include "hal_uart.h"
 #include "app_smmz.h"
 #include "app_wzdyj.h"
+#include "app_usbsmq.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -136,7 +138,7 @@ int main(void)
   __HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
 
   //串口3 接内置扫码枪
-  HAL_UART_Receive_DMA(&huart3, SmmzHandleContex.rxDataUart, SMMZ_UART_MAX_LEN);//串口3 DMA
+  HAL_UART_Receive_DMA(&huart3, sUSBSMQHandleContex.rxDataUart, USBSMQ_KEYBORD_SINGLE_LEN);//串口3 DMA
   __HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);
 
   //串口4 接RS485

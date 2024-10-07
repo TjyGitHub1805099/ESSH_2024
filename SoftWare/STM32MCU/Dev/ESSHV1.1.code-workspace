@@ -46,7 +46,8 @@
 			"app_crc.h": "c",
 			"fatfs.h": "c",
 			"app_at24c.h": "c",
-			"time.h": "c"
+			"time.h": "c",
+			"app_usbsmq.h": "c"
 		}
 	}
 }

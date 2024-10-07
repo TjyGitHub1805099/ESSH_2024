@@ -28,7 +28,7 @@ UINT8 g_u8InnerScreenVoicePrintfStatus = 0XFF;
 UINT8 innerScreenRxHandle_Version(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
-	if(DMG_SYS_VERSION_GET_ADD == pSdwe->SetAdd)
+	if(INNER_SCREEN_VERSION_GET_ADD == pSdwe->SetAdd)
 	{
 		pSdwe->sdwePowerOn = TRUE;//if recived version , indicate allready power on
 		t5lDisPlayDataClear();

@@ -135,7 +135,7 @@ void USBIf_PrepareFileName(tUsbStoreHandleStruct *pContex,const uint8 *pFileName
 {
     uint8 fileLen = U_S_FILE_NAME_OF_USER_LEN ;
     memset(&pContex->fileName[0],0,U_S_FILE_NAME_TOTAL_LEN);
-    fileLen = strlen(pFileName);
+    fileLen = strlen((const char *)pFileName);
     if(fileLen >= U_S_FILE_NAME_OF_USER_LEN)
     {
         fileLen = U_S_FILE_NAME_OF_USER_LEN;
@@ -255,15 +255,15 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
             {
                 //https://blog.csdn.net/llllllillllillli/article/details/129149203
                 //1. check file if not exist : f_stat
-                f_ret = f_stat(&pContex->fileName[0], &pContex->fno);
+                f_ret = f_stat((const TCHAR*)&pContex->fileName[0], &pContex->fno);
                 //2.f_open
                 if(FR_OK == f_ret)
                 {
-                    f_ret = f_open(&pContex->myFile, &pContex->fileName[0], FA_WRITE|FA_READ);
+                    f_ret = f_open(&pContex->myFile, (const TCHAR*)&pContex->fileName[0], FA_WRITE|FA_READ);
                 }
                 else
                 {
-                    f_ret = f_open(&pContex->myFile, &pContex->fileName[0], FA_CREATE_ALWAYS|FA_WRITE);
+                    f_ret = f_open(&pContex->myFile, (const TCHAR*)&pContex->fileName[0], FA_CREATE_ALWAYS|FA_WRITE);
                 }      
                 //
                 //f_stat
