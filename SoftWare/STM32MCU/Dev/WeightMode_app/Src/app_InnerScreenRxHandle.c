@@ -17,10 +17,7 @@
 #include "app_t5l_cfg.h"
 #include "app_UTCTimer.h"
 #include "time.h"
-
 struct tm localtm;
-sint64 g64Time;
-
 //屏幕语音播报状态
 UINT8 g_u8InnerScreenVoicePrintfStatus = 0XFF;
 
@@ -37,65 +34,80 @@ UINT8 innerScreenRxHandle_Version(T5LType *pSdwe)
 	return matched;
 }
 
-
-
 UINT8 innerScreenRxHandle_RTC_YMDHMS(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
 	INT32 tempBuf = 0 ;
-	if(DMG_SYS_RTC_GET_YM_ADD == pSdwe->SetAdd)
+	if(INNERSCREEN_RTC_GET_Y_ADD == pSdwe->SetAdd)
 	{
-		tempBuf = pSdwe->SetData;
+		tempBuf = pSdwe->SetData&0x00FF;
+		localtm.tm_year = 10*((pSdwe->SetData >> 4)&0x000F) + ((pSdwe->SetData >> 0)&0x000F);
+		localtm.tm_year +=2000;
 		tempBuf <<= 16;
-		tempBuf &= 0xFFFF0000;
-		gSystemPara.RTC_YMD &= 0x0000FFFF;
-		gSystemPara.RTC_YMD |= tempBuf;
-		matched = TRUE;
-	}
-	else if((DMG_SYS_RTC_GET_YM_ADD+1) == pSdwe->SetAdd)
-	{
-		tempBuf = pSdwe->SetData;
-		tempBuf &= 0x0000FFFF;
-		gSystemPara.RTC_YMD &= 0xFFFF0000;
-		gSystemPara.RTC_YMD |= tempBuf;
-		matched = TRUE;
-	}
-	else if((DMG_SYS_RTC_GET_YM_ADD+2) == pSdwe->SetAdd)
-	{
-		tempBuf = pSdwe->SetData;
-		tempBuf <<= 16;
-		tempBuf &= 0xFFFF0000;
-		gSystemPara.RTC_HMS &= 0x0000FFFF;
-		gSystemPara.RTC_HMS |= tempBuf;
-		matched = TRUE;
-	}
-	else if((DMG_SYS_RTC_GET_YM_ADD+3) == pSdwe->SetAdd)
-	{
-		tempBuf = pSdwe->SetData;
-		tempBuf &= 0x0000FFFF;
-		gSystemPara.RTC_HMS &= 0xFFFF0000;
-		gSystemPara.RTC_HMS |= tempBuf;
-		matched = TRUE;
+		tempBuf &= 0x00FF0000;
 		//
-
-		localtm.tm_year = (gSystemPara.RTC_YMD>>24)&0x000000FF;
-		localtm.tm_mon  = (gSystemPara.RTC_YMD>>16)&0x000000FF;
-		localtm.tm_mday = (gSystemPara.RTC_YMD>>8)&0x000000FF;
-		localtm.tm_hour = (gSystemPara.RTC_HMS>>24)&0x000000FF;
-		localtm.tm_min  = (gSystemPara.RTC_HMS>>16)&0x000000FF;
-		localtm.tm_sec  = (gSystemPara.RTC_HMS>>8)&0x000000FF;
-
-
-		localtm.tm_year = (gSystemPara.RTC_YMD>>24)&0xFF + 2000 - 1900;
-		localtm.tm_mon  = (gSystemPara.RTC_YMD>>16)&0xFF + 1;
-		localtm.tm_mday = (gSystemPara.RTC_YMD>>8)&0xFF;
-		localtm.tm_hour = (gSystemPara.RTC_HMS>>24)&0xFF;
-		localtm.tm_min  = (gSystemPara.RTC_HMS>>16)&0xFF;
-		localtm.tm_sec  = (gSystemPara.RTC_HMS>>8)&0xFF;
-
-		g64Time = mymktime(&localtm);
-
+		gSystemPara.RTC_YMD &= 0xFF00FFFF;
+		gSystemPara.RTC_YMD |= tempBuf;
+		matched = TRUE;
 	}
+	else if((INNERSCREEN_RTC_GET_M_ADD) == pSdwe->SetAdd)
+	{
+		tempBuf = pSdwe->SetData&0x00FF;
+		localtm.tm_mon = 10*((pSdwe->SetData >> 4)&0x000F) + ((pSdwe->SetData >> 0)&0x000F);
+		tempBuf <<= 8;
+		tempBuf &= 0x0000FF00;
+		//
+		gSystemPara.RTC_YMD &= 0xFFFF00FF;
+		gSystemPara.RTC_YMD |= tempBuf;
+		matched = TRUE;
+	}
+	else if((INNERSCREEN_RTC_GET_D_ADD) == pSdwe->SetAdd)
+	{
+		tempBuf = pSdwe->SetData&0x00FF;
+		localtm.tm_mday = 10*((pSdwe->SetData >> 4)&0x000F) + ((pSdwe->SetData >> 0)&0x000F);
+		tempBuf <<= 0;
+		tempBuf &= 0x000000FF;
+		//
+		gSystemPara.RTC_YMD &= 0xFFFF00FF;
+		gSystemPara.RTC_YMD |= tempBuf;
+		matched = TRUE;
+	}
+	else if(INNERSCREEN_RTC_GET_H_ADD == pSdwe->SetAdd)
+	{
+		tempBuf = pSdwe->SetData&0x00FF;
+		localtm.tm_hour = 10*((pSdwe->SetData >> 4)&0x000F) + ((pSdwe->SetData >> 0)&0x000F);
+		tempBuf <<= 16;
+		tempBuf &= 0x00FF0000;
+		//
+		gSystemPara.RTC_HMS &= 0xFF00FFFF;
+		gSystemPara.RTC_HMS |= tempBuf;
+		matched = TRUE;
+	}
+	else if((INNERSCREEN_RTC_GET_MI_ADD) == pSdwe->SetAdd)
+	{
+		tempBuf = pSdwe->SetData&0x00FF;
+		localtm.tm_min = 10*((pSdwe->SetData >> 4)&0x000F) + ((pSdwe->SetData >> 0)&0x000F);
+		tempBuf <<= 8;
+		tempBuf &= 0x0000FF00;
+		//
+		gSystemPara.RTC_HMS &= 0xFFFF00FF;
+		gSystemPara.RTC_HMS |= tempBuf;
+		matched = TRUE;
+	}
+	else if((INNERSCREEN_RTC_GET_S_ADD) == pSdwe->SetAdd)
+	{
+		tempBuf = pSdwe->SetData&0x00FF;
+		localtm.tm_sec = 10*((pSdwe->SetData >> 4)&0x000F) + ((pSdwe->SetData >> 0)&0x000F);
+		tempBuf <<= 0;
+		tempBuf &= 0x000000FF;
+		//
+		gSystemPara.RTC_HMS &= 0xFFFF00FF;
+		gSystemPara.RTC_HMS |= tempBuf;
+		matched = TRUE;
+		gS64UTCTime = mymktime(&localtm);
+		gUTCDecodeTime = *(mygmtime(&gS64UTCTime));
+	}
+
 	return matched;
 }
 
@@ -426,6 +438,23 @@ UINT8 innerScreenRxHandle_SystemReset(T5LType *pSdwe)
 	return matched;
 }
 
+
+//16
+UINT8 innerScreenRxHandle_Sizer_ClassifySet(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	UINT8 i = 0 , j = 0;
+	if((pSdwe->SetAdd >= INNERSCREEN_Sizer_ClassifySet_Address)	&& 
+	   (pSdwe->SetAdd < (INNERSCREEN_Sizer_ClassifySet_Address + SIZER_CLASSIFY_GROUP_NUM*SIZER_CLASSIFY_MEMBER_NUM)))
+	{
+		matched = TRUE;
+		i = (pSdwe->SetAdd - INNERSCREEN_Sizer_ClassifySet_Address)/SIZER_CLASSIFY_MEMBER_NUM;
+		j = (pSdwe->SetAdd - INNERSCREEN_Sizer_ClassifySet_Address)%SIZER_CLASSIFY_MEMBER_NUM;
+		gSystemPara.Sizer_ClassifySet[i][j] = pSdwe->SetData;
+		pSdwe->needStore |= DMG_TRIGER_SAVE_SECOTOR_2 ;
+	}
+	return matched;
+}
 //================================================================================================
 //===============================[函数列表：内屏数据接收后的事件处理]================================
 //================================================================================================
@@ -448,6 +477,7 @@ screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM]=
 	{0,	13,&innerScreenRxHandle_VoicePrintfStatusFromScreen},//屏幕语音控制后状态返回
 	{0,	14,&innerScreenRxHandle_SystemReset},//屏幕语音控制后状态返回
 	{0,	15,&innerScreenRxHandle_RTC_YMDHMS},//屏幕RTC获取状态返回
+	{0, 16,&innerScreenRxHandle_Sizer_ClassifySet},
 	
 };
 

@@ -20,6 +20,7 @@
 //0.0内屏初始化
 UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
 {
+	UINT8 i = 0 , j = 0;
 	INT16 sendData[64],len=0;
 	UINT8 result = FALSE ;
 	//
@@ -133,6 +134,22 @@ UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
 				t5lWriteVarible(pSdwe,DMG_FUNC_SET_CHANEL_NUM,sendData,len,0);/**< 校准的通道号 */  //2100
 				pSdwe->sendSysParaDataToDiwenIndex++;
 			}
+		break;
+		case 10:
+			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
+				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
+			{
+				len=0;
+				for( i = 0 ; i < SIZER_CLASSIFY_GROUP_NUM ; i++ )
+				{
+					for( j = 0 ; j < SIZER_CLASSIFY_MEMBER_NUM ; j++ )
+					{
+						sendData[len++] = gSystemPara.Sizer_ClassifySet[i][j] & 0xffff;
+					}
+				}
+				t5lWriteVarible(pSdwe,INNERSCREEN_Sizer_ClassifySet_Address,sendData,len,0);/**< 校准的通道号 */  //2100
+				pSdwe->sendSysParaDataToDiwenIndex++;
+			}		
 		break;
 		default:
 			if(TRUE == pSdwe->sdweHX711FirstSampleCoplt)

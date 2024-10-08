@@ -13,7 +13,7 @@ unionFloatInt32 flashStoreDataBuf_3030[FLASH_SYS_PARA_STORE_MAX_LEN]={0};
 //=======================sys parameter read :unit min max....
 gSystemParaType gSystemPara = gSystemParaDefault;
 
-//==read data from flash
+//==系统HX711校准相关参数：读取
 void readSysDataFromFlash(void)
 {
 	ChanelType *pChanel = 0;	
@@ -95,7 +95,7 @@ void readSysDataFromFlash(void)
 			}
 		}
 }
-//==store set data to flash
+//==系统HX711校准相关参数：写入
 void storeSysDataToFlash(void)
 {
 	static UINT16 storeTick = 0 ; 
@@ -204,12 +204,12 @@ void storeSysDataToFlash(void)
 	}
 }
 
-//=======================v3.0
+//系统应用相关参数：读取
 void readSysDataFromFlash_3030(void)
 {
 	unionFloatInt32 readflashDataBuf[FLASH_SYS_PARA_STORE_MAX_LEN]={0};
 	UINT32 crc = 0 ;
-	UINT16 start_i = 0 , end_i = 0;
+	UINT16 start_i = 0 , end_i = 0  , i = 0  , j = 0;
 	UINT8 point_i = 0 ;
 	HAL_StatusTypeDef ret = HAL_OK;
 	//read data from flash
@@ -253,8 +253,20 @@ void readSysDataFromFlash_3030(void)
 		gSystemPara.RTC_YMD = readflashDataBuf[start_i++].i_value;/**< RTC时间 */
 		gSystemPara.RTC_HMS = readflashDataBuf[start_i++].i_value;/**< RTC时间 */
 
+		//筛选器：年月日 时分秒
+		for( i = 0 ; i < 6 ; i++)
+		{
+			gSystemPara.Sizer_TimeSet[i] = readflashDataBuf[start_i++].i_value;
+		}
 
-
+		//筛选器：类型 最小值 最大值 是否选择
+		for( i = 0 ; i < SIZER_CLASSIFY_GROUP_NUM ; i++ )
+		{
+			for( j = 0 ; j < SIZER_CLASSIFY_MEMBER_NUM ; j++ )
+			{
+				gSystemPara.Sizer_ClassifySet[i][j] = readflashDataBuf[start_i++].i_value;
+			}
+		}
 
 		//参数再次处理：开始
 		if(ModbusAdd_Slave_1 == gSystemPara.isCascade)
@@ -271,7 +283,7 @@ void storeSysDataToFlash_3030(void)
 {
 	static UINT16 storeTick = 0 ; 
 	unionFloatInt32 *pWordInt32Float=&flashStoreDataBuf_3030[0];
-	UINT8 *pChar = 0 ;
+	UINT8 *pChar = 0 , i = 0 , j = 0;
 	INT32 *pInt32 = 0 ;
 	float *pFloat = 0;
 	UINT32 crc = 0 ;
@@ -467,7 +479,35 @@ void storeSysDataToFlash_3030(void)
 		pWordInt32Float[start_i].i_value = *pInt32++;
 	}	
 
-	//
+
+
+
+	//筛选器：年月日 时分秒
+	for( i = 0 ; i < 6 ; i++)
+	{
+		pWordInt32Float[start_i++].i_value = gSystemPara.Sizer_TimeSet[i];
+	}
+
+	//筛选器：类型 最小值 最大值 是否选择
+	for( i = 0 ; i < SIZER_CLASSIFY_GROUP_NUM ; i++ )
+	{
+		for( j = 0 ; j < SIZER_CLASSIFY_MEMBER_NUM ; j++ )
+		{
+			pWordInt32Float[start_i++].i_value = gSystemPara.Sizer_ClassifySet[i][j];
+		}
+	}
+
+
+
+
+
+
+
+
+
+
+	//======================================================================================
+	//======================================================================================
 	pChar = (UINT8 *)(&pWordInt32Float[0].u_value[0]);
 	crc = cal_crc16(pChar,(4*start_i));
 	pWordInt32Float[start_i].i_value = crc;

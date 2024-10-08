@@ -74,7 +74,7 @@ struct tm *mygmtime(const sint64 *timep)
         year++;
     }
 
-    tm.tm_year = year - 1900;
+    tm.tm_year = year;
     tm.tm_yday = time_ymd;
     month = 0;
     while (time_ymd >= get_days_in_month(year, month)) {
@@ -82,7 +82,7 @@ struct tm *mygmtime(const sint64 *timep)
         month++;
     }
 
-    tm.tm_mon = month;
+    tm.tm_mon = month + 1;
     tm.tm_mday = time_ymd + 1;
     tm.tm_isdst = -1;
 
@@ -95,8 +95,8 @@ struct tm *mygmtime(const sint64 *timep)
  ***********************************************************************/
 sint64 mymktime(struct tm *tm)
 {
-    int year = tm->tm_year + 1900;
-    int month = tm->tm_mon + 1;
+    int year = tm->tm_year;
+    int month = tm->tm_mon;
     int day = tm->tm_mday;
     int hour = tm->tm_hour;
     int min = tm->tm_min;

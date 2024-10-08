@@ -21,7 +21,8 @@
  ******************************************************************************/
 //sys main task status
 UINT32 g_sys_ms_tick = 0 ;
-
+struct tm gUTCDecodeTime;
+sint64 gS64UTCTime;
 /*******************************************************************************
  * Functions
  ******************************************************************************/
@@ -29,9 +30,7 @@ UINT32 g_sys_ms_tick = 0 ;
 void app_main_init(void)
 {
 }
-extern struct tm localtm;
-struct tm *pTm=&localtm;
-extern 	sint64 g64Time;
+
 
 uint8 test_daaa[20][120],test_daaa_i;
 
@@ -93,8 +92,8 @@ void app_main_task(void)
 
 	if(g_sys_ms_tick % 1000 == 0)
 	{
-		g64Time++;
-		pTm = mygmtime(&g64Time);
+		gS64UTCTime++;
+		gUTCDecodeTime = *(mygmtime(&gS64UTCTime));
 	}
 
 	USB_SMQ_Handle_MainFunction();

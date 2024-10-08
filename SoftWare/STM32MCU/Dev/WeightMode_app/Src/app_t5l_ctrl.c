@@ -1597,13 +1597,33 @@ UINT8 sdweAskVaribleData(ScreenHandleType  *screenHandlePtr,UINT16 varAdd, UINT1
 //接收到屏幕的寄存器数据处理
 UINT8 sdweAskRegData(ScreenHandleType  *screenHandlePtr,UINT8 regAdd, UINT8 regData)
 {
-	UINT8 needStore = FALSE ;
+	UINT8 needStore = FALSE , i = 0;
 	T5LType *pSdwe = screenHandlePtr->Ctx;
-	if(0 == regAdd)
+	//
+	pSdwe->SetAdd = regAdd ;
+	pSdwe->SetData = regData ;
+
+	//
+	if(0 == pSdwe->SetAdd)
 	{
-		pSdwe->version = regData;
+		pSdwe->version = pSdwe->SetData;
 		pSdwe->readSdweInit = TRUE;
 		pSdwe->sdwePowerOn = TRUE;
+	}
+
+	//receive address from SDWE
+	if(0xffff != pSdwe->SetAdd)
+	{
+		for( i = 0 ; i < screenHandlePtr->recvScreenHadlleNum ; i++)
+		{
+			if(TRUE == screenHandlePtr->recvScreenHadlleCtx[i].func(pSdwe))
+			{
+				needStore = pSdwe->needStore;
+				break;//遍历所有屏幕发过来的变量地址，满足则退出遍历
+			}
+		}
+		//clr address
+		pSdwe->SetAdd = 0xffff;
 	}
 	return needStore;
 }

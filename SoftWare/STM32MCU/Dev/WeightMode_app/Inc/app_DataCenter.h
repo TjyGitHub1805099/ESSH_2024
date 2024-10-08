@@ -6,13 +6,17 @@
 
 #define EXTFLASH_ORDER_BUZY (0x78)
 
-#define INNER_SCREEN_DATACENTER_START_ADD       (0x5000u)
-#define INNER_SCREEN_DATACENTER_LENOF_INDEX     (0x04u)// 4 ,Address[0x5000 ~ 0x5003] ,such as [0000]
-#define INNER_SCREEN_DATACENTER_LENOF_BARCODE   (0x0Du)//13 ,Address[0x5004 ~ 0x5010] ,such as [639382000393]
-#define INNER_SCREEN_DATACENTER_LENOF_RECTIME   (0x13u)//19 ,Address[0x5011 ~ 0x5023] ,such as [2024/12/12 08:08:08]
-#define INNER_SCREEN_DATACENTER_LENOF_WEIGHT    (0x08u)// 8 ,Address[0x5024 ~ 0x502B] ,such as [2222(ml)]
-#define INNER_SCREEN_DATACENTER_LENOF_TYPE      (0x01u)// 1 ,Address[0x502C ~ 0x502C] ,such as [A]
-#define INNER_SCREEN_DATACENTER_LENOF_RANGE     (0x0Du)//13 ,Address[0x502D ~ 0x5039] ,such as [[1111 ~ 2222]]
+
+#define INNERSCREEN_DATACENTER_GROUP_START_ADD  (INNERSCREEN_DATACENTER_START_ADD)
+#define INNERSCREEN_DATACENTER_GROUP_NUM        (7)
+#define INNERSCREEN_DATACENTER_GROUP_OFFSET     (0X80)
+
+#define INNER_SCREEN_DATACENTER_LENOF_INDEX     (4u) // 4 ,Address[0x5000 ~ 0x5003] ,such as [0000]
+#define INNER_SCREEN_DATACENTER_LENOF_BARCODE   (32u)//13 ,Address[0x5004 ~ 0x5010] ,such as [639382000393]
+#define INNER_SCREEN_DATACENTER_LENOF_RECTIME   (32u)//19 ,Address[0x5011 ~ 0x5023] ,such as [2024/12/12 08:08:08]
+#define INNER_SCREEN_DATACENTER_LENOF_WEIGHT    (12u)// 8 ,Address[0x5024 ~ 0x502B] ,such as [2222(ml)]
+#define INNER_SCREEN_DATACENTER_LENOF_TYPE      (4u) // 1 ,Address[0x502C ~ 0x502C] ,such as [2222]
+#define INNER_SCREEN_DATACENTER_LENOF_RANGE     (11u)//13 ,Address[0x502D ~ 0x5039] ,such as [1111 ~ 2222]
 
 #define CLASSIFICATION_SEARCH_DISPLAY_NUM       (6)//at onepage the max display num
 
@@ -51,6 +55,7 @@ typedef struct sInnerScreenDataCenterStruct
     //
     uint8 barCodeLen;
 }tInnerScreenDataCenterStruct;
+
 
 
 

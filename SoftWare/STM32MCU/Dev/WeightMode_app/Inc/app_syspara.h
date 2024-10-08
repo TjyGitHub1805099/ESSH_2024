@@ -38,6 +38,54 @@ typedef enum HX711SystemParaType
 	HX711SystemPara_weightNum = 22,/**< 单台数量 0x101f*/
 	HX711SystemPara_RTC_YMD = 23,/**< RTC 年月日*/
 	HX711SystemPara_RTC_HMS = 24,/**< RTC 时分秒*/
+
+	SystemPara_Sizer_TimeSet_Nian,
+	SystemPara_Sizer_TimeSet_Yue,
+	SystemPara_Sizer_TimeSet_Ri,
+	SystemPara_Sizer_TimeSet_Shi,
+	SystemPara_Sizer_TimeSet_Fen,
+	SystemPara_Sizer_TimeSet_Miao = 30,
+
+	SystemPara_Sizer_ClassifySet_ALei ,
+	SystemPara_Sizer_ClassifySet_ALei_Min,
+	SystemPara_Sizer_ClassifySet_ALei_Max,
+	SystemPara_Sizer_ClassifySet_ALei_Sel,
+
+	SystemPara_Sizer_ClassifySet_BLei,
+	SystemPara_Sizer_ClassifySet_BLei_Min,
+	SystemPara_Sizer_ClassifySet_BLei_Max,
+	SystemPara_Sizer_ClassifySet_BLei_Sel,
+
+	SystemPara_Sizer_ClassifySet_CLei ,
+	SystemPara_Sizer_ClassifySet_CLei_Min,
+	SystemPara_Sizer_ClassifySet_CLei_Max,
+	SystemPara_Sizer_ClassifySet_CLei_Sel,
+
+	SystemPara_Sizer_ClassifySet_DLei ,
+	SystemPara_Sizer_ClassifySet_DLei_Min,
+	SystemPara_Sizer_ClassifySet_DLei_Max,
+	SystemPara_Sizer_ClassifySet_DLei_Sel,
+	
+	SystemPara_Sizer_ClassifySet_ELei ,
+	SystemPara_Sizer_ClassifySet_ELei_Min,
+	SystemPara_Sizer_ClassifySet_ELei_Max,
+	SystemPara_Sizer_ClassifySet_ELei_Sel,
+
+	SystemPara_Sizer_ClassifySet_FLei ,
+	SystemPara_Sizer_ClassifySet_FLei_Min,
+	SystemPara_Sizer_ClassifySet_FLei_Max,
+	SystemPara_Sizer_ClassifySet_FLei_Sel,
+
+	SystemPara_Sizer_ClassifySet_GLei ,
+	SystemPara_Sizer_ClassifySet_GLei_Min,
+	SystemPara_Sizer_ClassifySet_GLei_Max,
+	SystemPara_Sizer_ClassifySet_GLei_Sel,
+
+	SystemPara_Sizer_ClassifySet_HLei ,
+	SystemPara_Sizer_ClassifySet_HLei_Min,
+	SystemPara_Sizer_ClassifySet_HLei_Max,
+	SystemPara_Sizer_ClassifySet_HLei_Sel=62,
+
 	HX711SystemPara_NUM  			/**< HX711  系统设置-最大长度 */
 }enumHX711SystemParaType;
 
@@ -103,6 +151,9 @@ typedef enum HX711SystemParaType
 //store flash data : HX711_CHANEL_NUM * (sample value , weight value , k , b , remove value , weightDir ) , crc
 #define FLASH_STORE_MAX_LEN						(((FLASH_STORE_ADDRESS_END-FLASH_STORE_ADDRESS_START)/4)+1)
 //==========================================================================================================================
+#define SIZER_CLASSIFY_GROUP_NUM	(8)
+#define SIZER_CLASSIFY_MEMBER_NUM	(4)
+
 //
 typedef struct SystemParaType
 {
@@ -137,6 +188,12 @@ typedef struct SystemParaType
 	INT32 	RTC_HMS;/**< RTC 0x009C*/
 	//sys used flag
 	UINT16	userColorUsed[SYS_COLOR_GROUP_NUM];/**< chanel_a<<8 + chanel_b*/
+
+
+	UINT32 Sizer_TimeSet[6];//NYR SFM
+	UINT32 Sizer_ClassifySet[SIZER_CLASSIFY_GROUP_NUM][SIZER_CLASSIFY_MEMBER_NUM];
+
+
 } gSystemParaType;
 //
 #define gSystemParaDefault {\

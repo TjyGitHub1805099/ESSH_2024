@@ -26,6 +26,10 @@
 #define DMG_DATA_HOLD_TIME						(250)//250ms
 #define DMG_WAIT_COLOR_HELP_SEND_TIME			(1000)//当重量信息发给屏幕后颜色信息最长这个时间段内要发送给屏幕
 //================================================================================================
+
+//系统参数 筛选页面：相关
+#define INNERSCREEN_Sizer_ClassifySet_Address	(0x1810)
+
 //称重校准页面：相关
 //==(update:20210328):address of set chanel number : 0->all chanel set  ; (1~8)->single chanel set
 #define DMG_FUNC_SET_CHANEL_NUM					(0X2100)//2024-10-06
@@ -54,6 +58,7 @@
 
 
 
+#define INNERSCREEN_DATACENTER_START_ADD        (0x3500)
 
 
 
@@ -142,7 +147,13 @@
 
 #define INNER_SCREEN_RTC_GET_ADD			(0X20)//读取日历（YY:MM:DD:WW:HH:MM:SS）：A5 5A 03 81 20 07
 #define INNER_SCREEN_RTC_GET_LEN			(0X07)
-
+#define INNERSCREEN_RTC_GET_Y_ADD			(0X0020)
+#define INNERSCREEN_RTC_GET_M_ADD			(0X0021)
+#define INNERSCREEN_RTC_GET_D_ADD			(0X0022)
+#define INNERSCREEN_RTC_GET_W_ADD			(0X0023)
+#define INNERSCREEN_RTC_GET_H_ADD			(0X0024)
+#define INNERSCREEN_RTC_GET_MI_ADD			(0X0025)
+#define INNERSCREEN_RTC_GET_S_ADD			(0X0026)
 
 //at BALANCING Page , auto to judge the remaining chanel weight minus
 //to help user to caculate
@@ -626,13 +637,15 @@ typedef struct structScreenHandleType
 	screenRxTxHandleType *sendScreenHadlleCtx;
 }ScreenHandleType;
 
-#define SCREEN_RX_HANDLE_TOTAL_NUM	(16)	/**< 屏幕RX数据处理事件数量 */
+#define SCREEN_RX_HANDLE_TOTAL_NUM	(17)	/**< 屏幕RX数据处理事件数量 */
 #define SCREEN_TX_HANDLE_TOTAL_NUM	(6)	/**< 屏幕TX数据处理事件数量 */
 extern screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM];
 extern screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM];
 
 #define SCREEN_LARGER_RX_HANDLE_TOTAL_NUM	(2)	/**< 屏幕RX数据处理事件数量 */
 #define SCREEN_LARGER_TX_HANDLE_TOTAL_NUM	(5)	/**< 屏幕TX数据处理事件数量 */
+
+
 
 extern screenRxTxHandleType externalScreenRxHandle[SCREEN_LARGER_RX_HANDLE_TOTAL_NUM];
 extern screenRxTxHandleType externalScreenTxHandle[SCREEN_LARGER_TX_HANDLE_TOTAL_NUM];
