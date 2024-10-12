@@ -129,6 +129,22 @@ void USB_SMQ_CodeCheck(tUSBSMQHandle *pCtx)
 
 }
 
+
+UINT8 USB_SMQ_DataDiffCheck(void)
+{
+    UINT8 i = 0 ,ret = 0;
+    for(i = 0 ;i < USBSMQ_KEYBORD_MAX_NUM ; i++)
+    {
+        if(sUSBSMQHandleContex.decodeDataVaild[i] != sUSBSMQHandleContex.decodeDataVaildPre[i])
+        {
+            ret = 1;
+            break;
+        }
+    }
+    return ret;
+}
+
+
 //双层USB的底部USB口是USB扫码枪
 void USB_SMQ_Handle_MainFunction(void)
 {
@@ -138,6 +154,7 @@ void USB_SMQ_Handle_MainFunction(void)
     switch(pCtx->handleType)
     {
         case USBSMQ_HANDLE_INIT:// = 0,    /**< 初始化 */
+            pCtx->handleType = USBSMQ_HANDLE_IDLE;
         break;
         case USBSMQ_HANDLE_IDLE:// = 1,    /**< 空闲 */
             if(1 == pCtx->RxFinishFlag)

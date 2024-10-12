@@ -6,6 +6,11 @@
 #include "stm32f4xx_it.h"
 #include "time.h"
 
+#define INNERSCREEN_TYPE_DIWEN      (0)//迪文屏
+#define INNERSCREEN_TYPE_ZHONGXIAN  (1)//中显屏
+
+#define INNERSCREEN_TYPE            (INNERSCREEN_TYPE_DIWEN)
+
 #define SYS_HX711_ONLINE_CHECK_TIME	(2000)//when power on 2000ms start check HX711  , total 3 times
 #define MCU_VERSION			        (821)//2024.08.21
 #define DIWEN_VERSION		        (821)//2024.08.21

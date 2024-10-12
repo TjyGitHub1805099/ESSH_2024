@@ -266,6 +266,7 @@ void readSysDataFromFlash_3030(void)
 			{
 				gSystemPara.Sizer_ClassifySet[i][j] = readflashDataBuf[start_i++].i_value;
 			}
+			DataCenterHandle_ClassificationVluSet(i,&gSystemPara.Sizer_ClassifySet[i][0]);
 		}
 
 		//参数再次处理：开始

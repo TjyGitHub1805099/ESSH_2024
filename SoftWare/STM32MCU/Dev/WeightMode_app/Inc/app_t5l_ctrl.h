@@ -51,21 +51,30 @@
 #define DMG_FUNC_SET_CHANEL_POINT_TRIG_ADDRESS	(0X2500)//0x2500~0x2509 2024-10-06
 #define DMG_FUNC_SET_CHANEL_POINT_TRIG_VAL		(0X12FE)
 
-//主页相关
-//==(update:20210328):address of remove weight
-#define DMG_FUNC_REMOVE_WEIGHT_ADDRESS			(0X0500)//2024-10-06
-#define DMG_FUNC_REMOVE_WEIGHT_VAL				(0X0011)
+//page0:主页相关
+//==(update:20241012):address of remove weight
+#define DMG_FUNC_REMOVE_WEIGHT_ADDRESS				(0X8000)
+#define DMG_FUNC_REMOVE_WEIGHT_VAL					(0X0012)
+
+//page5:数据筛选
+#define DMG_FUNC_PAGE5_OUPUT_ALL_ADDRESS			(0X8005)
+#define DMG_FUNC_PAGE5_OUPUT_ALL_VAL				(0X0512)
+
+//page9:数据中心
+#define DMG_FUNC_PAGE9_OUTPUT_CUR_PAGE_ADDRESS		(0X8009)
+#define DMG_FUNC_PAGE9_OUTPUT_CUR_PAGE_VLU			(0X0912)
+#define DMG_FUNC_PAGE9_OUTPUT_ALL_PAGE_ADDRESS		(0X8009)
+#define DMG_FUNC_PAGE9_OUTPUT_ALL_PAGE_VLU			(0X0923)
+#define DMG_FUNC_PAGE9_PAGEUP_PAGE_ADDRESS			(0X8009)
+#define DMG_FUNC_PAGE9_PAGEUP_PAGE_VLU				(0X0934)
+#define DMG_FUNC_PAGE9_PAGEDOWN_PAGE_ADDRESS		(0X8009)
+#define DMG_FUNC_PAGE9_PAGEDOWN_PAGE_VLU			(0X0945)
+
+
 
 
 
 #define INNERSCREEN_DATACENTER_START_ADD        (0x3500)
-
-
-
-
-
-
-
 
 
 //==(update:20211119):address of syspara entry
@@ -122,7 +131,7 @@
 #define DMG_FUNC_SAVE_FILE_NAME_SET_ADDRESS	(0X1300)//0x1200
 #define DMG_FUNC_SAVE_FILE_NAME_SET_LEN		(20)//20个字符
 
-#define DMG_FUNC_BC_CODE_ADDRESS			(0x1990)
+#define DMG_FUNC_BC_CODE_ADDRESS			(0x3003)
 
 #define DMG_SYS_STATUS_OF_VOICE_PRINTF_00A1	(0X00A1)
 
@@ -142,10 +151,25 @@
 #define DMG_SYS_RTC_GET_MS_ADD				(0X009F)
 #define DMG_SYS_RTC_GET_MS_LEN				(0X0001)//Y-M-D H:M:S
 
+#if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
 #define INNER_SCREEN_VERSION_GET_ADD		(0X00)//读取版本信息，串口下发指令 A5 5A 03 81 00 01
 #define INNER_SCREEN_VERSION_GET_LEN		(0X01)
+#else
+#define INNER_SCREEN_VERSION_GET_ADD		(0X000E)//读取版本信息，串口下发指令 5A A5 04 83 000E 02 , 
+#define INNER_SCREEN_VERSION_GET_LEN		(0X02)
+/*
+发送：5A A5 04 83 000E 02 
+返回：5A A5 08 83 000E 02 00 41 61 21
+*/
+#endif
 
-#define INNER_SCREEN_RTC_GET_ADD			(0X20)//读取日历（YY:MM:DD:WW:HH:MM:SS）：A5 5A 03 81 20 07
+#if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
+/*
+0x20 寄存器开始保存了当前 RTC值，使用 0x81 指令读取。 
+读取日历（YY:MM:DD:WW:HH:MM:SS）：A5 5A 03 81 20 07 
+读取时间（HH:MM:SS）：A5 5A 03 81 24 03 
+*/
+#define INNER_SCREEN_RTC_GET_ADD			(0X20)
 #define INNER_SCREEN_RTC_GET_LEN			(0X07)
 #define INNERSCREEN_RTC_GET_Y_ADD			(0X0020)
 #define INNERSCREEN_RTC_GET_M_ADD			(0X0021)
@@ -154,12 +178,32 @@
 #define INNERSCREEN_RTC_GET_H_ADD			(0X0024)
 #define INNERSCREEN_RTC_GET_MI_ADD			(0X0025)
 #define INNERSCREEN_RTC_GET_S_ADD			(0X0026)
-
+#else
+#define INNER_SCREEN_RTC_GET_ADD			(0x0010)
+#define INNER_SCREEN_RTC_GET_LEN			(0x04)
+/*
+指令示例： 
+写：5A A5 0B 82 0010 13 0A 01 00 0B 0C 0D 00 
+文本 RTC 显示 2019-10-0111:12:13 SUN ， 
+年系统自动补齐 20；星期为英文显示，系统会自动换算。 
+读：5A A5 04 83 00 10 04 
+应答：5A A5 0C 83 0010 04 13 0A 01 00 0B 0C 0D 00 
+*/
+#endif
 //at BALANCING Page , auto to judge the remaining chanel weight minus
 //to help user to caculate
 //1.find out the remaining chanel
 //2.find out the closed group(minus was smallest)
 //3.send to DIWEN Screen to display
+
+
+
+#if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
+#else
+#define INNNERSCREEN_TRIGER_SAVE_ADDRESS	(0x8000)
+#define INNNERSCREEN_TRIGER_SAVE_VLU		(0x0023)
+#endif
+
 
 #define DIFF_JUDGE_GROUP_NUM_SLAVE1	(4)//4 group help data display 
 #define DIFF_JUDGE_DATA_NUM_SLAVE1	(3)//num1 num2 minus
@@ -442,10 +486,11 @@ typedef struct structSdweType
 	UINT16 	freshDP;/**< 刷新描述指针*/
 	UINT16  isCascadTrigger;/**< 级联触发*/
 	UINT16  isWriteWeightIndexTrigger;/**< 写序号触发*/
-	INT16 	bcCodeVlu[INNER_SCREEN_DATACENTER_LENOF_BARCODE+1/2];
+	UINT16 	bcCodeVlu[(INNER_SCREEN_DATACENTER_LENOF_BARCODE+1)/2];//bc code
 	UINT8 	bcCodeTriger;
 	UINT8 	bcCodeLen;
-	
+	UINT16 	triggerSaveVlu;
+	UINT16 	triggerSaveVluPre;
 }T5LType;
 
 #define ScreenCycleTypeDefault   { \
@@ -479,6 +524,7 @@ typedef struct structSdweType
 #define T5LDataDefault   { \
 	0xA5,\
 	0x5A,\
+	\
 	SCREEN_STATUS_GET_VERSION,/*status ：sdwe 状态*/\
 	0,\
 	0,\
@@ -543,6 +589,8 @@ typedef struct structSdweType
 	.bcCodeVlu = {0},\
 	.bcCodeTriger = 0,\
 	.bcCodeLen = 0 ,\
+	.triggerSaveVlu = 0 ,\
+	.triggerSaveVluPre = 0,\
 }
 
 /** ModbusRtu设备默认配置 */
@@ -637,8 +685,8 @@ typedef struct structScreenHandleType
 	screenRxTxHandleType *sendScreenHadlleCtx;
 }ScreenHandleType;
 
-#define SCREEN_RX_HANDLE_TOTAL_NUM	(17)	/**< 屏幕RX数据处理事件数量 */
-#define SCREEN_TX_HANDLE_TOTAL_NUM	(6)	/**< 屏幕TX数据处理事件数量 */
+#define SCREEN_RX_HANDLE_TOTAL_NUM	(18)	/**< 屏幕RX数据处理事件数量 */
+#define SCREEN_TX_HANDLE_TOTAL_NUM	(7)	/**< 屏幕TX数据处理事件数量 */
 extern screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM];
 extern screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM];
 
@@ -706,6 +754,7 @@ extern void t5lReadVarible(T5LType *t5lCtx,UINT16 varAdd,UINT16 varlen ,UINT8 cr
 extern UINT8 t5lWriteDataColor(T5LType *t5lCtx,UINT16 varAdd, UINT16 ColorOrder1,UINT16 ColorOrder2,INT16 *pData_X_Y_X_Y_Color);
 extern UINT8 t5lWriteData(T5LType *t5lCtx,UINT16 varAdd, INT16 *pData ,UINT16 varlen ,UINT8 crcEn);
 extern UINT8 innerScreenReadReg(T5LType *t5lCtx,UINT8 varAdd,UINT8 varlen ,UINT8 crcEn);
+extern UINT8 innerScreenWriteReg(T5LType *t5lCtx,UINT8 regAdd, UINT8 *pData ,UINT8 reglen ,UINT8 crcEn);
 
 extern void screenPublic_ScreenVersionGet(T5LType *pSdwe);
 extern UINT8 screenPublic_PageJump(T5LType *pSdwe,INT16 pageNum);

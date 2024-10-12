@@ -12,7 +12,7 @@
 #define INNERSCREEN_DATACENTER_GROUP_OFFSET     (0X80)
 
 #define INNER_SCREEN_DATACENTER_LENOF_INDEX     (4u) // 4 ,Address[0x5000 ~ 0x5003] ,such as [0000]
-#define INNER_SCREEN_DATACENTER_LENOF_BARCODE   (32u)//13 ,Address[0x5004 ~ 0x5010] ,such as [639382000393]
+#define INNER_SCREEN_DATACENTER_LENOF_BARCODE   (13u)//13 ,Address[0x5004 ~ 0x5010] ,such as [639382000393]
 #define INNER_SCREEN_DATACENTER_LENOF_RECTIME   (32u)//19 ,Address[0x5011 ~ 0x5023] ,such as [2024/12/12 08:08:08]
 #define INNER_SCREEN_DATACENTER_LENOF_WEIGHT    (12u)// 8 ,Address[0x5024 ~ 0x502B] ,such as [2222(ml)]
 #define INNER_SCREEN_DATACENTER_LENOF_TYPE      (4u) // 1 ,Address[0x502C ~ 0x502C] ,such as [2222]
@@ -35,9 +35,9 @@ typedef enum
 
 typedef struct sClassificationStruct
 {
-    float min;
-    float mid;
-    float max;
+    uint32 mid;
+    uint32 min;
+    uint32 max;
     uint8 typeOutput;
 }tClassificationStruct;
 
@@ -113,13 +113,14 @@ DATA_INFO	stroenum	    barcode	date	        weight	        CRC	addStart_dec	addS
 
 //data info:( barcode[13byte] + date[0byte] + weight[4byte] + CRC16[2byte]) * num
 #define CLASSIFICATION_STORE_DATA_START_ADD         (((CLASSIFICATION_STORE_CFG_TIME_BU_END_ADD/EXT_FLASH_PROCESS_LEN)+1)*EXT_FLASH_PROCESS_LEN)
-#define CLASSIFICATION_STORE_DATA_SINGLE_LEN        (13+0+4+2)
+#define CLASSIFICATION_STORE_DATA_SINGLE_LEN        (INNER_SCREEN_DATACENTER_LENOF_BARCODE+0+4+2)
 #define CLASSIFICATION_STORE_DATA_END_ADD           (CLASSIFICATION_STORE_DATA_START_ADD + CLASSIFICATION_STORE_MAX_NUM*(CLASSIFICATION_STORE_DATA_SINGLE_LEN))
 #define CLASSIFICATION_STORE_DATA_TOTAL_LEN         (CLASSIFICATION_STORE_DATA_END_ADD - CLASSIFICATION_STORE_DATA_START_ADD)
 //local data center handle
 typedef struct sInnerScreenDataCenterHandleStruct
 {
     uint8 trigerStroreFromScreen;
+    uint8 	weigthClassifyCplt;
     //cfg info store in extern e2
     uint8 cfgInfo_weightType[CLASSIFICATION_STORE_CFG_LEN + 2];
     uint8 cfgInfo_utcTime[CLASSIFICATION_STORE_CFG_TIME_LEN+2];
@@ -153,9 +154,9 @@ typedef struct sInnerScreenDataCenterHandleStruct
     tInnerScreenDataCenterStruct *pRealTimeData;
 }tInnerScreenDataCenterHandleStruct;
 
-
+extern tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle;
 
 extern tDataCenterExtFlashCallbackStruct dataCenterCallbackRegisterList[E_F_HANDLE_JOBID_WR_MAX];
-
 extern void InnerScreenDataCenterHandle_MainFunction(void);
+extern void DataCenterHandle_ClassificationVluSet(uint8 type , uint32 *pData);
 #endif

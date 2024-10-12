@@ -208,7 +208,7 @@ void BalancingData_WeightData_Handle_PrepareAndJudgeAndSendToScreen(T5LType *pSd
 		break;
 
 		case 1://发送【重量】数据给屏幕
-			if(TRUE ==t5lWriteData(pSdwe,DMG_FUNC_ASK_CHANEL_WEIGHT_ADDRESS,pSdwe->screenCycle.pDataSendToDiWen,(2*(2*HX711_CHANEL_NUM)),0));//2*chanel_len:because each data type was 4 byte
+			if(TRUE ==t5lWriteData(pSdwe,DMG_FUNC_ASK_CHANEL_WEIGHT_ADDRESS,pSdwe->screenCycle.pDataSendToDiWen,(2*(HX711_CHANEL_NUM)),0));//2*chanel_len:because each data type was 4 byte
 			{
 				//设置pDataPre=pData
 				BalancingData_Data32_WasSend(pSdwe->screenCycle.pData,pSdwe->screenCycle.pDataPre,(2*HX711_CHANEL_NUM));

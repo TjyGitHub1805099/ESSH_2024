@@ -17,6 +17,8 @@
 #include "app_t5l_cfg.h"
 #include "app_UTCTimer.h"
 #include "time.h"
+#include "app_DataCenter.h"
+
 struct tm localtm;
 //屏幕语音播报状态
 UINT8 g_u8InnerScreenVoicePrintfStatus = 0XFF;
@@ -33,7 +35,7 @@ UINT8 innerScreenRxHandle_Version(T5LType *pSdwe)
 	}
 	return matched;
 }
-
+#if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
 UINT8 innerScreenRxHandle_RTC_YMDHMS(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
@@ -110,7 +112,80 @@ UINT8 innerScreenRxHandle_RTC_YMDHMS(T5LType *pSdwe)
 
 	return matched;
 }
-
+#else
+UINT8 innerScreenRxHandle_RTC_YMDHMS(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	INT32 tempBuf = 0 ;
+	if(INNER_SCREEN_RTC_GET_ADD == pSdwe->SetAdd)//YM
+	{
+		//年
+		tempBuf = (pSdwe->SetData>>8)&0x00FF;
+		localtm.tm_year = tempBuf;
+		localtm.tm_year +=2000;
+		tempBuf <<= 16;
+		tempBuf &= 0x00FF0000;
+		gSystemPara.RTC_YMD &= 0xFF00FFFF;
+		gSystemPara.RTC_YMD |= tempBuf;
+		//月
+		tempBuf = pSdwe->SetData&0x00FF;
+		localtm.tm_mon = tempBuf;
+		tempBuf <<= 8;
+		tempBuf &= 0x0000FF00;
+		gSystemPara.RTC_YMD &= 0xFFFF00FF;
+		gSystemPara.RTC_YMD |= tempBuf;
+		//
+		matched = TRUE;
+	}
+	else if((INNER_SCREEN_RTC_GET_ADD+1) == pSdwe->SetAdd)
+	{
+		//日
+		tempBuf = (pSdwe->SetData>>8)&0x00FF;
+		localtm.tm_mday = tempBuf;
+		tempBuf <<= 0;
+		tempBuf &= 0x000000FF;
+		gSystemPara.RTC_YMD &= 0xFFFF00FF;
+		gSystemPara.RTC_YMD |= tempBuf;
+		//
+		matched = TRUE;
+	}
+	else if((INNER_SCREEN_RTC_GET_ADD+2) == pSdwe->SetAdd)
+	{
+		//时
+		tempBuf = (pSdwe->SetData>>8)&0x00FF;
+		localtm.tm_hour = tempBuf;
+		tempBuf <<= 16;
+		tempBuf &= 0x00FF0000;
+		gSystemPara.RTC_HMS &= 0xFF00FFFF;
+		gSystemPara.RTC_HMS |= tempBuf;
+		//分
+		tempBuf = (pSdwe->SetData>>0)&0x00FF;
+		localtm.tm_min = tempBuf;
+		tempBuf <<= 8;
+		tempBuf &= 0x0000FF00;
+		gSystemPara.RTC_HMS &= 0xFFFF00FF;
+		gSystemPara.RTC_HMS |= tempBuf;
+		//
+		matched = TRUE;
+	}
+	else if((INNER_SCREEN_RTC_GET_ADD+3) == pSdwe->SetAdd)
+	{
+		//秒
+		tempBuf = (pSdwe->SetData>>8)&0x00FF;
+		localtm.tm_sec = tempBuf;
+		tempBuf <<= 0;
+		tempBuf &= 0x000000FF;
+		gSystemPara.RTC_HMS &= 0xFFFF00FF;
+		gSystemPara.RTC_HMS |= tempBuf;
+		//
+		matched = TRUE;
+		//
+		gS64UTCTime = mymktime(&localtm);
+		gUTCDecodeTime = *(mygmtime(&gS64UTCTime));
+	}
+	return matched;
+}
+#endif
 
 //1
 UINT8 innerScreenRxHandle_SysPassWord(T5LType *pSdwe)
@@ -269,9 +344,9 @@ UINT8 innerScreenRxHandle_CalibrateAddressSet(T5LType *pSdwe)
 	UINT8 matched = FALSE;
 	if(DMG_FUNC_RESET_CALIBRATION_ADDRESS == pSdwe->SetAdd)
 	{
-		matched = TRUE;
 		if(DMG_FUNC_RESET_CALIBRATION_VAL == (UINT16)pSdwe->SetData)
 		{
+			matched = TRUE;
 			pSdwe->sdweResetTriger = TRUE;
 			pSdwe->ResetTrigerValid = TRUE;
 			clearLocalCalibrationRecordData(pSdwe->CalibrateChanel);
@@ -287,13 +362,14 @@ UINT8 innerScreenRxHandle_JumpToCalibrateOrActivePage(T5LType *pSdwe)
 	UINT8 matched = FALSE;
 	if(DMG_FUNC_JUNPTO_CALIBRATION_ADDRESS == pSdwe->SetAdd)
 	{
-		matched = TRUE;
 		if(DMG_FUNC_JUNPTO_CALIBRATION_VAL == (UINT16)pSdwe->SetData)
 		{
+			matched = TRUE;
 			pSdwe->sdweJumpToCalitrationPage = TRUE;//jump to page 53
 		}
 		else if(DMG_FUNC_JUNPTO_ACTIVE_VAL == (UINT16)pSdwe->SetData)
 		{
+			matched = TRUE;
 			pSdwe->sdweJumpActivePage = TRUE;//jump to page 56
 		}
 	}
@@ -306,9 +382,9 @@ UINT8 innerScreenRxHandle_JumpToSysParaPage(T5LType *pSdwe)
 	UINT8 matched = FALSE;
 	if(DMG_FUNC_JUNPTO_SYSPAR_ADDRESS == pSdwe->SetAdd)
 	{
-		matched = TRUE;
 		if(DMG_FUNC_JUNPTO_SYSPAR_VAL == (UINT16)pSdwe->SetData)
 		{
+			matched = TRUE;
 			pSdwe->sdweJumpToSysParaPage = TRUE;//jump to page 52
 		}
 	}
@@ -322,9 +398,9 @@ UINT8 innerScreenRxHandle_RemoveWeightTriger(T5LType *pSdwe)
 	T5LType *pSdweSmaller = &g_T5LCtx[ScreenIndex_Smaller];
 	if(DMG_FUNC_REMOVE_WEIGHT_ADDRESS == pSdwe->SetAdd)
 	{
-		matched = TRUE;
 		if(DMG_FUNC_REMOVE_WEIGHT_VAL == (UINT16)pSdwe->SetData)
 		{
+			matched = TRUE;
 			pSdwe->sdweRemoveWeightTriger = TRUE;
 			pSdweSmaller->sdweRemoveWeightTriger = TRUE;
 			//
@@ -455,6 +531,24 @@ UINT8 innerScreenRxHandle_Sizer_ClassifySet(T5LType *pSdwe)
 	}
 	return matched;
 }
+//16
+UINT8 innerScreenRxHandle_TriggerSave(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	UINT8 i = 0 , j = 0;
+	if(pSdwe->SetAdd == INNNERSCREEN_TRIGER_SAVE_ADDRESS)
+	{
+		if(INNNERSCREEN_TRIGER_SAVE_VLU == pSdwe->SetData)
+		{
+			if(1 == InnerScreenDataCenteHandle.weigthClassifyCplt)
+			{
+				InnerScreenDataCenteHandle.trigerStroreFromScreen = 1;
+			}
+		}
+		matched = TRUE;
+	}
+	return matched;
+}
 //================================================================================================
 //===============================[函数列表：内屏数据接收后的事件处理]================================
 //================================================================================================
@@ -478,6 +572,7 @@ screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM]=
 	{0,	14,&innerScreenRxHandle_SystemReset},//屏幕语音控制后状态返回
 	{0,	15,&innerScreenRxHandle_RTC_YMDHMS},//屏幕RTC获取状态返回
 	{0, 16,&innerScreenRxHandle_Sizer_ClassifySet},
+	{0, 17,&innerScreenRxHandle_TriggerSave},
 	
 };
 

@@ -16,7 +16,7 @@
 #include "app_t5l_cfg.h"
 #include "app_BalancingDataHandle.h"
 #include "app_DataCenter.h"
-
+#include "app_usbsmq.h"
 //0.0内屏初始化
 UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
 {
@@ -405,15 +405,34 @@ void innerScreenTxHandle_ScreenBcCode_Upgrade(T5LType *pSdwe , UINT8 *pData , UI
 	}
 
 }
+void innerScreenDiwenLSBChangeToMSB(T5LType *pSdwe)
+{
+	uint16 i = 0 , temp = 0;
 
+	for( i = 0 ; i < (sUSBSMQHandleContex.decodeVaildLen+1)/2 ; i++)
+	{
+		temp = 0 ;
+		temp = (pSdwe->bcCodeVlu[i]>>0)&0xff;
+		temp <<= 8;
+		temp += (pSdwe->bcCodeVlu[i]>>8)&0xff;
+		pSdwe->bcCodeVlu[i] = temp;
+	}
+
+}
 
 void innerScreenTxHandle_ScreenBcCode(T5LType *pSdwe)
 {
 	if(1 == pSdwe->bcCodeTriger)
 	{
-		if(TRUE ==t5lWriteData(pSdwe,DMG_FUNC_BC_CODE_ADDRESS,&pSdwe->bcCodeVlu[0],pSdwe->bcCodeLen,0));//2*chanel_len:because each data type was 4 byte
+		//memset(&pSdwe->bcCodeVlu[0],0,(INNER_SCREEN_DATACENTER_LENOF_BARCODE+0));
+		memcpy(&pSdwe->bcCodeVlu[0],&sUSBSMQHandleContex.decodeDataVaild,USBSMQ_KEYBORD_MAX_NUM);
+		#if(INNERSCREEN_TYPE==INNERSCREEN_TYPE_DIWEN)
+			innerScreenDiwenLSBChangeToMSB(pSdwe);
+		#endif
+		if(TRUE ==t5lWriteData(pSdwe,DMG_FUNC_BC_CODE_ADDRESS,&pSdwe->bcCodeVlu[0],((USBSMQ_KEYBORD_MAX_NUM+1)/2),0));//2*chanel_len:because each data type was 4 byte
 		{
 			pSdwe->bcCodeTriger = 0;
+			memcpy(&sUSBSMQHandleContex.decodeDataVaildPre,&sUSBSMQHandleContex.decodeDataVaild,USBSMQ_KEYBORD_MAX_NUM);
 		}
 	}
 }
@@ -421,6 +440,7 @@ void innerScreenTxHandle_ScreenBcCode(T5LType *pSdwe)
 //
 UINT8 innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle(T5LType *pSdwe)
 {
+
 	UINT8 matched = FALSE;
 	if(g_sysLocked == STM32MCU_UNLOCKED)
 	{
@@ -434,8 +454,21 @@ UINT8 innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle(T5LType *pSd
 			//BalancingData_ColorData_Handle_PrepareAndJudgeAndSendToScreen(pSdwe);
 			//BalancingData_HelpData_Handle_PrepareAndJudgeAndSendToScreen(pSdwe);
 			//screenPublic_VoicePrintfMainfunction(pSdwe);
-			innerScreenTxHandle_ScreenBcCode(pSdwe);
+			if(1 == USB_SMQ_DataDiffCheck())
+			{
+				pSdwe->bcCodeTriger = 1;
+				innerScreenTxHandle_ScreenBcCode(pSdwe);
+			}
 		#endif
+
+
+		if(pSdwe->triggerSaveVlu != pSdwe->triggerSaveVluPre)
+		{
+			if(TRUE ==t5lWriteData(pSdwe,0x3002,&pSdwe->triggerSaveVlu,1,0))
+			{
+				pSdwe->triggerSaveVluPre = pSdwe->triggerSaveVlu;
+			}
+		}
 	}	
 	return matched;
 }
@@ -451,7 +484,8 @@ screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM]=
 	{0,	2, &screenPublic_ResetCalibrationTrigerHandle},//==C2 event arrive:At Calibration Page , calibration reset trigerd 
 	{0,	3, &screenPublic_PointTrigerHandle},//==C3 event arrive:At Calibration Page , point trigerd
 	{0,	4, &screenPublic_RemoveWeightTrigerHandle},//==C3 event arrive:At Calibration Page , point trigerd
-	{0,	5, &innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle},//normaly weight color voice handle
+	{0 ,5, &innerScreenTxHandle_JumpToCalibrationPage},
+	{0,	6, &innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle},//normaly weight color voice handle
 
 };
 

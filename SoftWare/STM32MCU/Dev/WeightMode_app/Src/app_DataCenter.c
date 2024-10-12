@@ -27,6 +27,8 @@
 #include "app_AT24C.h"
 #include "app_hx711_ctrl.h"
 #include "app_i2c.h"
+#include "app_syspara.h"
+#include "app_t5l_ctrl.h"
 
 extern UINT32 get_SysTick_ByTimer(void);
 /**********************************************************************************************************************
@@ -37,6 +39,7 @@ static tInnerScreenDataCenterStruct InnerScreenDataCenter;
 tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle = 
 {
     .trigerStroreFromScreen = 0,
+    .weigthClassifyCplt = 0,
     //store in extern e2
     .cfgInfo_weightType = {0},
     .cfgInfo_utcTime = {0},
@@ -69,8 +72,9 @@ tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle =
     .pRealTimeData =&InnerScreenDataCenter,
 };
 
+#if 1
 tClassificationStruct ClassificationCfg[D_C_CLASSIFICATION_NUM] = {
-    { 35, 40, 45, 'A'},
+    { 30,  50,  70,  'A'},
     { 180, 200, 220, 'B'},
     { 225, 250, 275, 'C'},
     { 270, 300, 330, 'D'},
@@ -79,7 +83,7 @@ tClassificationStruct ClassificationCfg[D_C_CLASSIFICATION_NUM] = {
     { 405, 450, 495, 'G'},
     { 450, 500, 550, 'H'}
 };
-
+#endif
 /**********************************************************************************************************************
  *
  * Used AUTOSAR Data Types
@@ -96,6 +100,17 @@ tClassificationStruct ClassificationCfg[D_C_CLASSIFICATION_NUM] = {
  * DO NOT CHANGE THIS COMMENT!           << Start of documentation area >>                  DO NOT CHANGE THIS COMMENT!
  * Symbol: IIC_Bus_MainFunction_doc
  *********************************************************************************************************************/
+//
+void DataCenterHandle_ClassificationVluSet(uint8 type , uint32 *pData)
+{
+    if(type < D_C_CLASSIFICATION_NUM)
+    {
+        memcpy(&ClassificationCfg[type].mid,pData,3*4);
+    }
+}
+
+
+
 //callback to uplayer
 static void DataCenterHandle_Callback(eExtFlashHandleJobIdType jobId, uint8 sts)
 {
@@ -144,9 +159,9 @@ void InnerScreenDataCenterHandle_Set_jobStatus(tInnerScreenDataCenterHandleStruc
 
 
 //use weight classification
-uint8 InnerScreenDataCenterHandle_UseWeight_Classification(float weight)
+uint8 InnerScreenDataCenterHandle_UseWeight_Classification(float weight , uint8 *type)
 {
-    uint8 i = 0 ,ret = 0xff ;
+    uint8 i = 0 ,ret = 0 ;
     tClassificationStruct *cfg = &ClassificationCfg[0];
     if(weight > 5)
     {
@@ -160,7 +175,8 @@ uint8 InnerScreenDataCenterHandle_UseWeight_Classification(float weight)
         }
         if(i < CLASSIFICATION_SEARCH_DISPLAY_NUM )
         {
-            ret = i;
+            *type = i;
+            ret = 1;
         }     
     }
     return ret;
@@ -316,8 +332,8 @@ static uint8 InnerScreenDataCenterHandle_EntryData_Prepare_dc_weight_dc_type_and
     sint8 i = 0 ;
 
     //1.update of 'weight type'
-    tempOffset = InnerScreenDataCenterHandle_UseWeight_Classification(weight);
-    if(0xFF != tempOffset)
+    ret = InnerScreenDataCenterHandle_UseWeight_Classification(weight,&tempOffset);
+    if(1 == ret)
     {
         pContex->pRealTimeData->classificationType = tempOffset;//cfg[tempOffset].typeOutput;
         ret = 1;
@@ -856,9 +872,9 @@ uint8 InnerScreenDataCenterHandle_Init(void)
 //data center
 void InnerScreenDataCenterHandle_MainFunction(void)
 {
-    uint8 ret = 0;
-    float localWeight = 0;
-    static float preWeight = 0 ;
+    uint8 ret = 0 , weightType;
+    INT32 localWeight = 0;
+    static INT32 preWeight = 0 ;
     static UINT32 weightHoldOnTime = 0 ;
     tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
     tInnerScreenDataCenterStruct entryData;
@@ -884,6 +900,8 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             }
         break;
         case 0:
+            pContex->weigthClassifyCplt = 0;
+            //
             localWeight = hx711_getWeight(HX711Chanel_1);
             if(preWeight != localWeight)
             {
@@ -892,13 +910,32 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             }
             else
             {
-                if(get_SysTick_ByTimer() - weightHoldOnTime >= 1000)
+                if((get_SysTick_ByTimer() - weightHoldOnTime) >= 100)
                 {
                     ret = 1;
+                }
+                else
+                {
+                    ret = 0;
                 }
             }
             //
             if(1 == ret)//1.重量稳定
+            {
+                if(preWeight > 5)
+                {
+                    ret = 1;
+                }
+                else
+                {
+                    pContex->dataStoreCplt = 0 ;//重量在0点范围代表取下袋子
+                    pContex->trigerStroreFromScreen = 0 ;//清除屏幕执行存储动作
+                    g_T5LCtx[ScreenIndex_Smaller].triggerSaveVlu = 0;
+                    ret = 0 ;
+                }
+            }
+            //
+            if(1 == ret)//2.重量大于零点
             {
                 if(0 == pContex->dataStoreCplt)
                 {
@@ -910,22 +947,15 @@ void InnerScreenDataCenterHandle_MainFunction(void)
                 }
             }
             //
-            if(1 == ret)//2.EE存储未执行
+            if(1 == ret)//3.EE存储未执行
             {
-                if(preWeight > 5)
-                {
-                    ret = 1;
-                }
-                else
-                {
-                    pContex->dataStoreCplt = 0 ;//重量在0点范围代表取下袋子
-                    pContex->trigerStroreFromScreen = 0 ;//清除屏幕执行存储动作
-                    ret = 0 ;
-                }
+                ret = InnerScreenDataCenterHandle_UseWeight_Classification(localWeight,&weightType);
             }
             //
-            if(1 == ret)//3.重量大于零点
+            if(1 == ret)//分类成功
             {
+                pContex->weigthClassifyCplt = 1;
+                g_T5LCtx[ScreenIndex_Smaller].triggerSaveVlu = 1;
                 if(1 == pContex->trigerStroreFromScreen)
                 {
                     ret = 1;
@@ -938,18 +968,13 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             //
             if(1 == ret)//4.屏幕触发存储
             {
-                ret = InnerScreenDataCenterHandle_UseWeight_Classification(localWeight);
-            }            
-            //
-            if(0xFF != ret)//5.分类成功
-            {
-                ret = USB_SMQ_GetDecodeData(&pContex->pRealTimeData->dc_barCode[0],INNER_SCREEN_DATACENTER_LENOF_BARCODE,&pContex->pRealTimeData->barCodeLen);
+                ret = USB_SMQ_GetDecodeData(&pContex->pRealTimeData->dc_barCode[0],INNER_SCREEN_DATACENTER_LENOF_BARCODE,&pContex->pRealTimeData->barCodeLen);         
             }
             //
             if(1 == ret)//6.条码值获取成功
             {
                 pContex->needToStore = 1;//执行存储
-            }
+            }       
         break;
         //
         case 1:
@@ -960,6 +985,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
                 if(0 == pContex->newDataEntryFlag)
                 {
                     InnerScreenDataCenterHandle_ClearAll_jobStatus(pContex);
+                    pContex->pRealTimeData->utctime = gS64UTCTime;
                     ret = InnerScreenDataCenterHandle_QueueEntry(pContex,pContex->pRealTimeData);
                 }
                 if(1 == ret)
@@ -985,6 +1011,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
                 //pContex->newDataEntryFlag = 0;
                 pContex->trigerStroreFromScreen = 0 ;
                 pContex->dataStoreCplt = 1;
+                g_T5LCtx[ScreenIndex_Smaller].triggerSaveVlu = 2;
                 USB_SMQ_ClearDecodeData();
                 //
                 pContex->needToStore = 0 ;

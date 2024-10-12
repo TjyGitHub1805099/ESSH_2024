@@ -180,6 +180,7 @@ typedef struct sUSBSMQHandleStruct
 	UINT8 decodeData[USBSMQ_KEYBORD_MAX_NUM];
 	UINT8 decodeLen;
 	UINT8 decodeDataVaild[USBSMQ_KEYBORD_MAX_NUM];
+	UINT8 decodeDataVaildPre[USBSMQ_KEYBORD_MAX_NUM];
 	UINT8 decodeVaildLen;
 	//
 	UINT8 decodeFinishFlag;
@@ -190,5 +191,6 @@ extern tUSBSMQHandle sUSBSMQHandleContex;
 extern void USB_SMQ_Handle_MainFunction(void);
 extern UINT8 USB_SMQ_GetDecodeData(UINT8 *pData,UINT8 maxLen,UINT8 *pVaildLen);
 extern void USB_SMQ_ClearDecodeData(void);
+UINT8 USB_SMQ_DataDiffCheck(void);
 #endif
 

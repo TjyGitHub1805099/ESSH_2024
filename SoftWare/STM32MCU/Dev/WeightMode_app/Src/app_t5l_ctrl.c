@@ -419,6 +419,67 @@ UINT8 innerScreenReadReg(T5LType *t5lCtx,UINT8 varAdd,UINT8 varlen ,UINT8 crcEn)
 	return ret;
 }
 
+//==write reg data to screen , have delay contrl
+UINT8 innerScreenWriteReg(T5LType *t5lCtx,UINT8 regAdd, UINT8 *pData ,UINT8 reglen ,UINT8 crcEn)
+{
+	//寄存器0x03和0x04单元连续写入0x00 、0x01
+	//0xA5 0x5A 0x04 0x80 0x03 0x00 0x01
+	//若有CRC   0x06
+	UINT8 i = 0 ,l_data = 0 , total_len = 0 , ret = FALSE;
+	UINT16 crc = 0;
+	if(((t5lCtx->LastSendTick > t5lCtx->CurTick)&&((t5lCtx->LastSendTick-t5lCtx->CurTick) >= DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
+		((t5lCtx->LastSendTick < t5lCtx->CurTick)&&((t5lCtx->CurTick - t5lCtx->LastSendTick) >= DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
+	{
+		if(regAdd <= 0xFF)
+		{
+			if(((regAdd+reglen)>0)&&((regAdd+reglen)<=0xFF))
+			{
+				//head
+				t5lCtx->txData[cmdPosHead1]=t5lCtx->frameHeadH;
+				t5lCtx->txData[cmdPosHead2]=t5lCtx->frameHeadL;
+				//data len
+				if(TRUE == crcEn)
+				{
+					t5lCtx->txData[cmdPosDataLen]=2+reglen+2;//CRC
+				}
+				else
+				{
+					t5lCtx->txData[cmdPosDataLen]=2+reglen;
+				}
+				//order:write
+				t5lCtx->txData[cmdPosCommand]=cmdWriteSWDERegister;
+				//regAdd
+				t5lCtx->txData[cmdPosRegWriteAddress]=regAdd;
+				//data
+				for(i=0;i<reglen;i++)
+				{
+					l_data = *pData++;
+					t5lCtx->txData[cmdPosRegWritesData+i] = l_data;
+				}
+				//crc
+				if(TRUE == crcEn)
+				{
+					crc = cal_crc16(&t5lCtx->txData[cmdPosCommand],(2+reglen));
+					t5lCtx->txData[cmdPosRegWritesData+reglen+0] = 0xff&(crc>>0);
+					t5lCtx->txData[cmdPosRegWritesData+reglen+1] = 0xff&(crc>>8);
+					//total len
+					total_len =  5 + reglen + 2 ;
+				}
+				else
+				{
+					//total len
+					total_len = 5+reglen;
+				}
+				//send
+				t5lCtx->pUartDevice->tx_bytes(t5lCtx->pUartDevice,&t5lCtx->txData[0],total_len);
+				t5lCtx->LastSendTick = t5lCtx->CurTick;
+			}
+		}
+		//
+		ret = TRUE;
+	}
+	return ret;
+}
 
 //屏幕相关变量初始化
 static void screenPrivate_Init(T5LType *t5lCtx)
@@ -449,10 +510,20 @@ static void screenPrivate_Init(T5LType *t5lCtx)
 		t5lCtx->screenCycle.handle_i  = &g_handle_i[ScreenIndex_Larger];
 		t5lCtx->screenCycle.rmTrigerInnerSts = &g_rmTrigerInnerSts[ScreenIndex_Larger];
 
-
+		t5lCtx->screenCalibrationPage = 7;
 
 		//t5lCtx->sdweJumpBalancingMainPage = TRUE;
 		t5lCtx->sdweChangeDescriblePoint = TRUE;
+
+		#if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
+			t5lCtx->frameHeadH = 0xA5;
+			t5lCtx->frameHeadL = 0x5A;
+		#else
+			t5lCtx->frameHeadH = 0x5A;
+			t5lCtx->frameHeadL = 0xA5;
+		#endif
+
+
 	}
 	else
 	{
@@ -480,6 +551,13 @@ static void screenPrivate_Init(T5LType *t5lCtx)
 		//t5lCtx->sdweJumpBalancingMainPage = TRUE;
 		t5lCtx->sdweChangeDescriblePoint = TRUE;
 
+		#if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
+			t5lCtx->frameHeadH = 0xA5;
+			t5lCtx->frameHeadL = 0x5A;
+		#else
+			t5lCtx->frameHeadH = 0x5A;
+			t5lCtx->frameHeadL = 0xA5;
+		#endif
 	}
 
 	//t5lCtx->pUartDevice = &g_UartDevice[t5lCtx->uartIndex];
@@ -525,13 +603,39 @@ void screenPublic_Init(void)
 //公共函数：获取屏幕的软件版本号
 void screenPublic_ScreenVersionGet(T5LType *pSdwe)
 {
-	innerScreenReadReg(pSdwe,INNER_SCREEN_VERSION_GET_ADD,INNER_SCREEN_VERSION_GET_LEN,0);//get version
+	#if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
+		/*
+			读取版本信息，串口下发指令 A5 5A 03 81 00 01 
+			返回A5 5A 04 81 00 01 43
+		 */
+		innerScreenReadReg(pSdwe,INNER_SCREEN_VERSION_GET_ADD,INNER_SCREEN_VERSION_GET_LEN,0);//get version
+	#else
+		/*
+			发送：5A A5 04 83 000E 02 
+			返回：5A A5 08 83 000E 02 00 41 61 21
+		*/
+		t5lReadVarible(pSdwe,INNER_SCREEN_VERSION_GET_ADD,INNER_SCREEN_VERSION_GET_LEN,0);//get cur page
+	#endif
 }
 
 //公共函数：获取屏幕的软件版本号
 void screenPublic_ScreenRTCGet_YMDHMS(T5LType *pSdwe)
 {
-	innerScreenReadReg(pSdwe,INNER_SCREEN_RTC_GET_ADD,7,0);//get RTC
+	#if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
+		/*
+			读取版本信息，串口下发指令 A5 5A 03 81 00 01 
+			返回A5 5A 04 81 00 01 43
+		 */
+		innerScreenReadReg(pSdwe,INNER_SCREEN_RTC_GET_ADD,7,0);//get RTC
+	#else
+		/*
+			发送：5A A5 04 83 000E 02 
+			返回：5A A5 08 83 000E 02 00 41 61 21
+		*/
+		t5lReadVarible(pSdwe,INNER_SCREEN_RTC_GET_ADD,INNER_SCREEN_RTC_GET_LEN,0);//get cur page
+	#endif
+
+
 }
 //公共函数：获取屏幕的当前页面序号
 void screenPublic_CurPageGet(T5LType *pSdwe)
@@ -560,13 +664,14 @@ UINT8 screenPublic_ScreenLight(T5LType *pSdwe)
 UINT8 screenPublic_PageJump(T5LType *pSdwe,INT16 pageNum)
 {
 	UINT8 result = 0 ;
-	//5A A5 07 82 0084 5A01 page
-	INT16 pageChangeOrderAndData[2]={0x5A01,53};//53 page
-	pageChangeOrderAndData[1] = pageNum;
+	//中显：切换到2号界面的指令A5 5A 04 80 03 00 02 
+	UINT8 pageChangeOrderAndData[2]={0};
+	pageChangeOrderAndData[0] = (pageNum>>8)&0xff;
+	pageChangeOrderAndData[1] = (pageNum>>0)&0xff;
 	if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
 		((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
 	{
-		t5lWriteVarible(pSdwe,(0X0084),pageChangeOrderAndData,2,0);
+		innerScreenWriteReg(pSdwe,(0X03),pageChangeOrderAndData,2,0);
 		result = 1;
 	}
 	return result;
