@@ -6,6 +6,8 @@
 #include "usbh_msc.h"
 #include "fatfs.h"
 #include "usb_ESSH.h"
+#include "app_DataCenter.h"
+#include "app_syspara.h"
 
 extern ApplicationTypeDef Appli_state;
 extern USBH_HandleTypeDef hUsbHostFS;
@@ -141,7 +143,7 @@ void USBIf_PrepareFileName(tUsbStoreHandleStruct *pContex,const uint8 *pFileName
         fileLen = U_S_FILE_NAME_OF_USER_LEN;
     }
     memcpy(&pContex->fileName[0],pFileName,fileLen);
-    strcat(&pContex->fileName[fileLen],U_S_FILE_NAME_OF_SUFFIX);
+    memcpy(&pContex->fileName[fileLen],U_S_FILE_NAME_OF_SUFFIX,U_S_FILE_NAME_OF_SUFFIX_LEN);
 }
 
 //usb if order read trigger
@@ -442,5 +444,202 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
     }
 }
 
+
 #endif
+
+
+/*
+==========================================================================================
+|  0000  |  0123456789ABC  |  2024/12/12 12:12:12  |  0056(ml)  |  0055  |  0010 ~ 0100  |
+==========================================================================================
+|  0001  |  0123456789ABC  |  2024/12/12 12:12:12  |  0056(ml)  |  0055  |  0010 ~ 0100  |
+==========================================================================================
+|  0002  |  0123456789ABC  |  2024/12/12 12:12:12  |  0056(ml)  |  0055  |  0010 ~ 0100  |
+==========================================================================================
+|  0003  |  0123456789ABC  |  2024/12/12 12:12:12  |  0056(ml)  |  0055  |  0010 ~ 0100  |
+==========================================================================================
+|  0000  |  0123456789ABC  |  2024/12/12 12:12:12  |  0056(ml)  |  0055  |  0010 ~ 0100  |
+==========================================================================================
+|  0001  |  0123456789ABC  |  2024/12/12 12:12:12  |  0056(ml)  |  0055  |  0010 ~ 0100  |
+==========================================================================================
+|  0002  |  0123456789ABC  |  2024/12/12 12:12:12  |  0056(ml)  |  0055  |  0010 ~ 0100  |
+==========================================================================================
+|  0003  |  0123456789ABC  |  2024/12/12 12:12:12  |  0056(ml)  |  0055  |  0010 ~ 0100  |
+==========================================================================================
+
+*/
+
+#define UPAN_STRORE_LINE_LINE_DIFF  "==========================================================================================\r"
+#define UPAN_STRORE_LINE_START      "|  "
+#define UPAN_STRORE_LINE_PART_DIFF  "  |  "
+#define UPAN_STRORE_LINE_END        "  |\r"
+#define UPAN_STRORE_LINE_MAX_LEN    (91)
+#define UPAN_STRORE_GROUP_NUM       (2)
+uint8 upanStoreDataGroup[2*UPAN_STRORE_GROUP_NUM][UPAN_STRORE_LINE_MAX_LEN];
+uint16 upanStoreOffset_i = 0;
+uint8 upanPrepareStoreData(void)
+{
+    uint8 ret = 0 , i = 0 , *pData = 0 , findoutLine = 0 , *pCpyData , tempType;
+    uint16 data_i = 0 , barcode_offset , payloadOffset;
+    tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
+    struct tm lUTCDecodeTime;
+    sint64 lS64UTCTime = 0;
+    UINT32 classifyIdentify , classifyMin , classifyMax;
+
+    //
+    if(0 == UsbStoreHandle.usbIfTrigger)
+    {
+        ret = 1 ;
+    }
+    //
+    if(1 == ret)
+    {
+        //
+        pContex->searchStartIndex_Use_WeightType = upanStoreOffset_i;
+        for( i = 0 ; i < UPAN_STRORE_GROUP_NUM ; i++)
+        {
+            ret = InnerScreenDataCenterHandle_Searching_Use_WeightType(pContex);
+            if(1 == ret)
+            {
+                memcpy(&upanStoreDataGroup[0+2*i][0],UPAN_STRORE_LINE_LINE_DIFF,UPAN_STRORE_LINE_MAX_LEN);
+                //
+                pData = &upanStoreDataGroup[1+2*i][0];
+                //每行：开始==
+                memcpy(pData,UPAN_STRORE_LINE_START,3);
+                data_i = 3;
+                //每行：自身序号
+                pData[data_i+0] = '0' + upanStoreOffset_i/1000;
+                pData[data_i+1] = '0' + upanStoreOffset_i%1000/100;
+                pData[data_i+2] = '0' + upanStoreOffset_i%100/10;
+                pData[data_i+3] = '0' + upanStoreOffset_i%10/1;
+                data_i += 4;
+                //每行：间隔==
+                memcpy((pData+data_i),UPAN_STRORE_LINE_PART_DIFF,5);
+                data_i += 5;
+                //每行：录入条码值
+                barcode_offset = upanStoreOffset_i*CLASSIFICATION_STORE_DATA_SINGLE_LEN;
+                pCpyData = &InnerScreenDataCenteHandle.dataCenterPayload[barcode_offset];
+                memcpy((pData+data_i),pCpyData,INNER_SCREEN_DATACENTER_LENOF_BARCODE);
+                data_i += INNER_SCREEN_DATACENTER_LENOF_BARCODE;
+                //每行：间隔==
+                memcpy((pData+data_i),UPAN_STRORE_LINE_PART_DIFF,5);
+                data_i += 5;
+                //每行：录入时间
+                payloadOffset = upanStoreOffset_i;
+                payloadOffset *= CLASSIFICATION_STORE_CFG_TIME_TYPEBYTE;
+                lS64UTCTime = 0;
+                lS64UTCTime +=  InnerScreenDataCenteHandle.cfgInfo_utcTime[payloadOffset+0];
+                lS64UTCTime <<= 8;
+                lS64UTCTime +=  InnerScreenDataCenteHandle.cfgInfo_utcTime[payloadOffset+1];
+                lS64UTCTime <<= 8;
+                lS64UTCTime +=  InnerScreenDataCenteHandle.cfgInfo_utcTime[payloadOffset+2];
+                lS64UTCTime <<= 8;
+                lS64UTCTime +=  InnerScreenDataCenteHandle.cfgInfo_utcTime[payloadOffset+3];
+                lUTCDecodeTime = *(mygmtime(&lS64UTCTime));
+
+                pData[data_i + 0] = '0' + lUTCDecodeTime.tm_year/1000;
+                pData[data_i + 1] = '0' + lUTCDecodeTime.tm_year%1000/100;
+                pData[data_i + 2] = '0' + lUTCDecodeTime.tm_year%100/10;
+                pData[data_i + 3] = '0' + lUTCDecodeTime.tm_year%10;
+
+                pData[data_i + 4] = '/';
+                pData[data_i + 5] = '0' + lUTCDecodeTime.tm_mon%100/10;
+                pData[data_i + 6] = '0' + lUTCDecodeTime.tm_mon%10;
+                        
+                pData[data_i + 7] = '/';
+                pData[data_i + 8] = '0' + lUTCDecodeTime.tm_mday%100/10;
+                pData[data_i + 9] = '0' + lUTCDecodeTime.tm_mday%10;
+                        
+                pData[data_i + 10] = ' ';
+                pData[data_i + 11] = '0' + lUTCDecodeTime.tm_hour%100/10;
+                pData[data_i + 12] = '0' + lUTCDecodeTime.tm_hour%10;
+                        
+                pData[data_i + 13] = ':';
+                pData[data_i + 14] = '0' + lUTCDecodeTime.tm_min%100/10;
+                pData[data_i + 15] = '0' + lUTCDecodeTime.tm_min%10;
+                        
+                pData[data_i + 16] = ':';
+                pData[data_i + 17] = '0' + lUTCDecodeTime.tm_sec%100/10;
+                pData[data_i + 18] = '0' + lUTCDecodeTime.tm_sec%10;
+
+                data_i += 19;
+                //每行：间隔==
+                memcpy((pData+data_i),UPAN_STRORE_LINE_PART_DIFF,5);
+                data_i += 5;
+                //每行：录入重量
+                barcode_offset = upanStoreOffset_i*CLASSIFICATION_STORE_DATA_SINGLE_LEN;
+                barcode_offset += INNER_SCREEN_DATACENTER_LENOF_BARCODE;
+                pCpyData = &InnerScreenDataCenteHandle.dataCenterPayload[barcode_offset];
+                memcpy((pData+data_i),pCpyData,4);
+                data_i += 4;
+                pData[data_i+0] = '(';
+                pData[data_i+1] = 'm';
+                pData[data_i+2] = 'l';
+                pData[data_i+3] = ')';
+                data_i += 4;
+                //每行：间隔==
+                memcpy((pData+data_i),UPAN_STRORE_LINE_PART_DIFF,5);
+                data_i += 5;            
+                //5.表格中的：分类结果
+                tempType = pContex->searchOutType%D_C_CLASSIFICATION_NUM;
+                classifyIdentify =  gSystemPara.Sizer_ClassifySet[tempType][0];
+                pData[data_i+0] = '0' + classifyIdentify/1000;
+                pData[data_i+1] = '0' + classifyIdentify%1000/100;
+                pData[data_i+2] = '0' + classifyIdentify%100/10;
+                pData[data_i+3] = '0' + classifyIdentify%10;
+                data_i += 4;
+                //每行：间隔==
+                memcpy((pData+data_i),UPAN_STRORE_LINE_PART_DIFF,5);
+                data_i += 5;  
+                //6.表格中的：分类标准
+                tempType = pContex->searchOutType%D_C_CLASSIFICATION_NUM;
+                classifyMin =  gSystemPara.Sizer_ClassifySet[tempType][1];
+                classifyMax =  gSystemPara.Sizer_ClassifySet[tempType][2];
+                pData[data_i+0] = '0' + classifyMin/1000;
+                pData[data_i+1] = '0' + classifyMin%1000/100;
+                pData[data_i+2] = '0' + classifyMin%100/10;
+                pData[data_i+3] = '0' + classifyMin%10;
+                pData[data_i+4] = ' ';
+                data_i += 5;
+                pData[data_i+0] = '~';
+                data_i += 1;
+                pData[data_i+0] = ' ';
+                data_i += 1;
+                pData[data_i+0] = '0' + classifyMax/1000;
+                pData[data_i+1] = '0' + classifyMax%1000/100;
+                pData[data_i+2] = '0' + classifyMax%100/10;
+                pData[data_i+3] = '0' + classifyMax%10;
+                data_i += 4;
+                //每行：结束
+                memcpy((pData+data_i),UPAN_STRORE_LINE_END,4);
+                data_i += 4;            
+
+
+
+
+
+                upanStoreOffset_i++;
+                findoutLine++;
+            }
+            else
+            {
+                break;
+            }       
+        }
+
+        //
+        if(findoutLine > 0)
+        {
+            USBIf_OrderTrigger_Write(&UsbStoreHandle,
+                                    "ESSH",
+                                    0,
+                                    findoutLine*UPAN_STRORE_LINE_MAX_LEN*2,
+                                    &upanStoreDataGroup[0][0],
+                                    0);
+        }
+    }
+    //
+    return findoutLine;
+
+}
 

@@ -181,4 +181,8 @@ extern tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle;
 extern tDataCenterExtFlashCallbackStruct dataCenterCallbackRegisterList[E_F_HANDLE_JOBID_WR_MAX];
 extern void InnerScreenDataCenterHandle_MainFunction(void);
 extern void DataCenterHandle_ClassificationVluSet(uint8 type , uint32 *pData);
+extern uint8 InnerScreenDataCenterHandle_Searching_Use_WeightType(tInnerScreenDataCenterHandleStruct *pContex);
+
+
+
 #endif

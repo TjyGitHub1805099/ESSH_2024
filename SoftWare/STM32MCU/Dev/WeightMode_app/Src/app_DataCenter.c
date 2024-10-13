@@ -394,7 +394,7 @@ static uint8 InnerScreenDataCenterHandle_EntryData_Prepare_dc_weight_dc_type_and
 }
 
 //S1.use weigth type searching the matched index
-static uint8 InnerScreenDataCenterHandle_Searching_Use_WeightType(tInnerScreenDataCenterHandleStruct *pContex)
+uint8 InnerScreenDataCenterHandle_Searching_Use_WeightType(tInnerScreenDataCenterHandleStruct *pContex)
 {
     uint16 i = 0 , j = 0;
     uint8 ret = 0 , tempType = 0;

@@ -122,15 +122,15 @@ static void USBH_UserProcess1  (USBH_HandleTypeDef *phost, uint8_t id)
   break;
 
   case HOST_USER_DISCONNECTION:
-  Appli_state = APPLICATION_DISCONNECT;
+  Appli_state2 = APPLICATION_DISCONNECT;
   break;
 
   case HOST_USER_CLASS_ACTIVE:
-  Appli_state = APPLICATION_READY;
+  Appli_state2 = APPLICATION_READY;
   break;
 
   case HOST_USER_CONNECTION:
-  Appli_state = APPLICATION_START;
+  Appli_state2 = APPLICATION_START;
   break;
 
   default:
@@ -148,15 +148,15 @@ static void USBH_UserProcess2  (USBH_HandleTypeDef *phost, uint8_t id)
   break;
 
   case HOST_USER_DISCONNECTION:
-  Appli_state2 = APPLICATION_DISCONNECT;
+  Appli_state = APPLICATION_DISCONNECT;
   break;
 
   case HOST_USER_CLASS_ACTIVE:
-  Appli_state2 = APPLICATION_READY;
+  Appli_state = APPLICATION_READY;
   break;
 
   case HOST_USER_CONNECTION:
-  Appli_state2 = APPLICATION_START;
+  Appli_state = APPLICATION_START;
   break;
 
   default:

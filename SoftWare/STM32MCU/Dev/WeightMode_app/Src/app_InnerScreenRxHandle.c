@@ -579,6 +579,20 @@ UINT8 innerScreenRxHandle_SearchTimeSet(T5LType *pSdwe)
 	}
 	return matched;
 }
+//18
+UINT8 innerScreenRxHandle_OutputAll2Upan(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	if(pSdwe->SetAdd == DMG_FUNC_PAGE9_OUTPUT_CUR_PAGE_ADDRESS)
+	{
+		if(DMG_FUNC_PAGE9_OUTPUT_ALL_PAGE_VLU == pSdwe->SetData)
+		{
+			matched = TRUE;
+			upanPrepareStoreData();
+		}
+	}
+	return matched;
+}
 
 
 //================================================================================================
@@ -606,6 +620,7 @@ screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM]=
 	{0, 16,&innerScreenRxHandle_Sizer_ClassifySet},
 	{0, 17,&innerScreenRxHandle_TriggerSave},
 	{0, 18,&innerScreenRxHandle_SearchTimeSet},
+	{0, 19,&innerScreenRxHandle_OutputAll2Upan},
 	
 };
 

@@ -16,7 +16,7 @@
 
 
 #define U_S_FILE_NAME_OF_USER_LEN       (8)//maxlen was 8
-#define U_S_FILE_NAME_OF_SUFFIX         (".txt")
+#define U_S_FILE_NAME_OF_SUFFIX         ".txt"
 #define U_S_FILE_NAME_OF_SUFFIX_LEN     (4)//.txt
 #define U_S_FILE_NAME_TOTAL_LEN         (U_S_FILE_NAME_OF_USER_LEN+U_S_FILE_NAME_OF_SUFFIX_LEN)
 
@@ -74,6 +74,6 @@ typedef struct sUsbStoreStruct
 
 extern void USBIf_Mainfunction(uint8 driver_status);
 
-
+extern uint8 upanPrepareStoreData(void);
 
 #endif
