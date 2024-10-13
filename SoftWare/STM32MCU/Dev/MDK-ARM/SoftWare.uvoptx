@@ -201,9 +201,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>983</LineNumber>
+          <LineNumber>1336</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134242932</Address>
+          <Address>134244254</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -212,23 +212,7 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\WeightMode_app\Src\app_DataCenter.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\SoftWare\../WeightMode_app/Src/app_DataCenter.c\983</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>1006</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134243030</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\WeightMode_app\Src\app_DataCenter.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\SoftWare\../WeightMode_app/Src/app_DataCenter.c\1006</Expression>
+          <Expression>\\SoftWare\../WeightMode_app/Src/app_DataCenter.c\1336</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -240,162 +224,57 @@
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>pEntryData</ItemText>
+          <ItemText>InnerScreenDataCenteHandle</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>InnerScreenDataCenteHandle,0x10</ItemText>
+          <ItemText>s64TempUTCTime</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>gS64UTCTime</ItemText>
+          <ItemText>pContex-&gt;searchUseUTCTimeStart</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>sys_tick,0x0A</ItemText>
+          <ItemText>pContex-&gt;searchUseUTCTimeEnd</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>weightHoldOnTime,0x0A</ItemText>
+          <ItemText>InnerScreenDataCenteHandle.dataCenterDisData[0]</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>g_T5LCtx[0],0x10</ItemText>
+          <ItemText>g_T5LCtx[0]</ItemText>
         </Ww>
         <Ww>
           <count>7</count>
           <WinNumber>1</WinNumber>
-          <ItemText>localChanel</ItemText>
+          <ItemText>index_i</ItemText>
         </Ww>
         <Ww>
           <count>8</count>
           <WinNumber>1</WinNumber>
-          <ItemText>pSdwe-&gt;CalibrateChanel</ItemText>
+          <ItemText>ClassificationCfg,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>9</count>
           <WinNumber>1</WinNumber>
-          <ItemText>g_t5l_triger_data,0x0A</ItemText>
+          <ItemText>weight</ItemText>
         </Ww>
         <Ww>
           <count>10</count>
           <WinNumber>1</WinNumber>
-          <ItemText>localtm,0x0A</ItemText>
+          <ItemText>g_T5LCtx[0]</ItemText>
         </Ww>
         <Ww>
           <count>11</count>
           <WinNumber>1</WinNumber>
-          <ItemText>gUTCDecodeTime,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>12</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>InnerScreenDataCenteHandle</ItemText>
-        </Ww>
-        <Ww>
-          <count>13</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>ClassificationCfg</ItemText>
-        </Ww>
-        <Ww>
-          <count>14</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>pSdwe</ItemText>
-        </Ww>
-        <Ww>
-          <count>15</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>ClassificationCfg,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>16</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>sUSBSMQHandleContex.decodeDataVaild</ItemText>
-        </Ww>
-        <Ww>
-          <count>17</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>DMG_FUNC_BC_CODE_ADDRESS</ItemText>
-        </Ww>
-        <Ww>
-          <count>18</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>pSdwe-&gt;bcCodeLen</ItemText>
-        </Ww>
-        <Ww>
-          <count>19</count>
-          <WinNumber>1</WinNumber>
           <ItemText>sUSBSMQHandleContex.decodeVaildLen</ItemText>
-        </Ww>
-        <Ww>
-          <count>20</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>pSdwe-&gt;bcCodeVlu</ItemText>
-        </Ww>
-        <Ww>
-          <count>21</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>pSdwe</ItemText>
-        </Ww>
-        <Ww>
-          <count>22</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>t5lCtx-&gt;txData</ItemText>
-        </Ww>
-        <Ww>
-          <count>23</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>l_data</ItemText>
-        </Ww>
-        <Ww>
-          <count>24</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>temp</ItemText>
-        </Ww>
-        <Ww>
-          <count>25</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>pSdwe-&gt;triggerSaveVlu</ItemText>
-        </Ww>
-        <Ww>
-          <count>26</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>g_T5LCtx[0].triggerSaveVlu</ItemText>
-        </Ww>
-        <Ww>
-          <count>27</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>g_T5LCtx[0].triggerSaveVluPre</ItemText>
-        </Ww>
-        <Ww>
-          <count>28</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>pEntryData-&gt;utctime</ItemText>
-        </Ww>
-        <Ww>
-          <count>29</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>pSdwe-&gt;SetData,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>30</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>pSdwe-&gt;SetAdd,0x10</ItemText>
-        </Ww>
-        <Ww>
-          <count>31</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>localtm,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>32</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>InnerScreenDataCenteHandle</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>

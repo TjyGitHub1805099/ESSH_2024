@@ -409,13 +409,21 @@ void innerScreenDiwenLSBChangeToMSB(T5LType *pSdwe)
 {
 	uint16 i = 0 , temp = 0;
 
-	for( i = 0 ; i < (sUSBSMQHandleContex.decodeVaildLen+1)/2 ; i++)
+	for( i = 0 ; i < (sUSBSMQHandleContex.decodeVaildLen/2) ; i++)
 	{
 		temp = 0 ;
 		temp = (pSdwe->bcCodeVlu[i]>>0)&0xff;
 		temp <<= 8;
 		temp += (pSdwe->bcCodeVlu[i]>>8)&0xff;
 		pSdwe->bcCodeVlu[i] = temp;
+	}
+	if(2*i < sUSBSMQHandleContex.decodeVaildLen)
+	{
+		temp = 0 ;
+		temp = (pSdwe->bcCodeVlu[i]>>0)&0xff;
+		temp <<= 8;
+		pSdwe->bcCodeVlu[i] = temp;
+		pSdwe->bcCodeVlu[i] &= 0xFF00;//clear last vlu
 	}
 
 }
@@ -425,11 +433,11 @@ void innerScreenTxHandle_ScreenBcCode(T5LType *pSdwe)
 	if(1 == pSdwe->bcCodeTriger)
 	{
 		//memset(&pSdwe->bcCodeVlu[0],0,(INNER_SCREEN_DATACENTER_LENOF_BARCODE+0));
-		memcpy(&pSdwe->bcCodeVlu[0],&sUSBSMQHandleContex.decodeDataVaild,USBSMQ_KEYBORD_MAX_NUM);
+		memcpy(&pSdwe->bcCodeVlu[0],&sUSBSMQHandleContex.decodeDataVaild[0],INNER_SCREEN_DATACENTER_LENOF_BARCODE);
 		#if(INNERSCREEN_TYPE==INNERSCREEN_TYPE_DIWEN)
 			innerScreenDiwenLSBChangeToMSB(pSdwe);
 		#endif
-		if(TRUE ==t5lWriteData(pSdwe,DMG_FUNC_BC_CODE_ADDRESS,&pSdwe->bcCodeVlu[0],((USBSMQ_KEYBORD_MAX_NUM+1)/2),0));//2*chanel_len:because each data type was 4 byte
+		if(TRUE ==t5lWriteData(pSdwe,DMG_FUNC_BC_CODE_ADDRESS,&pSdwe->bcCodeVlu[0],((INNER_SCREEN_DATACENTER_LENOF_BARCODE+1)/2),0));//2*chanel_len:because each data type was 4 byte
 		{
 			pSdwe->bcCodeTriger = 0;
 			memcpy(&sUSBSMQHandleContex.decodeDataVaildPre,&sUSBSMQHandleContex.decodeDataVaild,USBSMQ_KEYBORD_MAX_NUM);

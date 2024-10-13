@@ -37,7 +37,7 @@ static UINT8 keyBordVlu_LettersAndNumbersAndSpace[KEYBORD_MAX_NUM][2]={
 void USB_SMQ_ClearDecodeData(void)
 {
     tUSBSMQHandle *pCtx = &sUSBSMQHandleContex;
-    memset(pCtx->decodeDataVaild,0,USBSMQ_KEYBORD_MAX_NUM);
+    memset(&pCtx->decodeDataVaild[0],0,USBSMQ_KEYBORD_MAX_NUM);
     pCtx->decodeVaildLen = 0 ;
 }
 
