@@ -549,6 +549,38 @@ UINT8 innerScreenRxHandle_TriggerSave(T5LType *pSdwe)
 	}
 	return matched;
 }
+//17
+UINT8 innerScreenRxHandle_SearchTimeSet(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	UINT8 i = 0 , j = 0 , offset = 0;
+	if((pSdwe->SetAdd >= INNERSCRENN_DATACENTER_SEARCH_TIME_ADDRESS) &&
+	   (pSdwe->SetAdd < INNERSCRENN_DATACENTER_SEARCH_TIME_ADDRESS+INNERSCRENN_DATACENTER_SEARCH_TIME_LEN))
+	{
+		offset = pSdwe->SetAdd -INNERSCRENN_DATACENTER_SEARCH_TIME_ADDRESS;
+		gSystemPara.TimerSearch[offset/6][offset%6] = pSdwe->SetData;
+		//
+		localtm.tm_sec  = gSystemPara.TimerSearch[0][5];
+		localtm.tm_min  = gSystemPara.TimerSearch[0][4];
+		localtm.tm_hour = gSystemPara.TimerSearch[0][3];
+		localtm.tm_mday = gSystemPara.TimerSearch[0][2];
+		localtm.tm_mon  = gSystemPara.TimerSearch[0][1];
+		localtm.tm_year = gSystemPara.TimerSearch[0][0];
+		InnerScreenDataCenteHandle.searchUseUTCTimeStart =  mymktime(&localtm);
+		//
+		localtm.tm_sec  = gSystemPara.TimerSearch[1][5];
+		localtm.tm_min  = gSystemPara.TimerSearch[1][4];
+		localtm.tm_hour = gSystemPara.TimerSearch[1][3];
+		localtm.tm_mday = gSystemPara.TimerSearch[1][2];
+		localtm.tm_mon  = gSystemPara.TimerSearch[1][1];
+		localtm.tm_year = gSystemPara.TimerSearch[1][0];
+		InnerScreenDataCenteHandle.searchUseUTCTimeEnd =  mymktime(&localtm);
+		matched = TRUE;
+	}
+	return matched;
+}
+
+
 //================================================================================================
 //===============================[函数列表：内屏数据接收后的事件处理]================================
 //================================================================================================
@@ -573,6 +605,7 @@ screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM]=
 	{0,	15,&innerScreenRxHandle_RTC_YMDHMS},//屏幕RTC获取状态返回
 	{0, 16,&innerScreenRxHandle_Sizer_ClassifySet},
 	{0, 17,&innerScreenRxHandle_TriggerSave},
+	{0, 18,&innerScreenRxHandle_SearchTimeSet},
 	
 };
 

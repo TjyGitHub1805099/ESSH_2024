@@ -437,9 +437,17 @@ void innerScreenTxHandle_ScreenBcCode(T5LType *pSdwe)
 	}
 }
 
+
+UINT8 innerScreenDataCenter_Display(T5LType *pSdwe)
+{
+	UINT8 ret = 0 ;
+	return ret;
+}
 //
 UINT8 innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle(T5LType *pSdwe)
 {
+	static UINT16 testData[0x80];
+	static uint16 address=0x3500 , test_i = 0 ,test_flag = 0; 
 
 	UINT8 matched = FALSE;
 	if(g_sysLocked == STM32MCU_UNLOCKED)
@@ -464,11 +472,29 @@ UINT8 innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle(T5LType *pSd
 
 		if(pSdwe->triggerSaveVlu != pSdwe->triggerSaveVluPre)
 		{
-			if(TRUE ==t5lWriteData(pSdwe,0x3002,&pSdwe->triggerSaveVlu,1,0))
+			if(TRUE == t5lWriteData(pSdwe,0x3002,&pSdwe->triggerSaveVlu,1,0))
 			{
 				pSdwe->triggerSaveVluPre = pSdwe->triggerSaveVlu;
 			}
 		}
+
+		if(pSdwe->dataCenterDisplayPage != pSdwe->dataCenterDisplayPagePre)
+		{
+			if(TRUE == innerScreenDataCenter_Display(pSdwe))
+			{
+				pSdwe->dataCenterDisplayPagePre = pSdwe->dataCenterDisplayPage;
+			}
+		}
+
+		if(111 == test_flag)
+		{
+			if(TRUE ==t5lWriteData(pSdwe,(address+test_i*0x80),testData,0x60,0));//2*chanel_len:because each data type was 4 byte
+			{
+				test_flag = 0;
+			}
+		}
+
+
 	}	
 	return matched;
 }

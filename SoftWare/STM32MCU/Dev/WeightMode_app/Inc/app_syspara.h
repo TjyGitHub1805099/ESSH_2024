@@ -152,7 +152,7 @@ typedef enum HX711SystemParaType
 #define FLASH_STORE_MAX_LEN						(((FLASH_STORE_ADDRESS_END-FLASH_STORE_ADDRESS_START)/4)+1)
 //==========================================================================================================================
 #define SIZER_CLASSIFY_GROUP_NUM	(8)
-#define SIZER_CLASSIFY_MEMBER_NUM	(4)
+#define SIZER_CLASSIFY_MEMBER_NUM	(4)//mid min max select
 
 //
 typedef struct SystemParaType
@@ -192,7 +192,7 @@ typedef struct SystemParaType
 
 	UINT32 Sizer_TimeSet[6];//NYR SFM
 	UINT32 Sizer_ClassifySet[SIZER_CLASSIFY_GROUP_NUM][SIZER_CLASSIFY_MEMBER_NUM];
-
+	UINT16 TimerSearch[2][6];
 
 } gSystemParaType;
 //

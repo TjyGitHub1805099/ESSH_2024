@@ -18,7 +18,30 @@
 #define INNER_SCREEN_DATACENTER_LENOF_TYPE      (4u) // 1 ,Address[0x502C ~ 0x502C] ,such as [2222]
 #define INNER_SCREEN_DATACENTER_LENOF_RANGE     (11u)//13 ,Address[0x502D ~ 0x5039] ,such as [1111 ~ 2222]
 
-#define CLASSIFICATION_SEARCH_DISPLAY_NUM       (6)//at onepage the max display num
+//数据中心显示界面
+#define CLASSIFICATION_SEARCH_DISPLAY_NUM               (7)//at onepage the max display num
+#define CLASSIFICATION_SEARCH_DISPLAY_LEN               (0x80)
+//index(4byte) + barcode(32byte) + time(32byte) + weight(12byte) + weightType(4byte) + classifyRange(11byte)
+#define CLASSIFICATION_SEARCH_DISPLAY_OFFSET_INDEX      (0)
+#define CLASSIFICATION_SEARCH_DISPLAY_LEN_INDEX         (4)
+
+#define CLASSIFICATION_SEARCH_DISPLAY_OFFSET_BARCODE    (CLASSIFICATION_SEARCH_DISPLAY_OFFSET_INDEX+CLASSIFICATION_SEARCH_DISPLAY_LEN_INDEX)
+#define CLASSIFICATION_SEARCH_DISPLAY_LEN_BARCODE       (32)
+
+#define CLASSIFICATION_SEARCH_DISPLAY_OFFSET_TIME       (CLASSIFICATION_SEARCH_DISPLAY_OFFSET_BARCODE+CLASSIFICATION_SEARCH_DISPLAY_LEN_BARCODE)
+#define CLASSIFICATION_SEARCH_DISPLAY_LEN_TIME          (32)
+
+#define CLASSIFICATION_SEARCH_DISPLAY_OFFSET_WEIGHT     (CLASSIFICATION_SEARCH_DISPLAY_OFFSET_TIME+CLASSIFICATION_SEARCH_DISPLAY_LEN_TIME)
+#define CLASSIFICATION_SEARCH_DISPLAY_LEN_WEIGHT        (12)
+
+#define CLASSIFICATION_SEARCH_DISPLAY_OFFSET_WEIGHTTYPE (CLASSIFICATION_SEARCH_DISPLAY_OFFSET_WEIGHT+CLASSIFICATION_SEARCH_DISPLAY_LEN_WEIGHT)
+#define CLASSIFICATION_SEARCH_DISPLAY_LEN_WEIGHTTYPE    (4)
+
+#define CLASSIFICATION_SEARCH_DISPLAY_OFFSET_CLASSRANGE (CLASSIFICATION_SEARCH_DISPLAY_OFFSET_WEIGHTTYPE+CLASSIFICATION_SEARCH_DISPLAY_LEN_WEIGHTTYPE)
+#define CLASSIFICATION_SEARCH_DISPLAY_LEN_CLASSRANGE    (11)
+
+#define CLASSIFICATION_SEARCH_DISPLAY_LEN_MAX           (CLASSIFICATION_SEARCH_DISPLAY_OFFSET_CLASSRANGE+CLASSIFICATION_SEARCH_DISPLAY_LEN_CLASSRANGE)
+
 
 typedef enum
 {
@@ -55,10 +78,6 @@ typedef struct sInnerScreenDataCenterStruct
     //
     uint8 barCodeLen;
 }tInnerScreenDataCenterStruct;
-
-
-
-
 
 /*
 SYS	        para num byte	typebit	typetotalbit	typetotalbyte	CRC	addStart_dec	addStart_hex	addEnd_dec	addEnd_hex	percent	Size(kB)
@@ -132,6 +151,7 @@ typedef struct sInnerScreenDataCenterHandleStruct
     uint16 targetPageNum;
     uint16 curPageNum;
     //search need step1: use weight type search
+    eDataCenterClassificationType searchOutType;
     uint16 searchOutIndex_Use_WeightType;
     uint16 searchStartIndex_Use_WeightType;
     uint8 searchUseWeightType[D_C_CLASSIFICATION_NUM];
@@ -152,6 +172,8 @@ typedef struct sInnerScreenDataCenterHandleStruct
     uint8 newDataEntryFlag;//when start entry data set this flag , when I2C complete and callback executed clear this flag
     uint8 jobStatus[E_F_HANDLE_JOBID_WR_MAX][2];
     tInnerScreenDataCenterStruct *pRealTimeData;
+    uint8 dataCenterDisData[CLASSIFICATION_SEARCH_DISPLAY_NUM][CLASSIFICATION_SEARCH_DISPLAY_LEN];
+    uint8 singleClassifyGroupData[CLASSIFICATION_SEARCH_DISPLAY_LEN];
 }tInnerScreenDataCenterHandleStruct;
 
 extern tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle;

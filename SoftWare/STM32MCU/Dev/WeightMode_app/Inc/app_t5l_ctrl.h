@@ -71,7 +71,8 @@
 #define DMG_FUNC_PAGE9_PAGEDOWN_PAGE_VLU			(0X0945)
 
 
-
+#define INNERSCRENN_DATACENTER_SEARCH_TIME_ADDRESS	(0x5000)
+#define INNERSCRENN_DATACENTER_SEARCH_TIME_LEN		(6*2)
 
 
 #define INNERSCREEN_DATACENTER_START_ADD        (0x3500)
@@ -491,6 +492,10 @@ typedef struct structSdweType
 	UINT8 	bcCodeLen;
 	UINT16 	triggerSaveVlu;
 	UINT16 	triggerSaveVluPre;
+
+	UINT16 	dataCenterDisplayPage;
+	UINT16 	dataCenterDisplayPagePre;
+
 }T5LType;
 
 #define ScreenCycleTypeDefault   { \
@@ -591,6 +596,8 @@ typedef struct structSdweType
 	.bcCodeLen = 0 ,\
 	.triggerSaveVlu = 0 ,\
 	.triggerSaveVluPre = 0,\
+	.dataCenterDisplayPage = 0,\
+	.dataCenterDisplayPagePre = 0xff ,\
 }
 
 /** ModbusRtu设备默认配置 */
@@ -685,7 +692,7 @@ typedef struct structScreenHandleType
 	screenRxTxHandleType *sendScreenHadlleCtx;
 }ScreenHandleType;
 
-#define SCREEN_RX_HANDLE_TOTAL_NUM	(18)	/**< 屏幕RX数据处理事件数量 */
+#define SCREEN_RX_HANDLE_TOTAL_NUM	(19)	/**< 屏幕RX数据处理事件数量 */
 #define SCREEN_TX_HANDLE_TOTAL_NUM	(7)	/**< 屏幕TX数据处理事件数量 */
 extern screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM];
 extern screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM];

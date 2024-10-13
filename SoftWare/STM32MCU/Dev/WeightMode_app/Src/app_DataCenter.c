@@ -29,6 +29,7 @@
 #include "app_i2c.h"
 #include "app_syspara.h"
 #include "app_t5l_ctrl.h"
+#include "app_usbsmq.h"
 
 extern UINT32 get_SysTick_ByTimer(void);
 /**********************************************************************************************************************
@@ -50,12 +51,13 @@ tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle =
     .targetPageNum = 0,
     .curPageNum = 0 ,
     //search need step1: use weight type search
+    .searchOutType = D_C_CLASSIFICATION_NUM,
     .searchOutIndex_Use_WeightType = 0 ,
     .searchStartIndex_Use_WeightType = 0 ,
     .searchUseWeightType = {0},
     //search need step2: use weight type search
-    .searchUseUTCTimeStart = 0 ,
-    .searchUseUTCTimeEnd = 0 ,
+    .searchUseUTCTimeStart = 0x66B40C68 ,//2024-08-08 08:08:08
+    .searchUseUTCTimeEnd = 0xF3C5DDE8 ,//2099-08-08 08:08:08
     .searchOutIndex_CheckedBy_UTCTime = 0,
     //search out buffer
     .searchOutIndexArry = {0},
@@ -70,6 +72,8 @@ tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle =
     .newDataEntryFlag = 0,//when start entry data set this flag , when I2C complete and callback executed clear this flag
     .jobStatus = {{0}},
     .pRealTimeData =&InnerScreenDataCenter,
+    .dataCenterDisData = {{0}},
+    .singleClassifyGroupData = {0},
 };
 
 #if 1
@@ -139,11 +143,16 @@ static void InnerScreenDataCenterHandle_WeightClassification_Init(tInnerScreenDa
     pContex->curPageNum = 0 ;
     pContex->targetPageNum = pContex->curPageNum + 1;
     pContex->searchOutIndex_CheckedBy_UTCTime = 0 ;
-    pContex->searchUseUTCTimeStart = 0 ;
-    pContex->searchUseUTCTimeEnd = 0 ;
     for(i = 0 ; i < D_C_CLASSIFICATION_NUM ; i++)
     {
-        pContex->searchUseWeightType[i] = D_C_CLASSIFICATION_NUM;
+        if(0 == gSystemPara.Sizer_ClassifySet[i][3])//筛选勾选了
+        {
+            pContex->searchUseWeightType[i] = i;
+        }
+        else
+        {
+            pContex->searchUseWeightType[i] = 0xFF;//筛选未勾选
+        }
     }
     for( i = 0 ; i < CLASSIFICATION_SEARCH_DISPLAY_NUM ; i++ )
     {
@@ -198,7 +207,7 @@ uint8 InnerScreenDataCenterHandle_CaculateCrc16(tInnerScreenDataCenterHandleStru
 void InnerScreenDataCenterHandle_CaculateTotalNum(tInnerScreenDataCenterHandleStruct *pContex)
 {
     uint16 i = 0 , ret = 0;
-    eDataCenterClassificationType classType = 0;
+    UINT8 classType = 0;
     //1.2 caculate total num
     for( classType = D_C_CLASSIFICATION_A ; classType < D_C_CLASSIFICATION_NUM ; classType++ )
     {
@@ -212,12 +221,12 @@ void InnerScreenDataCenterHandle_CaculateTotalNum(tInnerScreenDataCenterHandleSt
         for( i = 0 ; i < CLASSIFICATION_STORE_MAX_NUM ; i++ )
         {
             classType = (pContex->cfgInfo_weightType[i] >> 4) & 0x0F;//high 4 bit
-            if((D_C_CLASSIFICATION_A <= classType) && (classType <= D_C_CLASSIFICATION_H))
+            if(((UINT8)D_C_CLASSIFICATION_A <= classType) && (classType <= (UINT8)D_C_CLASSIFICATION_H))
             {
                 pContex->totalStoreNum_EachType[classType]++;
             }
             classType = (pContex->cfgInfo_weightType[i] >> 0) & 0x0F;//low 4 bit
-            if((D_C_CLASSIFICATION_A <= classType) && (classType <= D_C_CLASSIFICATION_H))
+            if(((UINT8)D_C_CLASSIFICATION_A <= classType) && (classType <= (UINT8)D_C_CLASSIFICATION_H))
             {
                 pContex->totalStoreNum_EachType[classType]++;
             }
@@ -370,17 +379,15 @@ static uint8 InnerScreenDataCenterHandle_EntryData_Prepare_dc_weight_dc_type_and
             pContex->pRealTimeData->dc_range[1+i] = '0' + vlu;
             tempWeight /= 10;
         }
-        pContex->pRealTimeData->dc_range[5] = ' ';
-        pContex->pRealTimeData->dc_range[6] = '~';
-        pContex->pRealTimeData->dc_range[7] = ' ';
+        pContex->pRealTimeData->dc_range[5] = '~';
         tempWeight = cfg[tempOffset].max;
         for(i = (4-1) ; i >= 0  ; i--)
         {
             vlu = tempWeight%10;
-            pContex->pRealTimeData->dc_range[8+i] = '0' + vlu;
+            pContex->pRealTimeData->dc_range[6+i] = '0' + vlu;
             tempWeight /= 10;
         }
-        pContex->pRealTimeData->dc_range[12] = ']';
+        pContex->pRealTimeData->dc_range[10] = ']';
     }
     //
     return ret;
@@ -404,6 +411,7 @@ static uint8 InnerScreenDataCenterHandle_Searching_Use_WeightType(tInnerScreenDa
             {
                 if(tempType == pContex->searchUseWeightType[j])//high 4 bit
                 {
+                    pContex->searchOutType = tempType;
                     pContex->searchOutIndex_Use_WeightType = pContex->searchStartIndex_Use_WeightType;
                     ret = 1;
                     break;//search out and break for(;;)
@@ -418,6 +426,7 @@ static uint8 InnerScreenDataCenterHandle_Searching_Use_WeightType(tInnerScreenDa
             {
                 if(tempType == pContex->searchUseWeightType[j])//high 4 bit
                 {
+                    pContex->searchOutType = tempType;
                     pContex->searchOutIndex_Use_WeightType = pContex->searchStartIndex_Use_WeightType;
                     ret = 1;
                     break;//search out and break for(;;)
@@ -450,6 +459,7 @@ static uint8 InnerScreenDataCenterHandle_Searching_Use_WeightType(tInnerScreenDa
         {
             if(searchIndex_Record == pContex->searchStartIndex_Use_WeightType)
             {
+                ret = 0xFF;
                 break;//not search out at total cycle , break while(1)
             }
         }
@@ -484,6 +494,53 @@ static uint8 InnerScreenDataCenterHandle_Searching_CheckedBy_UTCTime(tInnerScree
     //
     return ret;
 }
+void innerScreenDataCenter_DisData_Time_Prepare(tInnerScreenDataCenterHandleStruct *pContex , uint8 offset)
+{
+    uint8 i_offset = INNER_SCREEN_DATACENTER_LENOF_INDEX+INNER_SCREEN_DATACENTER_LENOF_BARCODE;
+    pContex->dataCenterDisData[offset][i_offset + 0] = '0' + gUTCDecodeTime.tm_year/1000;
+    pContex->dataCenterDisData[offset][i_offset + 1] = '0' + gUTCDecodeTime.tm_year%1000/100;
+    pContex->dataCenterDisData[offset][i_offset + 2] = '0' + gUTCDecodeTime.tm_year%100/10;
+    pContex->dataCenterDisData[offset][i_offset + 3] = '0' + gUTCDecodeTime.tm_year%10;
+
+    pContex->dataCenterDisData[offset][i_offset + 4] = '/';
+    pContex->dataCenterDisData[offset][i_offset + 5] = '0' + gUTCDecodeTime.tm_mon%100/10;
+    pContex->dataCenterDisData[offset][i_offset + 6] = '0' + gUTCDecodeTime.tm_mon%10;
+
+    pContex->dataCenterDisData[offset][i_offset + 7] = '/';
+    pContex->dataCenterDisData[offset][i_offset + 8] = '0' + gUTCDecodeTime.tm_mday%100/10;
+    pContex->dataCenterDisData[offset][i_offset + 9] = '0' + gUTCDecodeTime.tm_mday%10;
+
+    pContex->dataCenterDisData[offset][i_offset + 10] = ' ';
+    pContex->dataCenterDisData[offset][i_offset + 11] = '0' + gUTCDecodeTime.tm_hour%100/10;
+    pContex->dataCenterDisData[offset][i_offset + 12] = '0' + gUTCDecodeTime.tm_hour%10;
+
+    pContex->dataCenterDisData[offset][i_offset + 13] = ' ';
+    pContex->dataCenterDisData[offset][i_offset + 14] = '0' + gUTCDecodeTime.tm_min%100/10;
+    pContex->dataCenterDisData[offset][i_offset + 15] = '0' + gUTCDecodeTime.tm_min%10;
+
+    pContex->dataCenterDisData[offset][i_offset + 16] = ' ';
+    pContex->dataCenterDisData[offset][i_offset + 17] = '0' + gUTCDecodeTime.tm_sec%100/10;
+    pContex->dataCenterDisData[offset][i_offset + 18] = '0' + gUTCDecodeTime.tm_sec%10;
+}
+void innerScreenDataCenter_DisDataPrepare(tInnerScreenDataCenterHandleStruct *pContex , uint8 offset)
+{
+    uint8 i = 0 ;
+    uint8 i_offset = INNER_SCREEN_DATACENTER_LENOF_INDEX+INNER_SCREEN_DATACENTER_LENOF_BARCODE;
+
+    //index
+    for(i = 0 ; i < (INNER_SCREEN_DATACENTER_LENOF_INDEX-1) ; i++ )
+    {
+        pContex->dataCenterDisData[offset][0] = '0';
+    }
+    pContex->dataCenterDisData[offset][i] = '0' + i;
+    //barcode
+    memcpy(&pContex->dataCenterDisData[offset][INNER_SCREEN_DATACENTER_LENOF_INDEX+i],
+            &sUSBSMQHandleContex.decodeDataVaild[0],INNER_SCREEN_DATACENTER_LENOF_BARCODE);
+    //time
+    innerScreenDataCenter_DisData_Time_Prepare(pContex,offset);
+    //weight
+
+}
 
 //PC.when target page upgrate , search the data inde which need to display
 void InnerScreenDataCenterHandle_PageAllIndexSearching(tInnerScreenDataCenterHandleStruct *pContex)
@@ -509,6 +566,10 @@ void InnerScreenDataCenterHandle_PageAllIndexSearching(tInnerScreenDataCenterHan
             if(1 == ret)
             {
                 pContex->searchOutIndexArry[i] =  pContex->searchOutIndex_CheckedBy_UTCTime;
+                //
+
+
+                //
                 i++;
             }    
         }
@@ -523,7 +584,6 @@ void InnerScreenDataCenterHandle_PageAllIndexSearching(tInnerScreenDataCenterHan
 void InnerScreenDataCenterHandle_Searching_Page1Init(tInnerScreenDataCenterHandleStruct *pContex)
 {
     uint16 i = 0;
-    uint8 ret = 0 ;
     pContex->searchStartIndex_Use_WeightType = 0 ;
     pContex->curPageNum = 0 ;
     pContex->targetPageNum = pContex->curPageNum + 1;
@@ -537,7 +597,6 @@ void InnerScreenDataCenterHandle_Searching_Page1Init(tInnerScreenDataCenterHandl
 void InnerScreenDataCenterHandle_Searching_PageDown(tInnerScreenDataCenterHandleStruct *pContex)
 {
     uint16 i = 0;
-    uint8 ret = 0 ;
     //check if curpage display num less than CLASSIFICATION_SEARCH_DISPLAY_NUM
     for( i = 0 ; i < CLASSIFICATION_SEARCH_DISPLAY_NUM ; i++ )
     {
@@ -569,6 +628,221 @@ void InnerScreenDataCenterHandle_Searching_PageUp(tInnerScreenDataCenterHandleSt
         //send data to screen ....
     }
 }
+
+
+
+UINT8 oneGroupSearchOutForDisplay(UINT16 inIndex, UINT8 in_MaxLen , UINT8 *pOutData,UINT16 *pOutLen)
+{
+    tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
+    UINT8 ret = 0  , lenOffset = 0 , tempType ;
+    UINT16 classifyIdentify = 0  , classifyMin = 0 , classifyMax = 0;
+    UINT32 payloadOffset = 0;
+    struct tm lUTCDecodeTime;
+    sint64 lS64UTCTime = 0;
+
+
+    //
+    while(1 != ret)
+    {
+        ret = InnerScreenDataCenterHandle_Searching_Use_WeightType(pContex);
+        //
+        if(1 == ret)//用重量类型筛选 找出匹配的type
+        {
+            ret = InnerScreenDataCenterHandle_Searching_CheckedBy_UTCTime(pContex);
+            if(1 == ret)//用时间筛选 找出匹配的type
+            {
+                //开始准备数据
+
+                //1.表格中的：序号
+                lenOffset = CLASSIFICATION_SEARCH_DISPLAY_OFFSET_INDEX ;
+                pOutData[lenOffset+0] = '0' + inIndex/1000;
+                pOutData[lenOffset+1] = '0' + inIndex%1000/100;
+                pOutData[lenOffset+2] = '0' + inIndex%100/10;
+                pOutData[lenOffset+3] = '0' + inIndex%10;
+
+                //2.表格中的：录入条码
+                lenOffset = CLASSIFICATION_SEARCH_DISPLAY_OFFSET_BARCODE ;
+                payloadOffset = pContex->searchOutIndex_CheckedBy_UTCTime;
+                payloadOffset *= CLASSIFICATION_STORE_DATA_SINGLE_LEN;
+                memcpy(&pOutData[lenOffset+0],&InnerScreenDataCenteHandle.dataCenterPayload[payloadOffset],INNER_SCREEN_DATACENTER_LENOF_BARCODE);
+                if(CLASSIFICATION_SEARCH_DISPLAY_LEN_BARCODE > INNER_SCREEN_DATACENTER_LENOF_BARCODE)
+                {
+                    memset(&pOutData[lenOffset + INNER_SCREEN_DATACENTER_LENOF_BARCODE],0,(CLASSIFICATION_SEARCH_DISPLAY_LEN_WEIGHT-INNER_SCREEN_DATACENTER_LENOF_BARCODE));
+                }
+  
+                //3.表格中的：录入时间
+                lenOffset = CLASSIFICATION_SEARCH_DISPLAY_OFFSET_TIME;
+                payloadOffset = pContex->searchOutIndex_CheckedBy_UTCTime;
+                payloadOffset *= CLASSIFICATION_STORE_CFG_TIME_TYPEBYTE;
+                lS64UTCTime +=  InnerScreenDataCenteHandle.cfgInfo_utcTime[payloadOffset+0];
+                lS64UTCTime <<= 8;
+                lS64UTCTime +=  InnerScreenDataCenteHandle.cfgInfo_utcTime[payloadOffset+1];
+                lS64UTCTime <<= 8;
+                lS64UTCTime +=  InnerScreenDataCenteHandle.cfgInfo_utcTime[payloadOffset+2];
+                lS64UTCTime <<= 8;
+                lS64UTCTime +=  InnerScreenDataCenteHandle.cfgInfo_utcTime[payloadOffset+3];
+		        lUTCDecodeTime = *(mygmtime(&lS64UTCTime));
+
+                pOutData[lenOffset + 0] = '0' + lUTCDecodeTime.tm_year/1000;
+                pOutData[lenOffset + 1] = '0' + lUTCDecodeTime.tm_year%1000/100;
+                pOutData[lenOffset + 2] = '0' + lUTCDecodeTime.tm_year%100/10;
+                pOutData[lenOffset + 3] = '0' + lUTCDecodeTime.tm_year%10;
+
+                pOutData[lenOffset + 4] = '/';
+                pOutData[lenOffset + 5] = '0' + lUTCDecodeTime.tm_mon%100/10;
+                pOutData[lenOffset + 6] = '0' + lUTCDecodeTime.tm_mon%10;
+
+                pOutData[lenOffset + 7] = '/';
+                pOutData[lenOffset + 8] = '0' + lUTCDecodeTime.tm_mday%100/10;
+                pOutData[lenOffset + 9] = '0' + lUTCDecodeTime.tm_mday%10;
+
+                pOutData[lenOffset + 10] = ' ';
+                pOutData[lenOffset + 11] = '0' + lUTCDecodeTime.tm_hour%100/10;
+                pOutData[lenOffset + 12] = '0' + lUTCDecodeTime.tm_hour%10;
+
+                pOutData[lenOffset + 13] = ':';
+                pOutData[lenOffset + 14] = '0' + lUTCDecodeTime.tm_min%100/10;
+                pOutData[lenOffset + 15] = '0' + lUTCDecodeTime.tm_min%10;
+
+                pOutData[lenOffset + 16] = ':';
+                pOutData[lenOffset + 17] = '0' + lUTCDecodeTime.tm_sec%100/10;
+                pOutData[lenOffset + 18] = '0' + lUTCDecodeTime.tm_sec%10;
+                if(CLASSIFICATION_SEARCH_DISPLAY_LEN_TIME > 19)
+                {
+                    memset(&pOutData[lenOffset + 19],0,(CLASSIFICATION_SEARCH_DISPLAY_LEN_TIME-19));
+                }
+
+                //4.表格中的：录入重量
+                lenOffset = CLASSIFICATION_SEARCH_DISPLAY_OFFSET_WEIGHT ;
+                payloadOffset = pContex->searchOutIndex_CheckedBy_UTCTime;
+                payloadOffset *= CLASSIFICATION_STORE_DATA_SINGLE_LEN;
+                payloadOffset += INNER_SCREEN_DATACENTER_LENOF_BARCODE;
+                memcpy(&pOutData[lenOffset+0],&InnerScreenDataCenteHandle.dataCenterPayload[payloadOffset],4);
+                lenOffset = CLASSIFICATION_SEARCH_DISPLAY_OFFSET_WEIGHT + 4 ;
+                pOutData[lenOffset+0] = '(';
+                pOutData[lenOffset+1] = 'm';
+                pOutData[lenOffset+2] = 'l';
+                pOutData[lenOffset+3] = ')';
+                
+                
+                
+                if(CLASSIFICATION_SEARCH_DISPLAY_LEN_WEIGHT > 8)
+                {
+                    memset(&pOutData[lenOffset + 8],0,(CLASSIFICATION_SEARCH_DISPLAY_LEN_WEIGHT-8));
+                }
+
+                //5.表格中的：分类结果
+                tempType = pContex->searchOutType%D_C_CLASSIFICATION_NUM;
+                classifyIdentify =  gSystemPara.Sizer_ClassifySet[tempType][0];
+                lenOffset = CLASSIFICATION_SEARCH_DISPLAY_OFFSET_WEIGHTTYPE ;
+                pOutData[lenOffset+0] = '0' + classifyIdentify/1000;
+                pOutData[lenOffset+1] = '0' + classifyIdentify%1000/100;
+                pOutData[lenOffset+2] = '0' + classifyIdentify%100/10;
+                pOutData[lenOffset+3] = '0' + classifyIdentify%10;
+
+                //6.表格中的：分类标准
+                tempType = pContex->searchOutType%D_C_CLASSIFICATION_NUM;
+                classifyMin =  gSystemPara.Sizer_ClassifySet[tempType][1];
+                classifyMax =  gSystemPara.Sizer_ClassifySet[tempType][2];
+                lenOffset = CLASSIFICATION_SEARCH_DISPLAY_OFFSET_CLASSRANGE ;
+                pOutData[lenOffset+0] = '0' + classifyMin/1000;
+                pOutData[lenOffset+1] = '0' + classifyMin%1000/100;
+                pOutData[lenOffset+2] = '0' + classifyMin%100/10;
+                pOutData[lenOffset+3] = '0' + classifyMin%10;
+                pOutData[lenOffset+4] = ' ';
+                lenOffset = CLASSIFICATION_SEARCH_DISPLAY_OFFSET_CLASSRANGE + 5 ;
+                pOutData[lenOffset+0] = '~';
+                lenOffset = CLASSIFICATION_SEARCH_DISPLAY_OFFSET_CLASSRANGE + 5 + 1;
+                pOutData[lenOffset+0] = ' ';
+                lenOffset = CLASSIFICATION_SEARCH_DISPLAY_OFFSET_CLASSRANGE + 5 + 1 + 1;
+                pOutData[lenOffset+0] = '0' + classifyMax/1000;
+                pOutData[lenOffset+1] = '0' + classifyMax%1000/100;
+                pOutData[lenOffset+2] = '0' + classifyMax%100/10;
+                pOutData[lenOffset+3] = '0' + classifyMax%10;
+
+                *pOutLen = CLASSIFICATION_SEARCH_DISPLAY_LEN_MAX;
+                //
+                break;
+            }
+        }
+        else if (0xFF == ret)//寻找了一轮都没有找到
+        {
+            break;
+        }        
+    }
+
+    return ret;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //data need store to ee entry it
 uint8 InnerScreenDataCenterHandle_QueueEntry(tInnerScreenDataCenterHandleStruct *pContex , tInnerScreenDataCenterStruct *pEntryData)
@@ -869,9 +1143,28 @@ uint8 InnerScreenDataCenterHandle_Init(void)
     }
     return ret;
 }
+
+
+void innerScreenDiwen_LSB2MSB(uint8 *pData,uint16 len)
+{
+    uint8 temp = 0;
+    uint16 i = 0 , lenMax = ((len+1)/2)*2;
+    for( i = 0 ; i < lenMax ; i++)
+    {
+        temp = pData[i];
+        pData[i] = pData[i+1];
+        pData[i+1] = temp;
+        i++;
+    }
+}
+
+
+
+
 //data center
 void InnerScreenDataCenterHandle_MainFunction(void)
 {
+    static uint16 index_i = 0 , address=0x3500 , outLen = 0;
     uint8 ret = 0 , weightType;
     INT32 localWeight = 0;
     static INT32 preWeight = 0 ;
@@ -879,9 +1172,40 @@ void InnerScreenDataCenterHandle_MainFunction(void)
     tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
     tInnerScreenDataCenterStruct entryData;
     tExtFlashOrderStruct pushOrder;
+    T5LType *pSdwe = g_ScreenHandle[ScreenIndex_Smaller].Ctx;
     //
     switch(pContex->needToStore)
     {
+        case 0x77:
+            InnerScreenDataCenterHandle_WeightClassification_Init(pContex);
+            pContex->needToStore = 0 ;
+        break;
+
+
+        case 0x68:
+            if(1 == oneGroupSearchOutForDisplay(index_i,0X80,
+                    &InnerScreenDataCenteHandle.dataCenterDisData[index_i][0],&outLen))
+            {
+                innerScreenDiwen_LSB2MSB(&InnerScreenDataCenteHandle.dataCenterDisData[index_i][0],outLen);
+                pContex->needToStore = 0x69;
+            }
+        break;
+
+        case 0x69:
+			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
+				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
+			{
+				t5lWriteVarible(pSdwe,(address+0x80*index_i),
+                            (INT16 *)&InnerScreenDataCenteHandle.dataCenterDisData[index_i][0],
+                            (0x80/2),0);
+                pContex->needToStore = 0x6A;
+			}
+        break;
+
+        case 0x6A:
+        
+        break;
+
         case 0x80:
             ret = InnerScreenDataCenterHandle_Init_OrderTriger(pContex);
             pContex->needToStore = 0x81;

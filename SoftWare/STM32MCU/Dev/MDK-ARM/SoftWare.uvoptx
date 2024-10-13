@@ -164,6 +164,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
+          <Name></Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -200,9 +201,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>1012</LineNumber>
+          <LineNumber>983</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134244080</Address>
+          <Address>134242932</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -211,14 +212,14 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\WeightMode_app\Src\app_DataCenter.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\SoftWare\../WeightMode_app/Src/app_DataCenter.c\1012</Expression>
+          <Expression>\\SoftWare\../WeightMode_app/Src/app_DataCenter.c\983</Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>989</LineNumber>
+          <LineNumber>1006</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134244010</Address>
+          <Address>134243030</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -227,7 +228,7 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\WeightMode_app\Src\app_DataCenter.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\SoftWare\../WeightMode_app/Src/app_DataCenter.c\989</Expression>
+          <Expression>\\SoftWare\../WeightMode_app/Src/app_DataCenter.c\1006</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -375,6 +376,26 @@
           <count>28</count>
           <WinNumber>1</WinNumber>
           <ItemText>pEntryData-&gt;utctime</ItemText>
+        </Ww>
+        <Ww>
+          <count>29</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>pSdwe-&gt;SetData,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>30</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>pSdwe-&gt;SetAdd,0x10</ItemText>
+        </Ww>
+        <Ww>
+          <count>31</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>localtm,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>32</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>InnerScreenDataCenteHandle</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
