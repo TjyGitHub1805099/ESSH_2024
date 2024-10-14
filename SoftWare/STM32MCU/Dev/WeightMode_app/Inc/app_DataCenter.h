@@ -148,12 +148,15 @@ typedef struct sInnerScreenDataCenterHandleStruct
     uint16 totalStoreNum_EachType[D_C_CLASSIFICATION_NUM + 2];
 
     //for data center display
-    uint16 targetPageNum;
-    uint16 curPageNum;
+    INT16 targetPageNum;
+    INT16 curPageNum;
+    INT16 dir;
     //search need step1: use weight type search
     eDataCenterClassificationType searchOutType;
     uint16 searchOutIndex_Use_WeightType;
     uint16 searchStartIndex_Use_WeightType;
+    uint16 searchStartIndex_Use_WeightType_EndApear;
+    uint16 searchStartIndex_Use_WeightType_LastSuccessIndex;
     uint8 searchUseWeightType[D_C_CLASSIFICATION_NUM];
     //search need step2: use weight type search
     sint64 searchUseUTCTimeStart;

@@ -527,6 +527,9 @@ UINT8 innerScreenRxHandle_Sizer_ClassifySet(T5LType *pSdwe)
 		i = (pSdwe->SetAdd - INNERSCREEN_Sizer_ClassifySet_Address)/SIZER_CLASSIFY_MEMBER_NUM;
 		j = (pSdwe->SetAdd - INNERSCREEN_Sizer_ClassifySet_Address)%SIZER_CLASSIFY_MEMBER_NUM;
 		gSystemPara.Sizer_ClassifySet[i][j] = pSdwe->SetData;
+		//
+		InnerScreenDataCenterHandle_WeightClassification_Init(&InnerScreenDataCenteHandle);
+		//
 		pSdwe->needStore |= DMG_TRIGER_SAVE_SECOTOR_2 ;
 	}
 	return matched;
@@ -593,7 +596,83 @@ UINT8 innerScreenRxHandle_OutputAll2Upan(T5LType *pSdwe)
 	}
 	return matched;
 }
+//19
+UINT8 innerScreenRxHandle_DataCenterPageHandle(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	if(pSdwe->SetAdd == DMG_FUNC_PAGE9_OUTPUT_CUR_PAGE_ADDRESS)
+	{
+		//下一页
+		if(DMG_FUNC_PAGE9_PAGEDOWN_PAGE_VLU == pSdwe->SetData)
+		{
+			InnerScreenDataCenteHandle.curPageNum = 0 ;
+			InnerScreenDataCenteHandle.targetPageNum = 1 ;
+			//
+			if(1 == InnerScreenDataCenteHandle.dir)//查找方向未改变
+			{
+				if(1 == InnerScreenDataCenteHandle.searchStartIndex_Use_WeightType_EndApear)//如果出现查找到尽头
+				{
+					//不做处理
+				}
+				else
+				{
+					InnerScreenDataCenteHandle.needToStore = 0x68;//执行扫描显示
+				}
+			}
+			else//查找方向已改变：与之前查找方向相反，之前是上页查找，现在是下页查找
+			{
+				InnerScreenDataCenteHandle.searchStartIndex_Use_WeightType_EndApear = 0;
+				if((InnerScreenDataCenteHandle.searchStartIndex_Use_WeightType_LastSuccessIndex + CLASSIFICATION_SEARCH_DISPLAY_NUM) < CLASSIFICATION_STORE_MAX_NUM)
+				{
+					InnerScreenDataCenteHandle.searchStartIndex_Use_WeightType = 
+						InnerScreenDataCenteHandle.searchStartIndex_Use_WeightType_LastSuccessIndex + CLASSIFICATION_SEARCH_DISPLAY_NUM;
+					InnerScreenDataCenteHandle.needToStore = 0x68;//执行扫描显示
+				}
+			}
+			//
+			matched = TRUE;
+		}
+		if(DMG_FUNC_PAGE9_PAGEUP_PAGE_VLU == pSdwe->SetData)
+		{
+			InnerScreenDataCenteHandle.curPageNum = 1 ;
+			InnerScreenDataCenteHandle.targetPageNum = 0 ;
+			//
+			if(0 == InnerScreenDataCenteHandle.dir)//查找方向未改变
+			{
+				if(1 == InnerScreenDataCenteHandle.searchStartIndex_Use_WeightType_EndApear)//如果出现查找到尽头
+				{
+					//不做处理
+				}
+				else
+				{
+					InnerScreenDataCenteHandle.needToStore = 0x68;//执行扫描显示
+				}
+			}
+			else//查找方向已改变：与之前查找方向相反，之前是下页查找，现在是上页查找
+			{
+				InnerScreenDataCenteHandle.searchStartIndex_Use_WeightType_EndApear = 0;
+				if(InnerScreenDataCenteHandle.searchStartIndex_Use_WeightType_LastSuccessIndex >= CLASSIFICATION_SEARCH_DISPLAY_NUM)
+				{
+					InnerScreenDataCenteHandle.searchStartIndex_Use_WeightType = 
+						InnerScreenDataCenteHandle.searchStartIndex_Use_WeightType_LastSuccessIndex - CLASSIFICATION_SEARCH_DISPLAY_NUM ;
+					
+					InnerScreenDataCenteHandle.searchStartIndex_Use_WeightType /= CLASSIFICATION_SEARCH_DISPLAY_NUM;
+					InnerScreenDataCenteHandle.searchStartIndex_Use_WeightType *= CLASSIFICATION_SEARCH_DISPLAY_NUM;
 
+					InnerScreenDataCenteHandle.needToStore = 0x68;//执行扫描显示
+				}
+			}
+			matched = TRUE;
+		}	
+		if(DMG_FUNC_PAGE9_DELET_ALL_DATA_VLU == pSdwe->SetData)
+		{
+			//删除所有数据
+			InnerScreenDataCenteHandle.needToStore = 0xFE;
+			matched = TRUE;
+		}
+	}
+	return matched;
+}
 
 //================================================================================================
 //===============================[函数列表：内屏数据接收后的事件处理]================================
@@ -621,6 +700,7 @@ screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM]=
 	{0, 17,&innerScreenRxHandle_TriggerSave},
 	{0, 18,&innerScreenRxHandle_SearchTimeSet},
 	{0, 19,&innerScreenRxHandle_OutputAll2Upan},
+	{0, 20,&innerScreenRxHandle_DataCenterPageHandle},
 	
 };
 

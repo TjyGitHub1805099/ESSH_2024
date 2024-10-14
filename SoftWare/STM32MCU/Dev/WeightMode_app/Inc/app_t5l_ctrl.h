@@ -61,6 +61,8 @@
 #define DMG_FUNC_PAGE5_OUPUT_ALL_VAL				(0X0512)
 
 //page9:数据中心
+#define DMG_FUNC_PAGE9_DELET_ALL_DATA_ADDRESS		(0X8009)
+#define DMG_FUNC_PAGE9_DELET_ALL_DATA_VLU			(0X0901)
 #define DMG_FUNC_PAGE9_OUTPUT_CUR_PAGE_ADDRESS		(0X8009)
 #define DMG_FUNC_PAGE9_OUTPUT_CUR_PAGE_VLU			(0X0912)
 #define DMG_FUNC_PAGE9_OUTPUT_ALL_PAGE_ADDRESS		(0X8009)
@@ -692,7 +694,7 @@ typedef struct structScreenHandleType
 	screenRxTxHandleType *sendScreenHadlleCtx;
 }ScreenHandleType;
 
-#define SCREEN_RX_HANDLE_TOTAL_NUM	(20)	/**< 屏幕RX数据处理事件数量 */
+#define SCREEN_RX_HANDLE_TOTAL_NUM	(21)	/**< 屏幕RX数据处理事件数量 */
 #define SCREEN_TX_HANDLE_TOTAL_NUM	(7)	/**< 屏幕TX数据处理事件数量 */
 extern screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM];
 extern screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM];

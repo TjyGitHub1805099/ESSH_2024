@@ -48,12 +48,15 @@ tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle =
     .totalStoreNum_EachType = {0},
 
     //for data center display
-    .targetPageNum = 0,
+    .targetPageNum = 1,
     .curPageNum = 0 ,
+    .dir = 1,
     //search need step1: use weight type search
     .searchOutType = D_C_CLASSIFICATION_NUM,
     .searchOutIndex_Use_WeightType = 0 ,
     .searchStartIndex_Use_WeightType = 0 ,
+    .searchStartIndex_Use_WeightType_EndApear = 0,
+    .searchStartIndex_Use_WeightType_LastSuccessIndex = 0xFFFF,
     .searchUseWeightType = {0},
     //search need step2: use weight type search
     .searchUseUTCTimeStart = 0x66B40C68 ,//2024-08-08 08:08:08
@@ -63,7 +66,7 @@ tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle =
     .searchOutIndexArry = {0},
     
     //used for execute store
-    .needToStore = 0x80 ,//INIT
+    .needToStore = 0x77 ,//INIT
     .dataStoreCplt = 0 ,
     .userDataStoreIndex = 0,
     .userDataStoreData = {0},
@@ -136,12 +139,18 @@ tDataCenterExtFlashCallbackStruct dataCenterCallbackRegisterList[E_F_HANDLE_JOBI
     {E_F_HANDLE_JOBID_R_DATACENTER_DATAPAYLOAD,DataCenterHandle_Callback}
 };
 
-static void InnerScreenDataCenterHandle_WeightClassification_Init(tInnerScreenDataCenterHandleStruct *pContex)
+void InnerScreenDataCenterHandle_WeightClassification_Init(tInnerScreenDataCenterHandleStruct *pContex)
 {
     uint8 i = 0 ;
-    pContex->searchStartIndex_Use_WeightType = 0 ;
+    //
     pContex->curPageNum = 0 ;
     pContex->targetPageNum = pContex->curPageNum + 1;
+    //
+    pContex->searchOutIndex_Use_WeightType = 0;
+    pContex->searchStartIndex_Use_WeightType = 0;
+    pContex->searchStartIndex_Use_WeightType_EndApear = 0;
+    pContex->searchStartIndex_Use_WeightType_LastSuccessIndex = 0;
+    //
     pContex->searchOutIndex_CheckedBy_UTCTime = 0 ;
     for(i = 0 ; i < D_C_CLASSIFICATION_NUM ; i++)
     {
@@ -397,12 +406,12 @@ static uint8 InnerScreenDataCenterHandle_EntryData_Prepare_dc_weight_dc_type_and
 uint8 InnerScreenDataCenterHandle_Searching_Use_WeightType(tInnerScreenDataCenterHandleStruct *pContex)
 {
     uint16 i = 0 , j = 0;
-    uint8 ret = 0 , tempType = 0;
+    uint8 ret = 0xFF , tempType = 0;
     uint16 searchIndex_Record = 0 ;
     //record start index
     searchIndex_Record = pContex->searchStartIndex_Use_WeightType;
     //
-    while(0 == ret)
+    while((0xFF == ret) && (0 == pContex->searchStartIndex_Use_WeightType_EndApear))
     {
         if((pContex->searchStartIndex_Use_WeightType % 2) == 0)
         {
@@ -413,11 +422,11 @@ uint8 InnerScreenDataCenterHandle_Searching_Use_WeightType(tInnerScreenDataCente
                 {
                     pContex->searchOutType = tempType;
                     pContex->searchOutIndex_Use_WeightType = pContex->searchStartIndex_Use_WeightType;
+                    pContex->searchStartIndex_Use_WeightType_LastSuccessIndex = pContex->searchOutIndex_Use_WeightType;
                     ret = 1;
                     break;//search out and break for(;;)
                 }                 
             }
-       
         }
         else
         {
@@ -428,16 +437,32 @@ uint8 InnerScreenDataCenterHandle_Searching_Use_WeightType(tInnerScreenDataCente
                 {
                     pContex->searchOutType = tempType;
                     pContex->searchOutIndex_Use_WeightType = pContex->searchStartIndex_Use_WeightType;
+                    pContex->searchStartIndex_Use_WeightType_LastSuccessIndex = pContex->searchOutIndex_Use_WeightType;
                     ret = 1;
                     break;//search out and break for(;;)
                 }                 
             }
         }
         //
-        if(pContex->curPageNum < pContex->targetPageNum)//forword search
+        if(pContex->searchStartIndex_Use_WeightType < CLASSIFICATION_STORE_MAX_NUM)
         {
             pContex->searchStartIndex_Use_WeightType++;
-            pContex->searchStartIndex_Use_WeightType = pContex->searchStartIndex_Use_WeightType % CLASSIFICATION_STORE_MAX_NUM;
+        }
+        else
+        {
+            pContex->searchStartIndex_Use_WeightType_EndApear = 1;
+        }
+        #if 0
+        if(pContex->curPageNum < pContex->targetPageNum)//forword search
+        {
+            if(pContex->searchStartIndex_Use_WeightType < CLASSIFICATION_STORE_MAX_NUM)
+            {
+                pContex->searchStartIndex_Use_WeightType++;
+            }
+            else
+            {
+                pContex->searchStartIndex_Use_WeightType_EndApear = 1;
+            }
         }
         else//backword search
         {
@@ -447,9 +472,10 @@ uint8 InnerScreenDataCenterHandle_Searching_Use_WeightType(tInnerScreenDataCente
             }
             else
             {
-                pContex->searchStartIndex_Use_WeightType = CLASSIFICATION_STORE_MAX_NUM - 1;
+                pContex->searchStartIndex_Use_WeightType_EndApear = 1;
             }
         }
+        #endif
         //
         if(1 == ret)
         {
@@ -457,7 +483,7 @@ uint8 InnerScreenDataCenterHandle_Searching_Use_WeightType(tInnerScreenDataCente
         }
         else
         {
-            if(searchIndex_Record == pContex->searchStartIndex_Use_WeightType)
+            if(1 == pContex->searchStartIndex_Use_WeightType_EndApear)
             {
                 ret = 0xFF;
                 break;//not search out at total cycle , break while(1)
@@ -567,7 +593,7 @@ void InnerScreenDataCenterHandle_PageAllIndexSearching(tInnerScreenDataCenterHan
             {
                 pContex->searchOutIndexArry[i] =  pContex->searchOutIndex_CheckedBy_UTCTime;
                 //
-
+                
 
                 //
                 i++;
@@ -609,8 +635,11 @@ void InnerScreenDataCenterHandle_Searching_PageDown(tInnerScreenDataCenterHandle
     if(i >= CLASSIFICATION_SEARCH_DISPLAY_NUM)
     {
         pContex->targetPageNum = pContex->curPageNum + 1;
-        InnerScreenDataCenterHandle_PageAllIndexSearching(pContex);
-        pContex->curPageNum++;
+        //InnerScreenDataCenterHandle_PageAllIndexSearching(pContex);
+
+
+
+        //pContex->curPageNum++;
         //send data to screen ....
     }
 }
@@ -623,8 +652,8 @@ void InnerScreenDataCenterHandle_Searching_PageUp(tInnerScreenDataCenterHandleSt
     if(pContex->curPageNum > 1)
     {
         pContex->targetPageNum = pContex->curPageNum - 1;
-        InnerScreenDataCenterHandle_PageAllIndexSearching(pContex);
-        pContex->curPageNum--;
+        //InnerScreenDataCenterHandle_PageAllIndexSearching(pContex);
+        //pContex->curPageNum--;
         //send data to screen ....
     }
 }
@@ -639,8 +668,6 @@ UINT8 oneGroupSearchOutForDisplay(UINT16 inIndex, UINT8 in_MaxLen , UINT8 *pOutD
     UINT32 payloadOffset = 0;
     struct tm lUTCDecodeTime;
     sint64 lS64UTCTime = 0;
-
-
     //
     while(1 != ret)
     {
@@ -840,7 +867,70 @@ UINT8 oneGroupSearchOutForDisplay(UINT16 inIndex, UINT8 in_MaxLen , UINT8 *pOutD
 
 
 
+//删除所有记录的数据
+uint8 InnerScreenDataCenterHandle_ClearAllData(tInnerScreenDataCenterHandleStruct *pContex , tInnerScreenDataCenterStruct *pEntryData)
+{
+    uint8 ret = 0 ;
+    uint16 i = 0 , crc16 = 0;
+    tExtFlashOrderStruct pushOrder;
+    //if uper data store complete
+    if(0 == pContex->newDataEntryFlag)
+    {
+        pContex->newDataEntryFlag = 1;
+        if(1 == pContex->newDataEntryFlag)
+        {
+            //clear cfgInfo_weightType
+            for( i = 0 ; i < CLASSIFICATION_STORE_CFG_LEN ; i++ )
+            {
+                pContex->cfgInfo_weightType[i] = 0xFF;
+            }
+            crc16 = EECRC16(&pContex->cfgInfo_weightType[0],CLASSIFICATION_STORE_CFG_LEN); 
+            pContex->cfgInfo_weightType[CLASSIFICATION_STORE_CFG_LEN+0] = ( (crc16 >> 8) & 0x00ff);
+            pContex->cfgInfo_weightType[CLASSIFICATION_STORE_CFG_LEN+1] = ( (crc16 >> 0) & 0x00ff);
+            //pContex->userDataStoreIndex = 2*i + high_low;
+            pContex->userDataStoreIndex = pContex->userDataStoreIndex % CLASSIFICATION_STORE_MAX_NUM;
+            pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
+            pushOrder.RegAddress = CLASSIFICATION_STORE_CFG_START_ADD;
+            pushOrder.totalLen = CLASSIFICATION_STORE_CFG_END_ADD - CLASSIFICATION_STORE_CFG_START_ADD;
+            pushOrder.remainLen = CLASSIFICATION_STORE_CFG_END_ADD - CLASSIFICATION_STORE_CFG_START_ADD;
+            pushOrder.writePtr = &pContex->cfgInfo_weightType[0];
+            pushOrder.timeout = 1000;
+            ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_WEIGHTTYPE,&pushOrder);
+            if(1 == ret)
+            {
+                InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_WEIGHTTYPE);
+            }
+            //
 
+            //clear utctime
+            for( i = 0 ; i < CLASSIFICATION_STORE_CFG_TIME_LEN ; i++ )
+            {
+                pContex->cfgInfo_utcTime[i] = 0xFF;
+            }
+            crc16 = EECRC16(&pContex->cfgInfo_utcTime[0],CLASSIFICATION_STORE_CFG_TIME_LEN); 
+            pContex->cfgInfo_utcTime[CLASSIFICATION_STORE_CFG_TIME_LEN+0] = ( (crc16 >> 8) & 0x00ff);
+            pContex->cfgInfo_utcTime[CLASSIFICATION_STORE_CFG_TIME_LEN+1] = ( (crc16 >> 0) & 0x00ff);
+            //pContex->userDataStoreIndex = 2*i + high_low;
+            pContex->userDataStoreIndex = pContex->userDataStoreIndex % CLASSIFICATION_STORE_MAX_NUM;
+            pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
+            pushOrder.RegAddress = CLASSIFICATION_STORE_CFG_TIME_START_ADD;
+            pushOrder.totalLen = CLASSIFICATION_STORE_CFG_TIME_END_ADD;
+            pushOrder.remainLen = CLASSIFICATION_STORE_CFG_TIME_END_ADD;
+            pushOrder.writePtr = &pContex->cfgInfo_utcTime[0];
+            pushOrder.timeout = 1000;
+            ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_WEIGHTTYPE,&pushOrder);
+            if(1 == ret)
+            {
+                InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_WEIGHTTYPE);
+            }
+        }
+    }
+    if(ret == 0)
+    {
+        pContex->newDataEntryFlag = 0 ;
+    }
+    return ret;
+}
 
 
 
@@ -971,7 +1061,9 @@ uint8 InnerScreenDataCenterHandle_QueueEntry(tInnerScreenDataCenterHandleStruct 
         memcpy(&pContex->userDataStoreData[pos_offset],&pEntryData->dc_weight[0],4);
         crc16 = EECRC16(&pContex->userDataStoreData[0],(CLASSIFICATION_STORE_DATA_SINGLE_LEN-2)); 
         pContex->userDataStoreData[CLASSIFICATION_STORE_DATA_SINGLE_LEN-2] = ( (crc16 >> 8) & 0x00ff);
-        pContex->userDataStoreData[CLASSIFICATION_STORE_DATA_SINGLE_LEN-1] = ( (crc16 >> 0) & 0x00ff);    
+        pContex->userDataStoreData[CLASSIFICATION_STORE_DATA_SINGLE_LEN-1] = ( (crc16 >> 0) & 0x00ff); 
+        memcpy( &pContex->dataCenterPayload[CLASSIFICATION_STORE_DATA_SINGLE_LEN * pContex->userDataStoreIndex],
+                &pContex->userDataStoreData[0],CLASSIFICATION_STORE_DATA_SINGLE_LEN);
         //   
         pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
         pushOrder.RegAddress = CLASSIFICATION_STORE_DATA_START_ADD + pContex->userDataStoreIndex * CLASSIFICATION_STORE_DATA_SINGLE_LEN;
@@ -1173,12 +1265,35 @@ void InnerScreenDataCenterHandle_MainFunction(void)
     tInnerScreenDataCenterStruct entryData;
     tExtFlashOrderStruct pushOrder;
     T5LType *pSdwe = g_ScreenHandle[ScreenIndex_Smaller].Ctx;
+    static uint8 emptyFlag = 0 ;
     //
     switch(pContex->needToStore)
     {
         case 0x77:
             InnerScreenDataCenterHandle_WeightClassification_Init(pContex);
-            pContex->needToStore = 0 ;
+            pContex->needToStore = 0x80 ;
+        break;
+
+        case 0xFE://删除所有
+            if(0 == pContex->newDataEntryFlag)
+            {
+                InnerScreenDataCenterHandle_ClearAll_jobStatus(pContex);
+                pContex->pRealTimeData->utctime = gS64UTCTime;
+                ret = InnerScreenDataCenterHandle_ClearAllData(pContex,pContex->pRealTimeData);
+                if(1 == ret)
+                {
+                    pContex->needToStore = 0xFD;
+                }
+            }
+        break;
+        case 0xFD:
+            if(1 == InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(pContex))
+            {
+                pContex->newDataEntryFlag = 0;
+                //
+                pContex->needToStore = 0 ;
+                preWeight = -1000 ;
+            }
         break;
 
 
@@ -1188,6 +1303,12 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             {
                 innerScreenDiwen_LSB2MSB(&InnerScreenDataCenteHandle.dataCenterDisData[index_i][0],outLen);
                 pContex->needToStore = 0x69;
+                emptyFlag = 0;
+            }
+            else
+            {
+                emptyFlag = 1;
+                pContex->needToStore = 0x69;
             }
         break;
 
@@ -1195,15 +1316,32 @@ void InnerScreenDataCenterHandle_MainFunction(void)
 			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
 				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
 			{
-				t5lWriteVarible(pSdwe,(address+0x80*index_i),
-                            (INT16 *)&InnerScreenDataCenteHandle.dataCenterDisData[index_i][0],
-                            (0x80/2),0);
-                pContex->needToStore = 0x6A;
+                if(0 == emptyFlag)
+                {
+                    t5lWriteVarible(pSdwe,(address+0x80*index_i),
+                                (INT16 *)&InnerScreenDataCenteHandle.dataCenterDisData[index_i][0],
+                                (0x80/2),0);
+                }
+                else
+                {
+                    memset(&InnerScreenDataCenteHandle.dataCenterDisData[index_i][0],0,CLASSIFICATION_SEARCH_DISPLAY_LEN);
+                    t5lWriteVarible(pSdwe,(address+0x80*index_i),
+                                (INT16 *)&InnerScreenDataCenteHandle.dataCenterDisData[index_i][0],
+                                (0x80/2),0);
+                }
+
+                pContex->needToStore = 0x68;
+                index_i++;
+                if(index_i >= CLASSIFICATION_SEARCH_DISPLAY_NUM)
+                {
+                    index_i = 0 ;
+                    pContex->needToStore = 0x6A;
+                }
 			}
         break;
 
         case 0x6A:
-        
+            pContex->needToStore = 0x00;
         break;
 
         case 0x80:
@@ -1332,7 +1470,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
         case 2:
             if(1 == InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(pContex))
             {
-                //pContex->newDataEntryFlag = 0;
+                pContex->newDataEntryFlag = 0;
                 pContex->trigerStroreFromScreen = 0 ;
                 pContex->dataStoreCplt = 1;
                 g_T5LCtx[ScreenIndex_Smaller].triggerSaveVlu = 2;
