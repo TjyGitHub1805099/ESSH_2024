@@ -75,5 +75,7 @@ typedef struct sUsbStoreStruct
 extern void USBIf_Mainfunction(uint8 driver_status);
 
 extern uint8 upanPrepareStoreData(void);
+extern uint16 g_TrigerUSBStoreAll;
+#define APP_TRIGER_USB_STORE_ALL_VAL (0XA5A5)
 
 #endif

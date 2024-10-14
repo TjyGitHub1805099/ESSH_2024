@@ -18,6 +18,7 @@
 #include "app_UTCTimer.h"
 #include "time.h"
 #include "app_DataCenter.h"
+#include "usb_ESSH.h"
 
 struct tm localtm;
 //屏幕语音播报状态
@@ -585,13 +586,24 @@ UINT8 innerScreenRxHandle_SearchTimeSet(T5LType *pSdwe)
 //18
 UINT8 innerScreenRxHandle_OutputAll2Upan(T5LType *pSdwe)
 {
-	UINT8 matched = FALSE;
+	UINT8 matched = FALSE , i = 0;
 	if(pSdwe->SetAdd == DMG_FUNC_PAGE9_OUTPUT_CUR_PAGE_ADDRESS)
 	{
 		if(DMG_FUNC_PAGE9_OUTPUT_ALL_PAGE_VLU == pSdwe->SetData)
 		{
 			matched = TRUE;
-			upanPrepareStoreData();
+			InnerScreenDataCenterHandle_WeightClassification_Init(&InnerScreenDataCenteHandle);
+
+
+
+			for(i = 0 ; i < D_C_CLASSIFICATION_NUM ; i++)
+			{
+				InnerScreenDataCenteHandle.searchUseWeightType[i] = i;
+			}
+
+			//upanPrepareStoreData();
+			g_TrigerUSBStoreAll = APP_TRIGER_USB_STORE_ALL_VAL;
+
 		}
 	}
 	return matched;

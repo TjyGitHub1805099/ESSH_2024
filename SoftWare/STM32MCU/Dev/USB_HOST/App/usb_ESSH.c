@@ -201,7 +201,8 @@ uint8 USBIf_OrderContinue_Write(tUsbStoreHandleStruct *pContex, uint8 *pFileName
     }
     return ret;
 }
-
+uint16 g_TrigerUSBStoreAll = 0;
+uint8 upanPrepareStoreData(void);
 //mainfunction
 void USBIf_Mainfunction(ApplicationTypeDef driver_status)
 {
@@ -224,7 +225,20 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
         {
             case U_S_HANDLE_TYPE_IDLE:// = 0,
             {
-                if(0xA5 == pContex->usbIfTrigger)
+                if(APP_TRIGER_USB_STORE_ALL_VAL == g_TrigerUSBStoreAll)
+                {
+                    if(0 != upanPrepareStoreData())//每次存储2个，如果有数据代表需要执行存储
+                    {
+                        //upanPrepareStoreData 函数里面已经执行了存储
+                    }
+                    else
+                    {
+			            InnerScreenDataCenterHandle_WeightClassification_Init(&InnerScreenDataCenteHandle);
+                        g_TrigerUSBStoreAll = 0 ;
+                    }
+                }
+                //
+                if(U_S_HANDLE_TRIGER == pContex->usbIfTrigger)
                 {
                     pContex->retryCnt = U_S_RETRY_TIME;
                     pContex->retryOffsetTicks = U_S_RETRY_OFFSET_TICKS;
