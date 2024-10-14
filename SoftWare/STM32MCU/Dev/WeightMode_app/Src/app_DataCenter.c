@@ -891,8 +891,8 @@ uint8 InnerScreenDataCenterHandle_ClearAllData(tInnerScreenDataCenterHandleStruc
             pContex->userDataStoreIndex = pContex->userDataStoreIndex % CLASSIFICATION_STORE_MAX_NUM;
             pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
             pushOrder.RegAddress = CLASSIFICATION_STORE_CFG_START_ADD;
-            pushOrder.totalLen = CLASSIFICATION_STORE_CFG_END_ADD - CLASSIFICATION_STORE_CFG_START_ADD;
-            pushOrder.remainLen = CLASSIFICATION_STORE_CFG_END_ADD - CLASSIFICATION_STORE_CFG_START_ADD;
+            pushOrder.totalLen = CLASSIFICATION_STORE_CFG_LEN_TOTAL;
+            pushOrder.remainLen = CLASSIFICATION_STORE_CFG_LEN_TOTAL;
             pushOrder.writePtr = &pContex->cfgInfo_weightType[0];
             pushOrder.timeout = 1000;
             ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_WEIGHTTYPE,&pushOrder);
@@ -914,8 +914,8 @@ uint8 InnerScreenDataCenterHandle_ClearAllData(tInnerScreenDataCenterHandleStruc
             pContex->userDataStoreIndex = pContex->userDataStoreIndex % CLASSIFICATION_STORE_MAX_NUM;
             pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
             pushOrder.RegAddress = CLASSIFICATION_STORE_CFG_TIME_START_ADD;
-            pushOrder.totalLen = CLASSIFICATION_STORE_CFG_TIME_END_ADD;
-            pushOrder.remainLen = CLASSIFICATION_STORE_CFG_TIME_END_ADD;
+            pushOrder.totalLen = CLASSIFICATION_STORE_CFG_TIME_TOTAL_LEN;
+            pushOrder.remainLen = CLASSIFICATION_STORE_CFG_TIME_TOTAL_LEN;
             pushOrder.writePtr = &pContex->cfgInfo_utcTime[0];
             pushOrder.timeout = 1000;
             ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_WEIGHTTYPE,&pushOrder);
@@ -1278,7 +1278,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             if(0 == pContex->newDataEntryFlag)
             {
                 InnerScreenDataCenterHandle_ClearAll_jobStatus(pContex);
-                pContex->pRealTimeData->utctime = gS64UTCTime;
+                //pContex->pRealTimeData->utctime = gS64UTCTime;
                 ret = InnerScreenDataCenterHandle_ClearAllData(pContex,pContex->pRealTimeData);
                 if(1 == ret)
                 {
@@ -1293,9 +1293,10 @@ void InnerScreenDataCenterHandle_MainFunction(void)
                 //
                 pContex->needToStore = 0 ;
                 preWeight = -1000 ;
+                InnerScreenDataCenterHandle_WeightClassification_Init(&InnerScreenDataCenteHandle);
+                InnerScreenDataCenteHandle.needToStore = 0x68;//执行扫描显示
             }
         break;
-
 
         case 0x68:
             if(1 == oneGroupSearchOutForDisplay(index_i,0X80,

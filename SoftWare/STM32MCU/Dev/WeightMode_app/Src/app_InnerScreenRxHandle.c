@@ -182,6 +182,10 @@ UINT8 innerScreenRxHandle_RTC_YMDHMS(T5LType *pSdwe)
 		matched = TRUE;
 		//
 		gS64UTCTime = mymktime(&localtm);
+		if(gS64UTCTime < 0x66B40C68)
+		{
+			//gS64UTCTime = 0x66B40C68 + 100;
+		}
 		gUTCDecodeTime = *(mygmtime(&gS64UTCTime));
 	}
 	return matched;
@@ -407,6 +411,11 @@ UINT8 innerScreenRxHandle_RemoveWeightTriger(T5LType *pSdwe)
 			//
 			setModbusSelfRemoveFlag(TRUE);
 		}
+		if(DMG_FUNC_JUMPTO_DATA_PAGE_VAL == (UINT16)pSdwe->SetData)
+		{
+			pSdweSmaller->jumpToDataCenterHandle = TRUE;
+		}
+
 	}
 	return matched;
 }
@@ -671,6 +680,11 @@ UINT8 innerScreenRxHandle_DataCenterPageHandle(T5LType *pSdwe)
 					InnerScreenDataCenteHandle.searchStartIndex_Use_WeightType /= CLASSIFICATION_SEARCH_DISPLAY_NUM;
 					InnerScreenDataCenteHandle.searchStartIndex_Use_WeightType *= CLASSIFICATION_SEARCH_DISPLAY_NUM;
 
+					InnerScreenDataCenteHandle.needToStore = 0x68;//执行扫描显示
+				}
+				else
+				{
+					InnerScreenDataCenteHandle.searchStartIndex_Use_WeightType = 0 ;
 					InnerScreenDataCenteHandle.needToStore = 0x68;//执行扫描显示
 				}
 			}

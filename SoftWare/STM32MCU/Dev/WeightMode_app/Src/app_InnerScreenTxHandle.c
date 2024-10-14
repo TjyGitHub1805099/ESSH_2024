@@ -23,6 +23,7 @@ UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
 	UINT8 i = 0 , j = 0;
 	INT16 sendData[64],len=0;
 	UINT8 result = FALSE ;
+	static UINT32 tickticktick = 0 ;
 	//
 	switch(pSdwe->sendSysParaDataToDiwenIndex)
 	{
@@ -46,12 +47,17 @@ UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
 				if(0 != screenPublic_FreshDisplayPosition_Of_WeightVlu(pSdwe))//根据小数是否打开 发送相关数据
 				{
 					pSdwe->sendSysParaDataToDiwenIndex=0x81;
+					tickticktick = 0 ;
 				}
 			}
 		break;
 
 		case 0x81://获取RTC YM
-			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
+			if(tickticktick++ < 2000 )
+			{
+
+			}
+			else if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
 				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
 			{
 				screenPublic_ScreenRTCGet_YMDHMS(pSdwe);
@@ -507,6 +513,25 @@ UINT8 innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle(T5LType *pSd
 	return matched;
 }
 
+
+
+//3
+UINT8 innerScreenTxHandle_JumpToDataCenterPage(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	if(TRUE == pSdwe->jumpToDataCenterHandle)
+	{
+		matched = TRUE;
+		//if(0 != screenPublic_PageJump(pSdwe,pSdwe->screenCalibrationPage))
+		{
+			InnerScreenDataCenterHandle_WeightClassification_Init(&InnerScreenDataCenteHandle);
+			InnerScreenDataCenteHandle.needToStore = 0x68;//执行扫描显示
+			pSdwe->jumpToDataCenterHandle = FALSE;
+		}
+	}
+	return matched;
+}
+
 //================================================================================================
 //===============================[函数列表：内屏初始化+事件处理+周期数据]============================
 //================================================================================================
@@ -519,7 +544,8 @@ screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM]=
 	{0,	3, &screenPublic_PointTrigerHandle},//==C3 event arrive:At Calibration Page , point trigerd
 	{0,	4, &screenPublic_RemoveWeightTrigerHandle},//==C3 event arrive:At Calibration Page , point trigerd
 	{0 ,5, &innerScreenTxHandle_JumpToCalibrationPage},
-	{0,	6, &innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle},//normaly weight color voice handle
+	{0 ,6, &innerScreenTxHandle_JumpToDataCenterPage},
+	{0,	7, &innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle},//normaly weight color voice handle
 
 };
 

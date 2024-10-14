@@ -22,7 +22,7 @@
 //sys main task status
 UINT32 g_sys_ms_tick = 0 ;
 struct tm gUTCDecodeTime;
-sint64 gS64UTCTime = 0;
+sint64 gS64UTCTime = 0xFFFFFFFF;//0x66B40C68;
 /*******************************************************************************
  * Functions
  ******************************************************************************/
@@ -90,7 +90,7 @@ void app_main_task(void)
 
 	ExFlash_MainFunction();
 
-	if((g_sys_ms_tick % 1000 == 0) && (0 != gS64UTCTime))
+	if((g_sys_ms_tick % 1000 == 0) && (0xFFFFFFFF != gS64UTCTime))
 	{
 		gS64UTCTime++;
 		gUTCDecodeTime = *(mygmtime(&gS64UTCTime));

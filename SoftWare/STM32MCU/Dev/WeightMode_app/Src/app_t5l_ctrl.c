@@ -1137,6 +1137,8 @@ UINT8 screenPublic_RemoveWeightTrigerHandle(T5LType *pSdwe)
 	return matched;
 }
 
+
+
 //公共函数：写序号事件触发
 UINT8 screenPublic_WriteIndexHandle(T5LType *pSdwe)
 {

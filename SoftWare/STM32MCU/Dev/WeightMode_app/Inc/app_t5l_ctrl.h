@@ -56,6 +56,11 @@
 #define DMG_FUNC_REMOVE_WEIGHT_ADDRESS				(0X8000)
 #define DMG_FUNC_REMOVE_WEIGHT_VAL					(0X0012)
 
+#define DMG_FUNC_JUMPTO_DATA_PAGE_ADDRESS			(0X8000)
+#define DMG_FUNC_JUMPTO_DATA_PAGE_VAL				(0X0034)
+
+
+
 //page5:数据筛选
 #define DMG_FUNC_PAGE5_OUPUT_ALL_ADDRESS			(0X8005)
 #define DMG_FUNC_PAGE5_OUPUT_ALL_VAL				(0X0512)
@@ -498,6 +503,8 @@ typedef struct structSdweType
 	UINT16 	dataCenterDisplayPage;
 	UINT16 	dataCenterDisplayPagePre;
 
+	UINT8   jumpToDataCenterHandle;
+
 }T5LType;
 
 #define ScreenCycleTypeDefault   { \
@@ -600,6 +607,7 @@ typedef struct structSdweType
 	.triggerSaveVluPre = 0,\
 	.dataCenterDisplayPage = 0,\
 	.dataCenterDisplayPagePre = 0xff ,\
+	.jumpToDataCenterHandle = 0 ,\
 }
 
 /** ModbusRtu设备默认配置 */
@@ -695,7 +703,7 @@ typedef struct structScreenHandleType
 }ScreenHandleType;
 
 #define SCREEN_RX_HANDLE_TOTAL_NUM	(21)	/**< 屏幕RX数据处理事件数量 */
-#define SCREEN_TX_HANDLE_TOTAL_NUM	(7)	/**< 屏幕TX数据处理事件数量 */
+#define SCREEN_TX_HANDLE_TOTAL_NUM	(8)	/**< 屏幕TX数据处理事件数量 */
 extern screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM];
 extern screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM];
 
