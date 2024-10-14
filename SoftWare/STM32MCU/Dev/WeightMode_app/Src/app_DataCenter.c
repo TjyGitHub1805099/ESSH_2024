@@ -145,6 +145,7 @@ void InnerScreenDataCenterHandle_WeightClassification_Init(tInnerScreenDataCente
     //
     pContex->curPageNum = 0 ;
     pContex->targetPageNum = pContex->curPageNum + 1;
+    pContex->dir = 1;
     //
     pContex->searchOutIndex_Use_WeightType = 0;
     pContex->searchStartIndex_Use_WeightType = 0;
@@ -447,6 +448,10 @@ uint8 InnerScreenDataCenterHandle_Searching_Use_WeightType(tInnerScreenDataCente
         if(pContex->searchStartIndex_Use_WeightType < CLASSIFICATION_STORE_MAX_NUM)
         {
             pContex->searchStartIndex_Use_WeightType++;
+            if(pContex->searchStartIndex_Use_WeightType >= CLASSIFICATION_STORE_MAX_NUM)
+            {
+                pContex->searchStartIndex_Use_WeightType_EndApear = 1;
+            }
         }
         else
         {

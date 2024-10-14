@@ -602,9 +602,6 @@ UINT8 innerScreenRxHandle_OutputAll2Upan(T5LType *pSdwe)
 		{
 			matched = TRUE;
 			InnerScreenDataCenterHandle_WeightClassification_Init(&InnerScreenDataCenteHandle);
-
-
-
 			for(i = 0 ; i < D_C_CLASSIFICATION_NUM ; i++)
 			{
 				InnerScreenDataCenteHandle.searchUseWeightType[i] = i;
