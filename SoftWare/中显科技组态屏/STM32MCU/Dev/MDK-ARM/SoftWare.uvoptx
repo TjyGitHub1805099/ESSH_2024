@@ -164,7 +164,6 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
-          <Name></Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -201,135 +200,56 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>655</LineNumber>
-          <EnabledFlag>0</EnabledFlag>
-          <Address>134280476</Address>
+          <LineNumber>238</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134265762</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\WeightMode_app\Src\app_InnerScreenRxHandle.c</Filename>
+          <Filename>D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\涓樉绉戞妧缁勬€佸睆\STM32MCU\Dev\WeightMode_app\Src\app_usbsmq.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\SoftWare\../WeightMode_app/Src/app_InnerScreenRxHandle.c\655</Expression>
+          <Expression>\\SoftWare\../WeightMode_app/Src/app_usbsmq.c\238</Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>443</LineNumber>
-          <EnabledFlag>0</EnabledFlag>
-          <Address>134246116</Address>
+          <LineNumber>222</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134265672</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\WeightMode_app\Src\app_DataCenter.c</Filename>
+          <Filename>D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\涓樉绉戞妧缁勬€佸睆\STM32MCU\Dev\WeightMode_app\Src\app_usbsmq.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\SoftWare\../WeightMode_app/Src/app_DataCenter.c\443</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>428</LineNumber>
-          <EnabledFlag>0</EnabledFlag>
-          <Address>134246042</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\WeightMode_app\Src\app_DataCenter.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\SoftWare\../WeightMode_app/Src/app_DataCenter.c\428</Expression>
-        </Bp>
-        <Bp>
-          <Number>3</Number>
-          <Type>0</Type>
-          <LineNumber>413</LineNumber>
-          <EnabledFlag>0</EnabledFlag>
-          <Address>134245956</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\WeightMode_app\Src\app_DataCenter.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\SoftWare\../WeightMode_app/Src/app_DataCenter.c\413</Expression>
-        </Bp>
-        <Bp>
-          <Number>4</Number>
-          <Type>0</Type>
-          <LineNumber>243</LineNumber>
-          <EnabledFlag>0</EnabledFlag>
-          <Address>134263374</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\USB_HOST\App\usb_ESSH.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\SoftWare\../USB_HOST/App/usb_ESSH.c\243</Expression>
-        </Bp>
-        <Bp>
-          <Number>5</Number>
-          <Type>0</Type>
-          <LineNumber>219</LineNumber>
-          <EnabledFlag>0</EnabledFlag>
-          <Address>134263292</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\USB_HOST\App\usb_ESSH.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\SoftWare\../USB_HOST/App/usb_ESSH.c\219</Expression>
+          <Expression>\\SoftWare\../WeightMode_app/Src/app_usbsmq.c\222</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>upanStoreDataGroup</ItemText>
+          <ItemText>sUSBSMQHandleContex.encodeDataOffset,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>InnerScreenDataCenteHandle,0x10</ItemText>
+          <ItemText>sUSBSMQHandleContex.decodeDataVaild</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>gS64UTCTime</ItemText>
+          <ItemText>sUSBSMQHandleContex.decodeVaildLen</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>gUTCDecodeTime,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>4</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>lUTCDecodeTime,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>5</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>lS64UTCTime,0x10</ItemText>
-        </Ww>
-        <Ww>
-          <count>6</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>t5lCtx-&gt;rxData</ItemText>
+          <ItemText>sUSBSMQHandleContex,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -356,7 +276,7 @@
         <aPa1>0</aPa1>
         <AscS4>0</AscS4>
         <aSer4>0</aSer4>
-        <StkLoc>0</StkLoc>
+        <StkLoc>1</StkLoc>
         <TrcWin>0</TrcWin>
         <newCpu>0</newCpu>
         <uProt>0</uProt>

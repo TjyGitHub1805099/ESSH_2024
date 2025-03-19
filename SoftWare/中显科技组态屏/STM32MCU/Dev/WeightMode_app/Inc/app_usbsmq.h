@@ -148,9 +148,9 @@
 57 AB 01 00 00 28 00 00 00 00 00 
 57 AB 01 00 00 00 00 00 00 00 00 
 */
-#define USBSMQ_KEYBORD_MAX_NUM		(32)
-#define USBSMQ_KEYBORD_SINGLE_LEN	(64)
-
+#define USBSMQ_KEYBORD_MAX_NUM			(40)//15位条码= 15*2 + 10 
+#define USBSMQ_KEYBORD_SINGLE_LEN		(64)
+#define USBSMQ_KEYBORD_SINGLE_LEN_COPY	(32)
 typedef enum
 {
 	USBSMQ_HANDLE_INIT = 0,    /**< 初始化 */
@@ -171,7 +171,7 @@ typedef struct sUSBSMQHandleStruct
 	UINT8 RxFinishFlag;
 	UINT8 RxLength;
 	UINT8 rxDataUart[USBSMQ_KEYBORD_SINGLE_LEN];//串口接收的数据
-	UINT8 enCodeData[USBSMQ_KEYBORD_MAX_NUM][USBSMQ_KEYBORD_SINGLE_LEN];//串口接收的数据复制到encode
+	UINT8 enCodeData[USBSMQ_KEYBORD_MAX_NUM][USBSMQ_KEYBORD_SINGLE_LEN_COPY];//串口接收的数据复制到encode
 	UINT8 checkoutData[USBSMQ_KEYBORD_MAX_NUM];
 	UINT8 encodeDataOffset;
 

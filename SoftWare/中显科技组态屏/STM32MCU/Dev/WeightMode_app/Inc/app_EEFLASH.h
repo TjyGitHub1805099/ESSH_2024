@@ -26,6 +26,16 @@ typedef enum
     E_F_HANDLE_JOBID_R_DATACENTER_UTCTIMEE_CRC=0x07,//utctime CRC read
     E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD=0x08,//user data payload write
     E_F_HANDLE_JOBID_R_DATACENTER_DATAPAYLOAD=0x09,//user data payload read
+
+    //20250319
+    E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025=0x0A,//user data payload read
+    E_F_HANDLE_JOBID_R_DATACENTER_DATAPAYLOAD_2025=0x0B,//user data payload read
+    E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_DATAPAYLOAD_2025=0x0C,//user data payload read
+    E_F_HANDLE_JOBID_R_DATACENTER_BACKUP_DATAPAYLOAD_2025=0x0D,//user data payload read
+    E_F_HANDLE_JOBID_W_DATACENTER_CRC_DATAPAYLOAD_2025=0x0E,//user data payload read
+    E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_CRC_DATAPAYLOAD_2025=0x0F,//user data payload read
+
+    //
     E_F_HANDLE_JOBID_WR_MAX
 }eExtFlashHandleJobIdType;
 

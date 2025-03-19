@@ -31,12 +31,15 @@
 #include "app_t5l_ctrl.h"
 #include "app_usbsmq.h"
 
+#if (CF_ATC24_USERDATA_BACKUP_STORE_END_ADD > EXT_FLASH_MAX_LOGIC_ADD)
+# error "CF_ATC24_USERDATA_BACKUP_STORE_END_ADD overflow"
+#endif
+
 extern UINT32 get_SysTick_ByTimer(void);
 /**********************************************************************************************************************
  * DO NOT CHANGE THIS COMMENT!           << End of include and declaration area >>          DO NOT CHANGE THIS COMMENT!
  *********************************************************************************************************************/
 static tInnerScreenDataCenterStruct InnerScreenDataCenter;
-
 tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle = 
 {
     .trigerStroreFromScreen = 0,
@@ -136,7 +139,13 @@ tDataCenterExtFlashCallbackStruct dataCenterCallbackRegisterList[E_F_HANDLE_JOBI
     {E_F_HANDLE_JOBID_W_DATACENTER_UTCTIMEE_CRC,DataCenterHandle_Callback},
     {E_F_HANDLE_JOBID_R_DATACENTER_UTCTIMEE_CRC,DataCenterHandle_Callback},
     {E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD,DataCenterHandle_Callback},
-    {E_F_HANDLE_JOBID_R_DATACENTER_DATAPAYLOAD,DataCenterHandle_Callback}
+    {E_F_HANDLE_JOBID_R_DATACENTER_DATAPAYLOAD,DataCenterHandle_Callback},
+    {E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025,DataCenterHandle_Callback},
+    {E_F_HANDLE_JOBID_R_DATACENTER_DATAPAYLOAD_2025,DataCenterHandle_Callback},
+    {E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_DATAPAYLOAD_2025,DataCenterHandle_Callback},
+    {E_F_HANDLE_JOBID_R_DATACENTER_BACKUP_DATAPAYLOAD_2025,DataCenterHandle_Callback},
+    {E_F_HANDLE_JOBID_W_DATACENTER_CRC_DATAPAYLOAD_2025,DataCenterHandle_Callback},
+    {E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_CRC_DATAPAYLOAD_2025,DataCenterHandle_Callback}
 };
 
 void InnerScreenDataCenterHandle_WeightClassification_Init(tInnerScreenDataCenterHandleStruct *pContex)
@@ -685,7 +694,7 @@ UINT8 oneGroupSearchOutForDisplay(UINT16 inIndex, UINT8 in_MaxLen , UINT8 *pOutD
             {
                 //开始准备数据
 
-                //1.表格中的：序号
+                //1.表格中的：员工序号
                 lenOffset = CLASSIFICATION_SEARCH_DISPLAY_OFFSET_INDEX ;
                 pOutData[lenOffset+0] = '0' + inIndex/1000;
                 pOutData[lenOffset+1] = '0' + inIndex%1000/100;
@@ -1153,7 +1162,7 @@ void InnerScreenDataCenterHandle_ClearAll_jobStatus(tInnerScreenDataCenterHandle
 uint8 InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(tInnerScreenDataCenterHandleStruct *pContex)
 {
     uint8 i = 0 ;
-    uint8 ret = 0 ;
+    uint8 ret = 1 ;
     for(i = 0 ; i < E_F_HANDLE_JOBID_WR_MAX ; i++)
     {
         if(1 == pContex->jobStatus[i][0])
@@ -1257,7 +1266,7 @@ void innerScreenDiwen_LSB2MSB(uint8 *pData,uint16 len)
 
 
 
-
+#if 0
 //data center
 void InnerScreenDataCenterHandle_MainFunction(void)
 {
@@ -1304,7 +1313,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
         break;
 
         case 0x68:
-            if(1 == oneGroupSearchOutForDisplay(index_i,0X80,
+            if(1 == oneGroupSearchOutForDisplay(index_i,0X20,
                     &InnerScreenDataCenteHandle.dataCenterDisData[index_i][0],&outLen))
             {
                 innerScreenDiwen_LSB2MSB(&InnerScreenDataCenteHandle.dataCenterDisData[index_i][0],outLen);
@@ -1493,4 +1502,350 @@ void InnerScreenDataCenterHandle_MainFunction(void)
         break;
     }
 }
+
+#else//20250319
+//
+uint8 InnerScreenDataCenterHandle_CaculateCrc16_2025(tInnerScreenDataCenterHandleStruct *pContex)
+{
+
+}
+uint8 InnerScreenDataCenterHandle_Init_OrderTriger2025(tInnerScreenDataCenterHandleStruct *pContex)
+{
+    uint8 ret = 0 ;
+    tExtFlashOrderStruct pushOrder;
+    //读取用户数据
+    pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
+    pushOrder.RegAddress = CF_ATC24_USERDATA_STORE_START_ADD;
+    pushOrder.totalLen = CF_ATC24_USERDATA_STORE_LEN;
+    pushOrder.remainLen = CF_ATC24_USERDATA_STORE_LEN;
+    pushOrder.readPtr = &pContex->s_StoreData[0];
+    pushOrder.timeout = 20000;
+    ret = ExFlashIf_Sync_Read(E_F_HANDLE_JOBID_R_DATACENTER_DATAPAYLOAD_2025,&pushOrder);
+    if(1 == ret)
+    {
+        InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_R_DATACENTER_DATAPAYLOAD_2025);
+    }    
+    //读取用户数据的备份区
+    if(1 == ret)
+    {
+        pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
+        pushOrder.RegAddress = CF_ATC24_USERDATA_BACKUP_STORE_START_ADD;
+        pushOrder.totalLen = CF_ATC24_USERDATA_BACKUP_STORE_LEN;
+        pushOrder.remainLen = CF_ATC24_USERDATA_BACKUP_STORE_LEN;
+        pushOrder.readPtr = &pContex->s_StoreData_Backup[0];
+        pushOrder.timeout = 20000;
+        ret = ExFlashIf_Sync_Read(E_F_HANDLE_JOBID_R_DATACENTER_BACKUP_DATAPAYLOAD_2025,&pushOrder);
+        if(1 == ret)
+        {
+            InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_R_DATACENTER_BACKUP_DATAPAYLOAD_2025);
+        } 
+    }
+    return ret;
+}
+
+void InnerScreenDataCenterHandle_MainFunction(void)
+{
+    tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
+    uint16 offset = 0 , len = 0 , ret = 0;
+    uint16 crc16;
+    tExtFlashOrderStruct pushOrder;
+
+    switch(pContex->handle)
+    {
+        case D_C_HANDLE_INIT:
+            pContex->initSuccess = 0 ;
+            memset(&pContex->singleStoreData[0],0,CF_STORE_TOTAL_LEN);//存储数据清零
+            pContex->handle = D_C_HANDLE_READUSERDATA;
+        break;
+
+        case D_C_HANDLE_READUSERDATA:
+            InnerScreenDataCenterHandle_Init_OrderTriger2025(pContex);
+            pContex->handle = D_C_HANDLE_READUSERDATA_WAIT_CPLT;
+        break;
+
+        case D_C_HANDLE_READUSERDATA_WAIT_CPLT:
+            if(1 == InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(pContex))
+            {
+                pContex->crc16 = 0;
+                pContex->crc16 += pContex->s_StoreData[CF_ATC24_USERDATA_STORE_LEN - 2];//最后2字节CRC
+                pContex->crc16 <<= 8;
+                pContex->crc16 &= 0xff00;
+                pContex->crc16 += pContex->s_StoreData[CF_ATC24_USERDATA_STORE_LEN - 1];//最后2字节CRC
+                crc16 = EECRC16(&pContex->s_StoreData[0],(CF_ATC24_USERDATA_STORE_LEN-2));
+                if(crc16 == pContex->crc16)
+                {
+                    pContex->initSuccess = 1;
+                    //
+                    pContex->userStorePosition = 0;
+                    pContex->userStorePosition += pContex->s_StoreData[CF_ATC24_USERDATA_STORE_LEN - 4];//最后3`4字节存储位置
+                    pContex->userStorePosition <= 8;
+                    pContex->userStorePosition &= 0xff00;
+                    pContex->userStorePosition += pContex->s_StoreData[CF_ATC24_USERDATA_STORE_LEN - 3];//最后3`4字节存储位置
+                }
+                else//第一份数据有误
+                {
+                    pContex->crc16 = 0;
+                    pContex->crc16 += pContex->s_StoreData_Backup[CF_ATC24_USERDATA_STORE_LEN - 2];//最后2字节CRC
+                    pContex->crc16 <<= 8;
+                    pContex->crc16 &= 0xff00;
+                    pContex->crc16 += pContex->s_StoreData_Backup[CF_ATC24_USERDATA_STORE_LEN - 1];//最后2字节CRC
+                    crc16 = EECRC16(&pContex->s_StoreData_Backup[0],(CF_ATC24_USERDATA_BACKUP_STORE_LEN-2));
+                    if(crc16 == pContex->crc16)
+                    {
+                        pContex->initSuccess = 1;
+                        //
+                        pContex->userStorePosition = 0;
+                        pContex->userStorePosition += pContex->s_StoreData_Backup[CF_ATC24_USERDATA_STORE_LEN - 4];//最后3`4字节存储位置
+                        pContex->userStorePosition <= 8;
+                        pContex->userStorePosition &= 0xff00;
+                        pContex->userStorePosition += pContex->s_StoreData_Backup[CF_ATC24_USERDATA_STORE_LEN - 3];//最后3`4字节存储位置
+                        //原始数据有误 备份数据正常 复制备份数据给原始数据 再进行存储
+                        memcpy(&pContex->s_StoreData[0],&pContex->s_StoreData_Backup[0],CF_ATC24_USERDATA_BACKUP_STORE_LEN);
+                        //
+                        pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
+                        pushOrder.RegAddress = CF_ATC24_USERDATA_STORE_START_ADD;
+                        pushOrder.totalLen = CF_ATC24_USERDATA_STORE_LEN;
+                        pushOrder.remainLen = CF_ATC24_USERDATA_STORE_LEN;
+                        pushOrder.writePtr = &pContex->s_StoreData[0];
+                        pushOrder.timeout = 20000;
+                        ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025,&pushOrder);    
+                        if(1 == ret)
+                        {
+                            InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025);
+                        } 
+                    }
+                    else
+                    {
+                        offset = CF_ATC24_USERDATA_STORE_LEN - CF_ATC24_USERDATA_STORE_POSITION_LEN - CLASSIFICATION_STORE_CFG_CRCLEN;
+                        len = CF_ATC24_USERDATA_STORE_LEN;
+                        //
+                        memset(&pContex->s_StoreData[0],0,CF_ATC24_USERDATA_STORE_LEN);
+                        pContex->crc16 = EECRC16(&pContex->s_StoreData[0],(CF_ATC24_USERDATA_STORE_LEN-2));
+                        pContex->s_StoreData[offset + 2] = (pContex->crc16 >> 8) & 0xff;
+                        pContex->s_StoreData[offset + 3] = (pContex->crc16 >> 0) & 0xff;
+                        memcpy(&pContex->s_StoreData_Backup[0],&pContex->s_StoreData[0],CF_ATC24_USERDATA_STORE_LEN);
+                        //
+                        pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
+                        pushOrder.RegAddress = CF_ATC24_USERDATA_STORE_START_ADD;
+                        pushOrder.totalLen = CF_ATC24_USERDATA_STORE_LEN;
+                        pushOrder.remainLen = CF_ATC24_USERDATA_STORE_LEN;
+                        pushOrder.writePtr = &pContex->s_StoreData[0];
+                        pushOrder.timeout = 20000;
+                        ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025,&pushOrder);    
+                        if(1 == ret)
+                        {
+                            InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025);
+                        } 
+                        //
+                        if(1 == ret)
+                        {
+                            pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
+                            pushOrder.RegAddress = CF_ATC24_USERDATA_BACKUP_STORE_START_ADD;
+                            pushOrder.totalLen = CF_ATC24_USERDATA_BACKUP_STORE_LEN;
+                            pushOrder.remainLen = CF_ATC24_USERDATA_BACKUP_STORE_LEN;
+                            pushOrder.writePtr = &pContex->s_StoreData_Backup[0];
+                            pushOrder.timeout = 20000;
+                            ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_DATAPAYLOAD_2025,&pushOrder);    
+                            if(1 == ret)
+                            {
+                                InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_DATAPAYLOAD_2025);
+                            }    
+                        }
+                    }
+                }
+                //==
+                if(0 == pContex->initSuccess)
+                {
+                    pContex->userStorePosition = 0;
+                    pContex->handle = D_C_HANDLE_READUSERDATA_WAIT_ERR_HANDLE_CPLT;
+                }
+                else
+                {
+                    pContex->userStorePosition = pContex->userStorePosition % CLASSIFICATION_STORE_MAX_NUM;
+                    pContex->handle = D_C_HANDLE_MAX_NUM;
+                }
+            }
+        break;
+        case D_C_HANDLE_READUSERDATA_WAIT_ERR_HANDLE_CPLT:
+            if(1 == InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(pContex))
+            {
+                pContex->handle = D_C_HANDLE_MAX_NUM;
+            }
+        break;
+
+        //==开始正常控制
+        case D_C_HANDLE_YUANGONGHAO:
+
+            //==
+            offset = 0;
+            len = CF_STORE_GONGHAO_TYPEBYTE;
+            memcpy(&pContex->singleStoreData[offset],&pContex->yuangonghao[0],len);
+            pContex->handle = D_C_HANDLE_BCCODE;
+        break;
+        case D_C_HANDLE_BCCODE:
+
+            //==
+            offset = CF_STORE_GONGHAO_TYPEBYTE;
+            len = CF_STORE_BCCODE_TYPEBYTE;
+            memcpy(&pContex->singleStoreData[offset],&pContex->bccode[0],len);
+            pContex->handle = D_C_HANDLE_UTCTIME2CHAR;
+        break;
+        case D_C_HANDLE_UTCTIME2CHAR:
+
+            //==
+            offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE;
+            len = CF_STORE_CFG_TIME_TYPEBYTE;
+            memcpy(&pContex->singleStoreData[offset],&pContex->utctime[0],len);
+            pContex->handle = D_C_HANDLE_WEIGHT;
+        break;
+        case D_C_HANDLE_WEIGHT:
+
+            //==
+            offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + CF_STORE_CFG_TIME_TYPEBYTE;
+            len = CF_STORE_WEIGHT_TYPEBYTE;
+            memcpy(&pContex->singleStoreData[offset],&pContex->weight[0],len);
+            pContex->handle = D_C_HANDLE_LEIXING;
+        break;
+        case D_C_HANDLE_LEIXING:
+
+            //==
+            offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE;
+            len = CF_STORE_LEIXING_TYPEBYTE;
+            memcpy(&pContex->singleStoreData[offset],&pContex->leixing[0],len);
+            pContex->handle = D_C_HANDLE_GUIGE;
+        break;
+        case D_C_HANDLE_GUIGE:
+
+            //==
+            offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE + CF_STORE_LEIXING_TYPEBYTE;
+            len = CF_STORE_GUIGE_TYPEBYTE;
+            memcpy(&pContex->singleStoreData[offset],&pContex->guige[0],len);
+            pContex->handle = D_C_HANDLE_STORE2EE;
+        break;
+
+
+
+        //====开始存储 单次的数据
+        case D_C_HANDLE_STORE2EE:
+            offset = pContex->userStorePosition * CF_STORE_TOTAL_LEN;
+            len = CF_STORE_TOTAL_LEN;
+            memcpy(&pContex->s_StoreData[offset],&pContex->singleStoreData[0],CF_STORE_TOTAL_LEN);
+            //
+            pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
+            pushOrder.RegAddress = CF_ATC24_USERDATA_STORE_START_ADD + offset;
+            pushOrder.totalLen = CF_STORE_TOTAL_LEN;
+            pushOrder.remainLen = CF_STORE_TOTAL_LEN;
+            pushOrder.writePtr = &pContex->s_StoreData[offset];
+            pushOrder.timeout = 1000;
+            ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025,&pushOrder);    
+            if(1 == ret)
+            {
+                InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025);
+            }
+            //==
+            pContex->handle = D_C_HANDLE_STORE2EE_WAIT;
+        break;
+        case D_C_HANDLE_STORE2EE_WAIT:
+            if(1 == InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(pContex))
+            {
+                //==
+                pContex->handle = D_C_HANDLE_STORE2EE_CRC;
+            }
+        break;
+        //====开始存储 存储的位置 和 CRC
+        case D_C_HANDLE_STORE2EE_CRC:
+            offset = CF_ATC24_USERDATA_STORE_LEN - 2 - 2;
+            len = 2 + 2;
+            pContex->s_StoreData[offset + 0] = (pContex->userStorePosition >> 8) & 0xff;
+            pContex->s_StoreData[offset + 1] = (pContex->userStorePosition >> 0) & 0xff;
+            pContex->crc16 = EECRC16(&pContex->s_StoreData[0],(CF_ATC24_USERDATA_STORE_LEN-2));
+            pContex->s_StoreData[offset + 2] = (pContex->crc16 >> 8) & 0xff;
+            pContex->s_StoreData[offset + 3] = (pContex->crc16 >> 0) & 0xff;
+            //
+            pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
+            pushOrder.RegAddress = CF_ATC24_USERDATA_STORE_START_ADD + offset;
+            pushOrder.totalLen = len;
+            pushOrder.remainLen = len;
+            pushOrder.writePtr = &pContex->s_StoreData[offset];
+            pushOrder.timeout = 1000;
+            ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_CRC_DATAPAYLOAD_2025,&pushOrder);    
+            if(1 == ret)
+            {
+                InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_CRC_DATAPAYLOAD_2025);
+            }
+            //
+            pContex->handle = D_C_HANDLE_STORE2EE_CRC_WAIT;
+        break;
+        case D_C_HANDLE_STORE2EE_CRC_WAIT:
+            if(1 == InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(pContex))
+            {
+                //==
+                pContex->handle = D_C_HANDLE_STORE2EE_BACKUP;
+            }
+        break;
+        //====开始存储备份区 单次的数据
+        case D_C_HANDLE_STORE2EE_BACKUP:
+            offset = pContex->userStorePosition * CF_STORE_TOTAL_LEN;
+            len = CF_STORE_TOTAL_LEN;
+            memcpy(&pContex->s_StoreData_Backup[offset],&pContex->singleStoreData[0],CF_STORE_TOTAL_LEN);
+            //
+            pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
+            pushOrder.RegAddress = CF_ATC24_USERDATA_BACKUP_STORE_START_ADD + offset;
+            pushOrder.totalLen = len;
+            pushOrder.remainLen = len;
+            pushOrder.writePtr = &pContex->s_StoreData_Backup[offset];
+            pushOrder.timeout = 1000;
+            ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_DATAPAYLOAD_2025,&pushOrder);    
+            if(1 == ret)
+            {
+                InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_DATAPAYLOAD_2025);
+            }
+            //==
+            pContex->handle = D_C_HANDLE_STORE2EE_BACKUP_WAIT;     
+        break;
+        case D_C_HANDLE_STORE2EE_BACKUP_WAIT:
+            if(1 == InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(pContex))
+            {
+                //==
+                pContex->handle = D_C_HANDLE_STORE2EE_BACKUP_CRC;
+            }
+        break;
+        //====开始存储备份区 存储的位置 和 CRC
+        case D_C_HANDLE_STORE2EE_BACKUP_CRC:
+            offset = CF_ATC24_USERDATA_BACKUP_STORE_LEN - 2 - 2;
+            len = 2 + 2;
+            pContex->s_StoreData_Backup[offset + 0] = (pContex->userStorePosition >> 8) & 0xff;
+            pContex->s_StoreData_Backup[offset + 1] = (pContex->userStorePosition >> 0) & 0xff;
+            pContex->crc16 = EECRC16(&pContex->s_StoreData_Backup[0],(CF_ATC24_USERDATA_BACKUP_STORE_LEN-2));
+            pContex->s_StoreData_Backup[offset + 2] = (pContex->crc16 >> 8) & 0xff;
+            pContex->s_StoreData_Backup[offset + 3] = (pContex->crc16 >> 0) & 0xff;
+            //
+            pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
+            pushOrder.RegAddress = CF_ATC24_USERDATA_BACKUP_STORE_START_ADD + offset;
+            pushOrder.totalLen = len;
+            pushOrder.remainLen = len;
+            pushOrder.writePtr = &pContex->s_StoreData_Backup[offset];
+            pushOrder.timeout = 1000;
+            ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_CRC_DATAPAYLOAD_2025,&pushOrder);    
+            if(1 == ret)
+            {
+                InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_CRC_DATAPAYLOAD_2025);
+            }
+            //
+            pContex->handle = D_C_HANDLE_STORE2EE_BACKUP_CRC_WAIT;
+        break;
+        case D_C_HANDLE_STORE2EE_BACKUP_CRC_WAIT:
+            if(1 == InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(pContex))
+            {
+                //==
+                pContex->handle = D_C_HANDLE_MAX_NUM;
+            }
+        break;
+
+        default:
+        break;
+    }
+}
+
+#endif
 

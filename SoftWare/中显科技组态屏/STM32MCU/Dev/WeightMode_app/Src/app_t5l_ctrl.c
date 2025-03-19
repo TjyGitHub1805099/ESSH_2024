@@ -605,8 +605,8 @@ void screenPublic_ScreenVersionGet(T5LType *pSdwe)
 {
 	#if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
 		/*
-			读取版本信息，串口下发指令 A5 5A 03 81 00 01 
-			返回A5 5A 04 81 00 01 43
+			发送：A5 5A 03 81 00 01 
+			返回：A5 5A 04 81 00 01 43
 		 */
 		innerScreenReadReg(pSdwe,INNER_SCREEN_VERSION_GET_ADD,INNER_SCREEN_VERSION_GET_LEN,0);//get version
 	#else
@@ -634,8 +634,6 @@ void screenPublic_ScreenRTCGet_YMDHMS(T5LType *pSdwe)
 		*/
 		t5lReadVarible(pSdwe,INNER_SCREEN_RTC_GET_ADD,INNER_SCREEN_RTC_GET_LEN,0);//get cur page
 	#endif
-
-
 }
 //公共函数：获取屏幕的当前页面序号
 void screenPublic_CurPageGet(T5LType *pSdwe)
@@ -1710,14 +1708,14 @@ UINT8 sdweAskRegData(ScreenHandleType  *screenHandlePtr,UINT8 regAdd, UINT8 regD
 	pSdwe->SetAdd = regAdd ;
 	pSdwe->SetData = regData ;
 
-	//
-	if(0 == pSdwe->SetAdd)
-	{
-		pSdwe->version = pSdwe->SetData;
-		pSdwe->readSdweInit = TRUE;
-		pSdwe->sdwePowerOn = TRUE;
-	}
-
+	#if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
+		if(0 == pSdwe->SetAdd)//中显屏幕 0号地址 就是屏幕版本信息
+		{
+			pSdwe->version = pSdwe->SetData;
+			pSdwe->readSdweInit = TRUE;
+			pSdwe->sdwePowerOn = TRUE;
+		}
+	#endif
 	//receive address from SDWE
 	if(0xffff != pSdwe->SetAdd)
 	{

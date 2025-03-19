@@ -88,7 +88,7 @@ void app_main_task(void)
 
 	InnerScreenDataCenterHandle_MainFunction();
 
-	ExFlash_MainFunction();
+	ExFlash_MainFunction();//AT24C
 
 	if((g_sys_ms_tick % 1000 == 0) && (0xFFFFFFFF != gS64UTCTime))
 	{

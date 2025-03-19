@@ -79,6 +79,17 @@ typedef struct sInnerScreenDataCenterStruct
     uint8 barCodeLen;
 }tInnerScreenDataCenterStruct;
 
+
+
+
+
+
+
+
+
+
+
+
 /*
 SYS	        para num byte	typebit	typetotalbit	typetotalbyte	CRC	addStart_dec	addStart_hex	addEnd_dec	addEnd_hex	percent	Size(kB)
 	         1022	        8	    8176	        1022	        2	0	            0x0000	        1024	    0x0400	    6.2500 	1.0000 
@@ -100,16 +111,55 @@ DATA_INFO	stroenum	    barcode	date	        weight	        CRC	addStart_dec	addS
 ------------------------------------------------------------------------------------------------------------------------------------------------											
                                                                                                                         Total	93.7988 15.0078 
 */
+#define CLASSIFICATION_STORE_CFG_CRCLEN             (2)//CRC16 
+#define EECRC16                                     cal_crc16
+
 //SYS PARA REVERSE
 #define EEFLASH_SYS_PARA_START_ADD                  (0x0000u)
 #define EEFLASH_SYS_PARA_LEN                        (2046u)
 #define EEFLASH_SYS_PARA_END_ADD                    (EEFLASH_SYS_PARA_START_ADD + EEFLASH_SYS_PARA_LEN + 2)
+
+#if 1//20250319
 //STORE NUM
-#define CLASSIFICATION_STORE_MAX_NUM                ((256) / 2 * 2)
+#define CLASSIFICATION_STORE_MAX_NUM    (220)//最大存储220条
+//定义数据
+#define CF_STORE_GONGHAO_TYPEBYTE       ( 4)//1.员工工号：4字节 0000 - 9999
+#define CF_STORE_BCCODE_TYPEBYTE        (15)//2.献血条码：15位
+#define CF_STORE_CFG_TIME_TYPEBYTE      ( 4)//3.称重时间：utc time at 1970~2099 需要4字节
+#define CF_STORE_WEIGHT_TYPEBYTE        ( 2)//4.血浆重量：2字节重量 0~65535ml
+#define CF_STORE_LEIXING_TYPEBYTE       ( 1)//5.血浆类型：1字节 
+#define CF_STORE_GUIGE_TYPEBYTE         ( 1)//6.血浆规格：1字节
+#define CF_STORE_TOTAL_LEN              (CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + \
+    CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE + CF_STORE_LEIXING_TYPEBYTE + CF_STORE_GUIGE_TYPEBYTE )//27byte
+//原始数据
+#define CF_ATC24_USERDATA_STORE_POSITION_LEN        (2)
+#define CF_ATC24_USERDATA_STORE_START_ADD           (((EEFLASH_SYS_PARA_END_ADD/EXT_FLASH_PROCESS_LEN) + 1)*EXT_FLASH_PROCESS_LEN)
+#define CF_ATC24_USERDATA_STORE_LEN                 (CLASSIFICATION_STORE_MAX_NUM*CF_STORE_TOTAL_LEN + CLASSIFICATION_STORE_CFG_CRCLEN + CF_ATC24_USERDATA_STORE_POSITION_LEN)
+#define CF_ATC24_USERDATA_STORE_END_ADD             (CF_ATC24_USERDATA_STORE_START_ADD + CF_ATC24_USERDATA_STORE_LEN)
+
+//备份数据
+#define CF_ATC24_USERDATA_BACKUP_STORE_START_ADD    (((CF_ATC24_USERDATA_STORE_END_ADD/EXT_FLASH_PROCESS_LEN) + 1)*EXT_FLASH_PROCESS_LEN)
+#define CF_ATC24_USERDATA_BACKUP_STORE_LEN          (CLASSIFICATION_STORE_MAX_NUM*CF_STORE_TOTAL_LEN + CLASSIFICATION_STORE_CFG_CRCLEN + CF_ATC24_USERDATA_STORE_POSITION_LEN)
+#define CF_ATC24_USERDATA_BACKUP_STORE_END_ADD      (CF_ATC24_USERDATA_BACKUP_STORE_START_ADD + CF_ATC24_USERDATA_BACKUP_STORE_LEN)
+#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #define CLASSIFICATION_STORE_CFG_TYPEBIT            (4)//4bit : 0000 as A, ~ 0111 as H , for 
 #define CLASSIFICATION_STORE_CFG_TIME_TYPEBYTE      (4)//4byte : utc time at 1970~2099
-#define CLASSIFICATION_STORE_CFG_CRCLEN             (2)//CRC16 
-#define EECRC16                                     cal_crc16
+
 //cfg info use : typebit*num + crc16[2byte]
 #define CLASSIFICATION_STORE_CFG_START_ADD          (EEFLASH_SYS_PARA_END_ADD)
 #define CLASSIFICATION_STORE_CFG_LEN                (CLASSIFICATION_STORE_MAX_NUM*CLASSIFICATION_STORE_CFG_TYPEBIT/8) 
@@ -137,9 +187,41 @@ DATA_INFO	stroenum	    barcode	date	        weight	        CRC	addStart_dec	addS
 #define CLASSIFICATION_STORE_DATA_SINGLE_LEN        (INNER_SCREEN_DATACENTER_LENOF_BARCODE+0+4+2)
 #define CLASSIFICATION_STORE_DATA_END_ADD           (CLASSIFICATION_STORE_DATA_START_ADD + CLASSIFICATION_STORE_MAX_NUM*(CLASSIFICATION_STORE_DATA_SINGLE_LEN))
 #define CLASSIFICATION_STORE_DATA_TOTAL_LEN         (CLASSIFICATION_STORE_DATA_END_ADD - CLASSIFICATION_STORE_DATA_START_ADD)
+//20250319
+
+typedef enum
+{
+    D_C_HANDLE_INIT = 0,
+    D_C_HANDLE_READUSERDATA,
+    D_C_HANDLE_READUSERDATA_WAIT_CPLT,
+    D_C_HANDLE_READUSERDATA_WAIT_ERR_HANDLE_CPLT,
+
+
+
+    D_C_HANDLE_YUANGONGHAO,
+    D_C_HANDLE_BCCODE,
+    D_C_HANDLE_UTCTIME2CHAR,
+    D_C_HANDLE_WEIGHT,
+    D_C_HANDLE_LEIXING,
+    D_C_HANDLE_GUIGE,
+
+    D_C_HANDLE_STORE2EE,
+    D_C_HANDLE_STORE2EE_WAIT,
+    D_C_HANDLE_STORE2EE_CRC,
+    D_C_HANDLE_STORE2EE_CRC_WAIT,
+
+
+    D_C_HANDLE_STORE2EE_BACKUP,
+    D_C_HANDLE_STORE2EE_BACKUP_WAIT,
+    D_C_HANDLE_STORE2EE_BACKUP_CRC,
+    D_C_HANDLE_STORE2EE_BACKUP_CRC_WAIT,
+    D_C_HANDLE_MAX_NUM
+}eDataCenterHandleType;
+
 //local data center handle
 typedef struct sInnerScreenDataCenterHandleStruct
 {
+    uint8 initSuccess;
     uint8 trigerStroreFromScreen;
     uint8 	weigthClassifyCplt;
     //cfg info store in extern e2
@@ -179,6 +261,22 @@ typedef struct sInnerScreenDataCenterHandleStruct
     tInnerScreenDataCenterStruct *pRealTimeData;
     uint8 dataCenterDisData[CLASSIFICATION_SEARCH_DISPLAY_NUM][CLASSIFICATION_SEARCH_DISPLAY_LEN];
     uint8 singleClassifyGroupData[CLASSIFICATION_SEARCH_DISPLAY_LEN];
+    //
+    //20250319
+    eDataCenterHandleType handle;
+    uint8 yuangonghao[CF_STORE_GONGHAO_TYPEBYTE];
+    uint8 bccode[CF_STORE_BCCODE_TYPEBYTE];
+    uint8 utctime[CF_STORE_CFG_TIME_TYPEBYTE];
+    uint8 weight[CF_STORE_WEIGHT_TYPEBYTE];
+    uint8 leixing[CF_STORE_LEIXING_TYPEBYTE];
+    uint8 guige[CF_STORE_GUIGE_TYPEBYTE];
+    uint8 singleStoreData[CF_STORE_TOTAL_LEN];
+    //
+    uint8 s_StoreData[CF_ATC24_USERDATA_STORE_LEN];
+    uint8 s_StoreData_Backup[CF_ATC24_USERDATA_BACKUP_STORE_LEN];
+    //
+    uint16 userStorePosition;
+    uint16 crc16;
 }tInnerScreenDataCenterHandleStruct;
 
 extern tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle;

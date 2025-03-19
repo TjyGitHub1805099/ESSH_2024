@@ -74,7 +74,7 @@ void USB_SMQ_Decode(tUSBSMQHandle *pCtx)
         pCtx->decodeDataVaild[i] = 0 ;
     }
     //
-    for(i = 0 ;i < pCtx->decodeLen ; i++ )
+    for(i = 0 ;i < pCtx->decodeLen%USBSMQ_KEYBORD_MAX_NUM ; i++ )
     {
         pDecode = &pCtx->enCodeData[i][0];
         //
@@ -83,16 +83,19 @@ void USB_SMQ_Decode(tUSBSMQHandle *pCtx)
             //校验和
             len = 0 ;
             add = 0 ;
-            len = pDecode[3] - 2;
+            len = (pDecode[3] - 2)%USBSMQ_KEYBORD_SINGLE_LEN_COPY;
             for( j = 0 ; j < len ; j++ )
             {
                 add += pDecode[5+j];
             }
             //校验和判断
-            vlu = 0xff;
             if(pDecode[5+j] == add)
             {
                 vlu = pDecode[7];
+            }
+            else
+            {
+                vlu = 0xff;
             }        
         }
         else//帧头不匹配
@@ -119,6 +122,10 @@ void USB_SMQ_Decode(tUSBSMQHandle *pCtx)
                 {
                     pCtx->decodeDataVaild[pCtx->decodeVaildLen++] = pCtx->decodeData[i];
                 }
+            }
+            else
+            {
+                vlu = 0xff;
             }
         }
     }
@@ -149,6 +156,7 @@ UINT8 USB_SMQ_DataDiffCheck(void)
 void USB_SMQ_Handle_MainFunction(void)
 {
     tUSBSMQHandle *pCtx = &sUSBSMQHandleContex;
+    static UINT32 preTick = 0;
     pCtx->curTick++;
     //
     switch(pCtx->handleType)
@@ -159,6 +167,17 @@ void USB_SMQ_Handle_MainFunction(void)
         case USBSMQ_HANDLE_IDLE:// = 1,    /**< 空闲 */
             if(1 == pCtx->RxFinishFlag)
             {
+                //==记录间隔时间 平均间隔时间 8 ms
+                if(0 == pCtx->encodeDataOffset)
+                {
+                    pCtx->rxDataOffsetTiime[pCtx->encodeDataOffset] = 0;
+                }
+                else
+                {
+                    pCtx->rxDataOffsetTiime[pCtx->encodeDataOffset] = pCtx->curTick - preTick;
+                }
+                preTick = pCtx->curTick;
+                //==判断收到的数据
                 if((pCtx->rxDataUart[0] == 0x57) && 
                    (pCtx->rxDataUart[1] == 0xAB) && 
                    (pCtx->rxDataUart[2] == 0x82))
@@ -170,7 +189,7 @@ void USB_SMQ_Handle_MainFunction(void)
                 {
                     pCtx->decodeFinishFlag = 0 ;
                     //
-                    memcpy(&pCtx->enCodeData[pCtx->encodeDataOffset][0],&pCtx->rxDataUart[0],pCtx->RxLength);
+                    memcpy(&pCtx->enCodeData[pCtx->encodeDataOffset][0],&pCtx->rxDataUart[0],pCtx->RxLength%USBSMQ_KEYBORD_SINGLE_LEN_COPY);
                     pCtx->encodeDataOffset++;
                     pCtx->encodeDataOffset = pCtx->encodeDataOffset%USBSMQ_KEYBORD_MAX_NUM;
                     pCtx->lastRxTick = pCtx->curTick;
@@ -180,11 +199,10 @@ void USB_SMQ_Handle_MainFunction(void)
             }
             else
             {
-                if((0 != pCtx->encodeDataOffset) && ((pCtx->curTick - pCtx->lastRxTick) >= 100))
+                if((0 != pCtx->encodeDataOffset) && ((pCtx->curTick - pCtx->lastRxTick) >= 100))//因为平均间隔时间是8ms 所以这里可以用100ms判断结束了
                 {
                     pCtx->handleType = USBSMQ_HANDLE_DECODE;
                     pCtx->decodeLen = pCtx->encodeDataOffset;
-                    //pCtx->rxDataOffsetTiime[pCtx->encodeDataOffset]++;
                 }
             }
         break;
