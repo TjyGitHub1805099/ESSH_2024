@@ -81,7 +81,7 @@ I (../USB_HOST/App/usb_host.h)(0x66E68751)
 I (../Core/Inc/gpio.h)(0x66C491BC)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_hx711_ctrl.h)(0x66C4A46C)
@@ -90,16 +90,16 @@ I (../WeightMode_app/Inc/hal_gpio.h)(0x66CF368B)
 I (../WeightMode_app/Inc/app_sdwe_ctrl.h)(0x652AAC25)
 I (../WeightMode_app/Inc/app_modbus_rtu_ctrl.h)(0x66C6037B)
 I (../WeightMode_app/Inc/hal_uart.h)(0x66FA9697)
-I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67DA3309)
+I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67E01CFA)
 I (../WeightMode_app/Inc/app_InnerScreen_Cfg.h)(0x666EF595)
 I (../WeightMode_app/Inc/app_t5l_cfg.h)(0x66783310)
 I (../WeightMode_app/Inc/app_ExternalScreen_Cfg.h)(0x666E905A)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (../WeightMode_app/Inc/app_crc.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
-I (../WeightMode_app/Inc/app_syspara.h)(0x670B4480)
+I (../WeightMode_app/Inc/app_syspara.h)(0x67E02545)
 I (../WeightMode_app/Inc/app_smmz.h)(0x66CF39DE)
 I (../WeightMode_app/Inc/app_wzdyj.h)(0x66CF446A)
 I (../WeightMode_app/Inc/app_usbsmq.h)(0x67DADEBD)
@@ -199,7 +199,7 @@ I (../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h)(0x644CD8C9
 I (../Core/Inc/usart.h)(0x66C60CA3)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x55AEF5F2)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
@@ -425,23 +425,23 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x55AEF5F2)
-I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67DA3309)
+I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67E01CFA)
 I (../WeightMode_app/Inc/app_sdwe_ctrl.h)(0x652AAC25)
 I (../WeightMode_app/Inc/hal_uart.h)(0x66FA9697)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
 I (../WeightMode_app/Inc/app_hx711_ctrl.h)(0x66C4A46C)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_InnerScreen_Cfg.h)(0x666EF595)
 I (../WeightMode_app/Inc/app_t5l_cfg.h)(0x66783310)
 I (../WeightMode_app/Inc/app_ExternalScreen_Cfg.h)(0x666E905A)
 I (../WeightMode_app/Inc/app_modbus_rtu_ctrl.h)(0x66C6037B)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (../WeightMode_app/Inc/app_crc.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
 I (../Core/Inc/i2c.h)(0x66C491C1)
 I (../WeightMode_app/Inc/hal_gpio.h)(0x66CF368B)
@@ -491,22 +491,22 @@ I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
 I (../Core/Inc/usart.h)(0x66C60CA3)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x55AEF5F2)
-I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67DA3309)
+I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67E01CFA)
 I (../WeightMode_app/Inc/app_sdwe_ctrl.h)(0x652AAC25)
 I (../WeightMode_app/Inc/hal_uart.h)(0x66FA9697)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
 I (../WeightMode_app/Inc/app_hx711_ctrl.h)(0x66C4A46C)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_InnerScreen_Cfg.h)(0x666EF595)
 I (../WeightMode_app/Inc/app_t5l_cfg.h)(0x66783310)
 I (../WeightMode_app/Inc/app_ExternalScreen_Cfg.h)(0x666E905A)
 I (../WeightMode_app/Inc/app_modbus_rtu_ctrl.h)(0x66C6037B)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (../WeightMode_app/Inc/app_crc.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
 I (../Core/Inc/i2c.h)(0x66C491C1)
 I (../WeightMode_app/Inc/hal_gpio.h)(0x66CF368B)
@@ -1607,7 +1607,7 @@ I (../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h)(0x644CD8C9
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/task.h)(0x644CD8C9)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/list.h)(0x644CD8C9)
 F (..\WeightMode_app\Src\app_BalancingDataHandle.c)(0x670A968E)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_balancingdatahandle.o --omf_browse software\app_balancingdatahandle.crf --depend software\app_balancingdatahandle.d)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
@@ -1655,30 +1655,30 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
-I (../WeightMode_app/Inc/app_syspara.h)(0x670B4480)
+I (../WeightMode_app/Inc/app_syspara.h)(0x67E02545)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
 I (../Core/Inc/i2c.h)(0x66C491C1)
 I (../Core/Inc/main.h)(0x66E68751)
 I (../WeightMode_app/Inc/hal_gpio.h)(0x66CF368B)
-I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67DA3309)
+I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67E01CFA)
 I (../WeightMode_app/Inc/app_InnerScreen_Cfg.h)(0x666EF595)
 I (../WeightMode_app/Inc/app_t5l_cfg.h)(0x66783310)
 I (../WeightMode_app/Inc/app_ExternalScreen_Cfg.h)(0x666E905A)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
 I (../WeightMode_app/Inc/app_password.h)(0x652AAC25)
 F (..\WeightMode_app\Src\app_crc.c)(0x652AAC25)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_crc.o --omf_browse software\app_crc.crf --depend software\app_crc.d)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
 I (../WeightMode_app/Inc/app_hx711_ctrl.h)(0x66C4A46C)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
 F (..\WeightMode_app\Src\app_ExternalScreen_Cfg.c)(0x667976CF)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_externalscreen_cfg.o --omf_browse software\app_externalscreen_cfg.crf --depend software\app_externalscreen_cfg.d)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
-I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67DA3309)
+I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67E01CFA)
 I (../WeightMode_app/Inc/app_sdwe_ctrl.h)(0x652AAC25)
 I (../WeightMode_app/Inc/hal_uart.h)(0x66FA9697)
 I (../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h)(0x644CD8BF)
@@ -1720,24 +1720,24 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
 I (../WeightMode_app/Inc/app_hx711_ctrl.h)(0x66C4A46C)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_InnerScreen_Cfg.h)(0x666EF595)
 I (../WeightMode_app/Inc/app_t5l_cfg.h)(0x66783310)
 I (../WeightMode_app/Inc/app_ExternalScreen_Cfg.h)(0x666E905A)
 I (../WeightMode_app/Inc/app_modbus_rtu_ctrl.h)(0x66C6037B)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_crc.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
 I (../Core/Inc/i2c.h)(0x66C491C1)
 I (../Core/Inc/main.h)(0x66E68751)
 I (../WeightMode_app/Inc/hal_gpio.h)(0x66CF368B)
 F (..\WeightMode_app\Src\app_ExternalScreenRxHandle.c)(0x67DA31F5)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_externalscreenrxhandle.o --omf_browse software\app_externalscreenrxhandle.crf --depend software\app_externalscreenrxhandle.d)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
@@ -1785,22 +1785,22 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
-I (../WeightMode_app/Inc/app_syspara.h)(0x670B4480)
+I (../WeightMode_app/Inc/app_syspara.h)(0x67E02545)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
 I (../Core/Inc/i2c.h)(0x66C491C1)
 I (../Core/Inc/main.h)(0x66E68751)
 I (../WeightMode_app/Inc/hal_gpio.h)(0x66CF368B)
-I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67DA3309)
+I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67E01CFA)
 I (../WeightMode_app/Inc/app_InnerScreen_Cfg.h)(0x666EF595)
 I (../WeightMode_app/Inc/app_t5l_cfg.h)(0x66783310)
 I (../WeightMode_app/Inc/app_ExternalScreen_Cfg.h)(0x666E905A)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
 I (../WeightMode_app/Inc/app_password.h)(0x652AAC25)
 F (..\WeightMode_app\Src\app_ExternalScreenTxHandle.c)(0x66EAC63D)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_externalscreentxhandle.o --omf_browse software\app_externalscreentxhandle.crf --depend software\app_externalscreentxhandle.d)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
@@ -1848,19 +1848,19 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
-I (../WeightMode_app/Inc/app_syspara.h)(0x670B4480)
+I (../WeightMode_app/Inc/app_syspara.h)(0x67E02545)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
 I (../Core/Inc/i2c.h)(0x66C491C1)
 I (../Core/Inc/main.h)(0x66E68751)
 I (../WeightMode_app/Inc/hal_gpio.h)(0x66CF368B)
-I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67DA3309)
+I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67E01CFA)
 I (../WeightMode_app/Inc/app_InnerScreen_Cfg.h)(0x666EF595)
 I (../WeightMode_app/Inc/app_t5l_cfg.h)(0x66783310)
 I (../WeightMode_app/Inc/app_ExternalScreen_Cfg.h)(0x666E905A)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
 I (../WeightMode_app/Inc/app_password.h)(0x652AAC25)
 I (../WeightMode_app/Inc/app_BalancingDataHandle.h)(0x6677DDAB)
 F (..\WeightMode_app\Src\app_hx711_ctrl.c)(0x67067A79)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_hx711_ctrl.o --omf_browse software\app_hx711_ctrl.crf --depend software\app_hx711_ctrl.d)
@@ -1904,28 +1904,28 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
 I (../WeightMode_app/Inc/hal_delay.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_hx711_ctrl.h)(0x66C4A46C)
 I (../WeightMode_app/Inc/app_sdwe_ctrl.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_syspara.h)(0x670B4480)
+I (../WeightMode_app/Inc/app_syspara.h)(0x67E02545)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
 I (../Core/Inc/i2c.h)(0x66C491C1)
 I (../Core/Inc/main.h)(0x66E68751)
-I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67DA3309)
+I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67E01CFA)
 I (../WeightMode_app/Inc/hal_uart.h)(0x66FA9697)
 I (../WeightMode_app/Inc/app_InnerScreen_Cfg.h)(0x666EF595)
 I (../WeightMode_app/Inc/app_t5l_cfg.h)(0x66783310)
 I (../WeightMode_app/Inc/app_ExternalScreen_Cfg.h)(0x666E905A)
 I (../WeightMode_app/Inc/app_modbus_rtu_ctrl.h)(0x66C6037B)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_crc.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
-F (..\WeightMode_app\Src\app_i2c.c)(0x66E77DBC)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_i2c.o --omf_browse software\app_i2c.crf --depend software\app_i2c.d)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
+F (..\WeightMode_app\Src\app_i2c.c)(0x67E019FF)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_i2c.o --omf_browse software\app_i2c.crf --depend software\app_i2c.d)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
 I (../Core/Inc/i2c.h)(0x66C491C1)
@@ -1970,13 +1970,13 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
 I (../WeightMode_app/Inc/hal_gpio.h)(0x66CF368B)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
 I (../WeightMode_app/Inc/hal_delay.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
 F (..\WeightMode_app\Src\app_InnerScreen_Cfg.c)(0x66EC1A6C)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_innerscreen_cfg.o --omf_browse software\app_innerscreen_cfg.crf --depend software\app_innerscreen_cfg.d)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
-I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67DA3309)
+I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67E01CFA)
 I (../WeightMode_app/Inc/app_sdwe_ctrl.h)(0x652AAC25)
 I (../WeightMode_app/Inc/hal_uart.h)(0x66FA9697)
 I (../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h)(0x644CD8BF)
@@ -2018,24 +2018,24 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
 I (../WeightMode_app/Inc/app_hx711_ctrl.h)(0x66C4A46C)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_InnerScreen_Cfg.h)(0x666EF595)
 I (../WeightMode_app/Inc/app_t5l_cfg.h)(0x66783310)
 I (../WeightMode_app/Inc/app_ExternalScreen_Cfg.h)(0x666E905A)
 I (../WeightMode_app/Inc/app_modbus_rtu_ctrl.h)(0x66C6037B)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_crc.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
 I (../Core/Inc/i2c.h)(0x66C491C1)
 I (../Core/Inc/main.h)(0x66E68751)
 I (../WeightMode_app/Inc/hal_gpio.h)(0x66CF368B)
-F (..\WeightMode_app\Src\app_InnerScreenRxHandle.c)(0x67D2EF51)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_innerscreenrxhandle.o --omf_browse software\app_innerscreenrxhandle.crf --depend software\app_innerscreenrxhandle.d)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+F (..\WeightMode_app\Src\app_InnerScreenRxHandle.c)(0x67E025B6)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_innerscreenrxhandle.o --omf_browse software\app_innerscreenrxhandle.crf --depend software\app_innerscreenrxhandle.d)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
@@ -2083,19 +2083,19 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
-I (../WeightMode_app/Inc/app_syspara.h)(0x670B4480)
+I (../WeightMode_app/Inc/app_syspara.h)(0x67E02545)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
 I (../Core/Inc/i2c.h)(0x66C491C1)
 I (../Core/Inc/main.h)(0x66E68751)
 I (../WeightMode_app/Inc/hal_gpio.h)(0x66CF368B)
-I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67DA3309)
+I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67E01CFA)
 I (../WeightMode_app/Inc/app_InnerScreen_Cfg.h)(0x666EF595)
 I (../WeightMode_app/Inc/app_t5l_cfg.h)(0x66783310)
 I (../WeightMode_app/Inc/app_ExternalScreen_Cfg.h)(0x666E905A)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
 I (../WeightMode_app/Inc/app_password.h)(0x652AAC25)
 I (../USB_HOST/App/usb_ESSH.h)(0x670D0FC6)
 I (../USB_HOST/App/usb_host.h)(0x66E68751)
@@ -2131,8 +2131,8 @@ I (../FATFS/Target/ffconf.h)(0x66EAD492)
 I (../Middlewares/Third_Party/FatFs/src/ff_gen_drv.h)(0x644CD8C9)
 I (../Middlewares/Third_Party/FatFs/src/diskio.h)(0x644CD8C8)
 I (../FATFS/Target/usbh_diskio.h)(0x66E68751)
-F (..\WeightMode_app\Src\app_InnerScreenTxHandle.c)(0x670D2598)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_innerscreentxhandle.o --omf_browse software\app_innerscreentxhandle.crf --depend software\app_innerscreentxhandle.d)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+F (..\WeightMode_app\Src\app_InnerScreenTxHandle.c)(0x67E02139)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_innerscreentxhandle.o --omf_browse software\app_innerscreentxhandle.crf --depend software\app_innerscreentxhandle.d)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
@@ -2180,24 +2180,24 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
-I (../WeightMode_app/Inc/app_syspara.h)(0x670B4480)
+I (../WeightMode_app/Inc/app_syspara.h)(0x67E02545)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
 I (../Core/Inc/i2c.h)(0x66C491C1)
 I (../Core/Inc/main.h)(0x66E68751)
 I (../WeightMode_app/Inc/hal_gpio.h)(0x66CF368B)
-I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67DA3309)
+I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67E01CFA)
 I (../WeightMode_app/Inc/app_InnerScreen_Cfg.h)(0x666EF595)
 I (../WeightMode_app/Inc/app_t5l_cfg.h)(0x66783310)
 I (../WeightMode_app/Inc/app_ExternalScreen_Cfg.h)(0x666E905A)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
 I (../WeightMode_app/Inc/app_password.h)(0x652AAC25)
 I (../WeightMode_app/Inc/app_BalancingDataHandle.h)(0x6677DDAB)
 I (../WeightMode_app/Inc/app_usbsmq.h)(0x67DADEBD)
 F (..\WeightMode_app\Src\app_key_ctrl.c)(0x6545FA3E)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_key_ctrl.o --omf_browse software\app_key_ctrl.crf --depend software\app_key_ctrl.d)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
@@ -2243,17 +2243,17 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
 I (../WeightMode_app/Inc/app_hx711_ctrl.h)(0x66C4A46C)
 I (../WeightMode_app/Inc/app_sdwe_ctrl.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67DA3309)
+I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67E01CFA)
 I (../WeightMode_app/Inc/hal_uart.h)(0x66FA9697)
 I (../WeightMode_app/Inc/app_InnerScreen_Cfg.h)(0x666EF595)
 I (../WeightMode_app/Inc/app_t5l_cfg.h)(0x66783310)
 I (../WeightMode_app/Inc/app_ExternalScreen_Cfg.h)(0x666E905A)
 I (../WeightMode_app/Inc/app_modbus_rtu_ctrl.h)(0x66C6037B)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_crc.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
 I (../Core/Inc/i2c.h)(0x66C491C1)
 I (../Core/Inc/main.h)(0x66E68751)
@@ -2298,27 +2298,27 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_hx711_ctrl.h)(0x66C4A46C)
 I (../WeightMode_app/Inc/app_sdwe_ctrl.h)(0x652AAC25)
 I (../WeightMode_app/Inc/app_crc.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_syspara.h)(0x670B4480)
+I (../WeightMode_app/Inc/app_syspara.h)(0x67E02545)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
 I (../Core/Inc/i2c.h)(0x66C491C1)
 I (../Core/Inc/main.h)(0x66E68751)
-I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67DA3309)
+I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67E01CFA)
 I (../WeightMode_app/Inc/hal_uart.h)(0x66FA9697)
 I (../WeightMode_app/Inc/app_InnerScreen_Cfg.h)(0x666EF595)
 I (../WeightMode_app/Inc/app_t5l_cfg.h)(0x66783310)
 I (../WeightMode_app/Inc/app_ExternalScreen_Cfg.h)(0x666E905A)
 I (../WeightMode_app/Inc/app_modbus_rtu_ctrl.h)(0x66C6037B)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
-F (..\WeightMode_app\Src\app_main_task.c)(0x67DA754C)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_main_task.o --omf_browse software\app_main_task.crf --depend software\app_main_task.d)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
+F (..\WeightMode_app\Src\app_main_task.c)(0x67E01AA5)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_main_task.o --omf_browse software\app_main_task.crf --depend software\app_main_task.d)
 I (../WeightMode_app/Inc/hal_gpio.h)(0x66CF368B)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h)(0x644CD8F3)
@@ -2359,7 +2359,7 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_hx711_ctrl.h)(0x66C4A46C)
@@ -2367,23 +2367,24 @@ I (../WeightMode_app/Inc/app_key_ctrl.h)(0x652AAC25)
 I (../WeightMode_app/Inc/app_sdwe_ctrl.h)(0x652AAC25)
 I (../WeightMode_app/Inc/app_modbus_rtu_ctrl.h)(0x66C6037B)
 I (../WeightMode_app/Inc/hal_uart.h)(0x66FA9697)
-I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67DA3309)
+I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67E01CFA)
 I (../WeightMode_app/Inc/app_InnerScreen_Cfg.h)(0x666EF595)
 I (../WeightMode_app/Inc/app_t5l_cfg.h)(0x66783310)
 I (../WeightMode_app/Inc/app_ExternalScreen_Cfg.h)(0x666E905A)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_crc.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
 I (../Core/Inc/i2c.h)(0x66C491C1)
 I (../Core/Inc/main.h)(0x66E68751)
 I (../WeightMode_app/Inc/app_smmz.h)(0x66CF39DE)
 I (../WeightMode_app/Inc/app_wzdyj.h)(0x66CF446A)
 I (../WeightMode_app/Inc/app_usbsmq.h)(0x67DADEBD)
+I (../WeightMode_app/Inc/app_AT24C.h)(0x67E01FBD)
 F (..\WeightMode_app\Src\app_modbus_rtu_ctrl.c)(0x66C5F872)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_modbus_rtu_ctrl.o --omf_browse software\app_modbus_rtu_ctrl.crf --depend software\app_modbus_rtu_ctrl.d)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
@@ -2431,24 +2432,24 @@ I (../WeightMode_app/Inc/app_hx711_ctrl.h)(0x66C4A46C)
 I (../WeightMode_app/Inc/app_crc.h)(0x652AAC25)
 I (../WeightMode_app/Inc/hal_delay.h)(0x652AAC25)
 I (../WeightMode_app/Inc/app_sdwe_ctrl.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_syspara.h)(0x670B4480)
+I (../WeightMode_app/Inc/app_syspara.h)(0x67E02545)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
 I (../Core/Inc/i2c.h)(0x66C491C1)
 I (../Core/Inc/main.h)(0x66E68751)
 I (../WeightMode_app/Inc/hal_gpio.h)(0x66CF368B)
-I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67DA3309)
+I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67E01CFA)
 I (../WeightMode_app/Inc/app_InnerScreen_Cfg.h)(0x666EF595)
 I (../WeightMode_app/Inc/app_t5l_cfg.h)(0x66783310)
 I (../WeightMode_app/Inc/app_ExternalScreen_Cfg.h)(0x666E905A)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
 F (..\WeightMode_app\Src\app_password.c)(0x652AAC25)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_password.o --omf_browse software\app_password.crf --depend software\app_password.d)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
-I (../WeightMode_app/Inc/app_syspara.h)(0x670B4480)
+I (../WeightMode_app/Inc/app_syspara.h)(0x67E02545)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_sdwe_ctrl.h)(0x652AAC25)
@@ -2498,9 +2499,9 @@ F (..\WeightMode_app\Src\app_sdwe_ctrl.c)(0x652AAC25)(--c99 -c --cpu Cortex-M4.f
 F (..\WeightMode_app\Src\app_syspara.c)(0x670A7A27)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_syspara.o --omf_browse software\app_syspara.crf --depend software\app_syspara.d)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
 I (../WeightMode_app/Inc/app_crc.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_syspara.h)(0x670B4480)
+I (../WeightMode_app/Inc/app_syspara.h)(0x67E02545)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_sdwe_ctrl.h)(0x652AAC25)
@@ -2546,16 +2547,16 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
 I (../WeightMode_app/Inc/hal_gpio.h)(0x66CF368B)
 I (../WeightMode_app/Inc/app_hx711_ctrl.h)(0x66C4A46C)
-I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67DA3309)
+I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67E01CFA)
 I (../WeightMode_app/Inc/hal_uart.h)(0x66FA9697)
 I (../WeightMode_app/Inc/app_InnerScreen_Cfg.h)(0x666EF595)
 I (../WeightMode_app/Inc/app_t5l_cfg.h)(0x66783310)
 I (../WeightMode_app/Inc/app_ExternalScreen_Cfg.h)(0x666E905A)
 I (../WeightMode_app/Inc/app_modbus_rtu_ctrl.h)(0x66C6037B)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
 I (../WeightMode_app/Inc/drv_flash.h)(0x652AAC25)
 I (../WeightMode_app/Inc/app_password.h)(0x652AAC25)
 F (..\WeightMode_app\Src\app_systest.c)(0x652AAC25)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_systest.o --omf_browse software\app_systest.crf --depend software\app_systest.d)
@@ -2600,7 +2601,7 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_hx711_ctrl.h)(0x66C4A46C)
@@ -2610,7 +2611,7 @@ I (../WeightMode_app/Inc/app_modbus_rtu_ctrl.h)(0x66C6037B)
 I (../WeightMode_app/Inc/hal_uart.h)(0x66FA9697)
 F (..\WeightMode_app\Src\app_t5l_cfg.c)(0x66799465)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_t5l_cfg.o --omf_browse software\app_t5l_cfg.crf --depend software\app_t5l_cfg.d)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
-I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67DA3309)
+I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67E01CFA)
 I (../WeightMode_app/Inc/app_sdwe_ctrl.h)(0x652AAC25)
 I (../WeightMode_app/Inc/hal_uart.h)(0x66FA9697)
 I (../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h)(0x644CD8BF)
@@ -2652,25 +2653,25 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
 I (../WeightMode_app/Inc/app_hx711_ctrl.h)(0x66C4A46C)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_InnerScreen_Cfg.h)(0x666EF595)
 I (../WeightMode_app/Inc/app_t5l_cfg.h)(0x66783310)
 I (../WeightMode_app/Inc/app_ExternalScreen_Cfg.h)(0x666E905A)
 I (../WeightMode_app/Inc/app_modbus_rtu_ctrl.h)(0x66C6037B)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_crc.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
 I (../Core/Inc/i2c.h)(0x66C491C1)
 I (../Core/Inc/main.h)(0x66E68751)
 I (../WeightMode_app/Inc/hal_gpio.h)(0x66CF368B)
-I (../WeightMode_app/Inc/app_syspara.h)(0x670B4480)
-F (..\WeightMode_app\Src\app_t5l_ctrl.c)(0x67D2EF01)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_t5l_ctrl.o --omf_browse software\app_t5l_ctrl.crf --depend software\app_t5l_ctrl.d)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_syspara.h)(0x67E02545)
+F (..\WeightMode_app\Src\app_t5l_ctrl.c)(0x67E01CF3)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_t5l_ctrl.o --omf_browse software\app_t5l_ctrl.crf --depend software\app_t5l_ctrl.d)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
@@ -2718,19 +2719,19 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
-I (../WeightMode_app/Inc/app_syspara.h)(0x670B4480)
+I (../WeightMode_app/Inc/app_syspara.h)(0x67E02545)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
 I (../Core/Inc/i2c.h)(0x66C491C1)
 I (../Core/Inc/main.h)(0x66E68751)
 I (../WeightMode_app/Inc/hal_gpio.h)(0x66CF368B)
-I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67DA3309)
+I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67E01CFA)
 I (../WeightMode_app/Inc/app_InnerScreen_Cfg.h)(0x666EF595)
 I (../WeightMode_app/Inc/app_t5l_cfg.h)(0x66783310)
 I (../WeightMode_app/Inc/app_ExternalScreen_Cfg.h)(0x666E905A)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
 I (../WeightMode_app/Inc/app_password.h)(0x652AAC25)
 F (..\WeightMode_app\Src\drv_flash.c)(0x652AAC25)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\drv_flash.o --omf_browse software\drv_flash.crf --depend software\drv_flash.d)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
@@ -2776,7 +2777,7 @@ F (..\WeightMode_app\Src\hal_delay.c)(0x652AAC25)(--c99 -c --cpu Cortex-M4.fp -g
 I (../WeightMode_app/Inc/hal_delay.h)(0x652AAC25)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
 F (..\WeightMode_app\Src\hal_gpio.c)(0x66CF36A8)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\hal_gpio.o --omf_browse software\hal_gpio.crf --depend software\hal_gpio.d)
@@ -2907,7 +2908,7 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
 I (../WeightMode_app/Inc/hal_delay.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
@@ -2955,18 +2956,18 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
 I (../WeightMode_app/Inc/hal_uart.h)(0x66FA9697)
 I (../WeightMode_app/Inc/hal_delay.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
-F (..\WeightMode_app\Src\app_AT24C.c)(0x6703A2FB)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_at24c.o --omf_browse software\app_at24c.crf --depend software\app_at24c.d)
-I (../WeightMode_app/Inc/app_AT24C.h)(0x66E7A965)
+F (..\WeightMode_app\Src\app_AT24C.c)(0x67E01F37)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_at24c.o --omf_browse software\app_at24c.crf --depend software\app_at24c.d)
+I (../WeightMode_app/Inc/app_AT24C.h)(0x67E01FBD)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_crc.h)(0x652AAC25)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
 I (../Core/Inc/i2c.h)(0x66C491C1)
 I (../Core/Inc/main.h)(0x66E68751)
@@ -3008,15 +3009,15 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
 I (../WeightMode_app/Inc/hal_gpio.h)(0x66CF368B)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
-F (..\WeightMode_app\Src\app_DataCenter.c)(0x67DA8C2A)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_datacenter.o --omf_browse software\app_datacenter.crf --depend software\app_datacenter.d)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
+F (..\WeightMode_app\Src\app_DataCenter.c)(0x67E0230C)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_datacenter.o --omf_browse software\app_datacenter.crf --depend software\app_datacenter.d)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_crc.h)(0x652AAC25)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
 I (../Core/Inc/i2c.h)(0x66C491C1)
 I (../Core/Inc/main.h)(0x66E68751)
@@ -3058,26 +3059,26 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
 I (../WeightMode_app/Inc/hal_gpio.h)(0x66CF368B)
-I (../WeightMode_app/Inc/app_AT24C.h)(0x66E7A965)
+I (../WeightMode_app/Inc/app_AT24C.h)(0x67E01FBD)
 I (../WeightMode_app/Inc/app_hx711_ctrl.h)(0x66C4A46C)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
-I (../WeightMode_app/Inc/app_syspara.h)(0x670B4480)
+I (../WeightMode_app/Inc/app_syspara.h)(0x67E02545)
 I (../WeightMode_app/Inc/app_sdwe_ctrl.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67DA3309)
+I (../WeightMode_app/Inc/app_t5l_ctrl.h)(0x67E01CFA)
 I (../WeightMode_app/Inc/hal_uart.h)(0x66FA9697)
 I (../WeightMode_app/Inc/app_InnerScreen_Cfg.h)(0x666EF595)
 I (../WeightMode_app/Inc/app_t5l_cfg.h)(0x66783310)
 I (../WeightMode_app/Inc/app_ExternalScreen_Cfg.h)(0x666E905A)
 I (../WeightMode_app/Inc/app_modbus_rtu_ctrl.h)(0x66C6037B)
 I (../WeightMode_app/Inc/app_usbsmq.h)(0x67DADEBD)
-F (..\WeightMode_app\Src\app_UTCTimer.c)(0x670551B4)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_utctimer.o --omf_browse software\app_utctimer.crf --depend software\app_utctimer.d)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
+F (..\WeightMode_app\Src\app_UTCTimer.c)(0x67E02601)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_utctimer.o --omf_browse software\app_utctimer.crf --depend software\app_utctimer.d)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
-F (..\WeightMode_app\Src\app_usbsmq.c)(0x67DAE18B)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_usbsmq.o --omf_browse software\app_usbsmq.crf --depend software\app_usbsmq.d)
+F (..\WeightMode_app\Src\app_usbsmq.c)(0x67DC1C04)(--c99 -c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\app_usbsmq.o --omf_browse software\app_usbsmq.crf --depend software\app_usbsmq.d)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x55AEF5F2)
 I (../WeightMode_app/Inc/app_usbsmq.h)(0x67DADEBD)
 I (../WeightMode_app/Inc/hal_gpio.h)(0x66CF368B)
@@ -3121,7 +3122,7 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h)(0x644CD8F3)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x644CD8F3)
 I (../WeightMode_app/Inc/hal_uart.h)(0x66FA9697)
 I (../WeightMode_app/Inc/hal_delay.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
@@ -3269,7 +3270,7 @@ I (../Middlewares/Third_Party/FatFs/src/ff_gen_drv.h)(0x644CD8C9)
 I (../Middlewares/Third_Party/FatFs/src/diskio.h)(0x644CD8C8)
 I (../FATFS/Target/usbh_diskio.h)(0x66E68751)
 I (../USB_HOST/App/usb_host.h)(0x66E68751)
-F (..\USB_HOST\App\usb_ESSH.c)(0x670D0FB9)(--c99 -c --cpu Cortex-M4.fp -g -O1 -Otime --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\usb_essh.o --omf_browse software\usb_essh.crf --depend software\usb_essh.d)
+F (..\USB_HOST\App\usb_ESSH.c)(0x67E0255A)(--c99 -c --cpu Cortex-M4.fp -g -O1 -Otime --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\usb_essh.o --omf_browse software\usb_essh.crf --depend software\usb_essh.d)
 I (..\USB_HOST\App\usb_host.h)(0x66E68751)
 I (../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h)(0x644CD8BF)
 I (../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h)(0x644CD8BF)
@@ -3344,17 +3345,17 @@ I (../Middlewares/Third_Party/FatFs/src/diskio.h)(0x644CD8C8)
 I (../FATFS/Target/usbh_diskio.h)(0x66E68751)
 I (..\USB_HOST\App\usb_ESSH.h)(0x670D0FC6)
 I (../WeightMode_app/Inc/typedefine.h)(0x66E69D77)
-I (../WeightMode_app/Inc/app_DataCenter.h)(0x67DA8138)
+I (../WeightMode_app/Inc/app_DataCenter.h)(0x67E012A2)
 I (../WeightMode_app/Inc/app_EEFLASH.h)(0x67DA5CA7)
 I (../WeightMode_app/Inc/app_crc.h)(0x652AAC25)
 I (C:\Keil_v5\ARM\ARMCC\include\time.h)(0x55AEF5F2)
-I (../WeightMode_app/Inc/app_UTCTimer.h)(0x66E688CC)
+I (../WeightMode_app/Inc/app_UTCTimer.h)(0x67E00F87)
 I (../WeightMode_app/Inc/app_i2c.h)(0x66E70E54)
 I (../Core/Inc/i2c.h)(0x66C491C1)
 I (../WeightMode_app/Inc/hal_gpio.h)(0x66CF368B)
-I (../WeightMode_app/Inc/app_syspara.h)(0x670B4480)
+I (../WeightMode_app/Inc/app_syspara.h)(0x67E02545)
 I (../WeightMode_app/Inc/app_led_ctrl.h)(0x652AAC25)
-I (../WeightMode_app/Inc/app_main_task.h)(0x67D2EB64)
+I (../WeightMode_app/Inc/app_main_task.h)(0x67E00F27)
 I (../Core/Inc/stm32f4xx_it.h)(0x66FA7D11)
 I (../WeightMode_app/Inc/app_sdwe_ctrl.h)(0x652AAC25)
 F (../USB_HOST/App/usb_host.c)(0x670BFED9)(--c99 -c --cpu Cortex-M4.fp -g -O1 -Otime --apcs=interwork --split_sections -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../WeightMode_app/Inc -I../FATFS/Target -I../FATFS/App -I../USB_HOST/App -I../USB_HOST/Target -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc-I D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\中显科技组态屏\STM32MCU\Dev\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F40_41xxx -DUSE_HAL_DRIVER -DSTM32F407xx-o software\usb_host.o --omf_browse software\usb_host.crf --depend software\usb_host.d)

@@ -40,10 +40,10 @@ tExtFlashHandleStruct ExtFlashHandleContex = {
     .orderQueueLock = 0,
     .orderQueuePushIndex = 0,
     .orderQueuePopIndex = 0,
-    .orderQueue = {{0}},
+    .orderQueue = {{0,0,0,0,0,0,0,0,0,0}},
 
     //process handle info
-    .process = {0},
+    .process = {0,0,0,0,0,0,0,0,0,0},
     .onGoingOrder = E_F_ORDER_N,
     .processDelayTime = 0,
 
@@ -337,10 +337,8 @@ static void ExFlash_CycleHandle(tExtFlashHandleStruct *contex)
 }
 
 //mainfunction
-void ExFlash_MainFunction(void)
+void AT24C_MainFunction(void)
 {
-    tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
-    tExtFlashOrderStruct pushOrder;
     tExtFlashHandleStruct *contex = &ExtFlashHandleContex;
     contex->curTicks++;
     //

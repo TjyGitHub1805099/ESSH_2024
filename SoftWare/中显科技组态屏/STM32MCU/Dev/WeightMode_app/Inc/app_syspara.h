@@ -151,7 +151,7 @@ typedef enum HX711SystemParaType
 //store flash data : HX711_CHANEL_NUM * (sample value , weight value , k , b , remove value , weightDir ) , crc
 #define FLASH_STORE_MAX_LEN						(((FLASH_STORE_ADDRESS_END-FLASH_STORE_ADDRESS_START)/4)+1)
 //==========================================================================================================================
-#define SIZER_CLASSIFY_GROUP_NUM	(8)
+#define SIZER_CLASSIFY_GROUP_NUM	(10)//最多10个分类
 #define SIZER_CLASSIFY_MEMBER_NUM	(4)//mid min max select
 
 //

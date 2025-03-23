@@ -32,6 +32,8 @@ static const int days_in_month[2][12] = {
     {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
     {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 };
+struct tm gUTCDecodeTime;
+sint64 gS64UTCTime = 0xFFFFFFFF;//0x66B40C68;
 
 static int is_leap_year(int year)
 {
@@ -52,7 +54,8 @@ struct tm *mygmtime(const sint64 *timep)
 {
     static struct tm tm;
     sint64 t = *timep;
-    int days, year, month, time_ymd;
+    //int days;
+	int year, month, time_ymd;
 
     tm.tm_sec = t % 60;
     t /= 60;
@@ -67,7 +70,7 @@ struct tm *mygmtime(const sint64 *timep)
     }
     time_ymd = (int)t;
     year = 1970;
-    days = 0;
+    //days = 0;
 
     while(time_ymd >= (is_leap_year(year) ? 366 : 365)){
         time_ymd -=(is_leap_year(year) ? 366 : 365);
@@ -131,6 +134,18 @@ sint64 mymktime(struct tm *tm)
 
     return result;
 }
+
+
+void RTC_MainFunction(uint32 ticks)
+{
+    if((ticks % 1000 == 0) && (0xFFFFFFFF != gS64UTCTime))
+	{
+		gS64UTCTime++;
+		gUTCDecodeTime = *(mygmtime(&gS64UTCTime));
+	} 
+}
+
+
 
 
 /**********************************************************************************************************************

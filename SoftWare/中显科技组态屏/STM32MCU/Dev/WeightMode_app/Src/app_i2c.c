@@ -195,7 +195,7 @@ void app_i2c_test(void)
  *********************************************************************************************************************/
 void app_EEPROM_IDLE(app_i2cComtextDef *comtext)
 {
-    HAL_StatusTypeDef ret = 0 ;
+    HAL_StatusTypeDef ret = HAL_OK ;
     switch(comtext->order)
     {
         case EEPROM_ORDER_READ:/**< 读 */

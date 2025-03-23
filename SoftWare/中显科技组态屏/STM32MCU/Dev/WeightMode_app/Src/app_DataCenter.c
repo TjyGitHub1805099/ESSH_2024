@@ -35,6 +35,15 @@
 # error "CF_ATC24_USERDATA_BACKUP_STORE_END_ADD overflow"
 #endif
 
+#define CLASSTYPE_NUM   (10)
+uint16 s_ClassficationArr[CLASSTYPE_NUM][3];
+
+
+
+
+
+
+
 extern UINT32 get_SysTick_ByTimer(void);
 /**********************************************************************************************************************
  * DO NOT CHANGE THIS COMMENT!           << End of include and declaration area >>          DO NOT CHANGE THIS COMMENT!
@@ -42,6 +51,7 @@ extern UINT32 get_SysTick_ByTimer(void);
 static tInnerScreenDataCenterStruct InnerScreenDataCenter;
 tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle = 
 {
+    .ticks = 0,
     .trigerStroreFromScreen = 0,
     .weigthClassifyCplt = 0,
     //store in extern e2
@@ -84,14 +94,16 @@ tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle =
 
 #if 1
 tClassificationStruct ClassificationCfg[D_C_CLASSIFICATION_NUM] = {
-    { 30,  50,  70,  'A'},
-    { 180, 200, 220, 'B'},
-    { 225, 250, 275, 'C'},
-    { 270, 300, 330, 'D'},
-    { 315, 350, 385, 'E'},
-    { 360, 400, 440, 'F'},
-    { 405, 450, 495, 'G'},
-    { 450, 500, 550, 'H'}
+    {37  , 50  , 62  , 'A'},
+    {62  , 75  , 87  , 'B'},
+    {87  , 100 , 112 , 'C'},
+    {112 , 125 , 137 , 'D'},
+    {137 , 150 , 162 , 'E'},
+    {162 , 175 , 187 , 'F'},
+    {187 , 200 , 212 , 'G'},
+    {212 , 225 , 237 , 'H'},
+    {237 , 250 , 262 , 'I'},
+    {262 , 275 , 287 , 'J'}
 };
 #endif
 /**********************************************************************************************************************
@@ -115,7 +127,7 @@ void DataCenterHandle_ClassificationVluSet(uint8 type , uint32 *pData)
 {
     if(type < D_C_CLASSIFICATION_NUM)
     {
-        memcpy(&ClassificationCfg[type].mid,pData,3*4);
+        memcpy(&ClassificationCfg[type].mid,pData,sizeof(tClassificationStruct));
     }
 }
 
@@ -195,7 +207,7 @@ uint8 InnerScreenDataCenterHandle_UseWeight_Classification(float weight , uint8 
     {
         for(i = 0 ; i < D_C_CLASSIFICATION_NUM ; i++)
         {
-            if((cfg->min <= weight) && (weight <= cfg->max))
+            if((cfg->min <= weight) && (weight < cfg->max))
             {
                 break;
             }
@@ -222,11 +234,11 @@ uint8 InnerScreenDataCenterHandle_CaculateCrc16(tInnerScreenDataCenterHandleStru
     }
     return ret;
 }
-
+# if 0
 void InnerScreenDataCenterHandle_CaculateTotalNum(tInnerScreenDataCenterHandleStruct *pContex)
 {
     uint16 i = 0 , ret = 0;
-    UINT8 classType = 0;
+    eDataCenterClassificationType classType = D_C_CLASSIFICATION_A;
     //1.2 caculate total num
     for( classType = D_C_CLASSIFICATION_A ; classType < D_C_CLASSIFICATION_NUM ; classType++ )
     {
@@ -239,12 +251,12 @@ void InnerScreenDataCenterHandle_CaculateTotalNum(tInnerScreenDataCenterHandleSt
     {
         for( i = 0 ; i < CLASSIFICATION_STORE_MAX_NUM ; i++ )
         {
-            classType = (pContex->cfgInfo_weightType[i] >> 4) & 0x0F;//high 4 bit
+            classType = (eDataCenterClassificationType)((pContex->cfgInfo_weightType[i] >> 4) & 0x0F);//high 4 bit
             if(((UINT8)D_C_CLASSIFICATION_A <= classType) && (classType <= (UINT8)D_C_CLASSIFICATION_H))
             {
                 pContex->totalStoreNum_EachType[classType]++;
             }
-            classType = (pContex->cfgInfo_weightType[i] >> 0) & 0x0F;//low 4 bit
+            classType = (eDataCenterClassificationType)((pContex->cfgInfo_weightType[i] >> 0) & 0x0F);//low 4 bit
             if(((UINT8)D_C_CLASSIFICATION_A <= classType) && (classType <= (UINT8)D_C_CLASSIFICATION_H))
             {
                 pContex->totalStoreNum_EachType[classType]++;
@@ -411,24 +423,25 @@ static uint8 InnerScreenDataCenterHandle_EntryData_Prepare_dc_weight_dc_type_and
     //
     return ret;
 }
-
+#endif
 //S1.use weigth type searching the matched index
 uint8 InnerScreenDataCenterHandle_Searching_Use_WeightType(tInnerScreenDataCenterHandleStruct *pContex)
 {
-    uint16 i = 0 , j = 0;
-    uint8 ret = 0xFF , tempType = 0;
-    uint16 searchIndex_Record = 0 ;
+    uint16 j = 0;
+    uint8 ret = 0xFF ;
+    eDataCenterClassificationType tempType = D_C_CLASSIFICATION_A;
+    //uint16 searchIndex_Record = 0 ;
     //record start index
-    searchIndex_Record = pContex->searchStartIndex_Use_WeightType;
+    //searchIndex_Record = pContex->searchStartIndex_Use_WeightType;
     //
     while((0xFF == ret) && (0 == pContex->searchStartIndex_Use_WeightType_EndApear))
     {
         if((pContex->searchStartIndex_Use_WeightType % 2) == 0)
         {
-            tempType = ((pContex->cfgInfo_weightType[pContex->searchStartIndex_Use_WeightType / 2] >> 4) & 0x0F);
+            tempType = (eDataCenterClassificationType)((pContex->cfgInfo_weightType[pContex->searchStartIndex_Use_WeightType / 2] >> 4) & 0x0F);
             for(j = 0 ; j < D_C_CLASSIFICATION_NUM ; j++)
             {
-                if(tempType == pContex->searchUseWeightType[j])//high 4 bit
+                if(tempType == (eDataCenterClassificationType)pContex->searchUseWeightType[j])//high 4 bit
                 {
                     pContex->searchOutType = tempType;
                     pContex->searchOutIndex_Use_WeightType = pContex->searchStartIndex_Use_WeightType;
@@ -440,10 +453,10 @@ uint8 InnerScreenDataCenterHandle_Searching_Use_WeightType(tInnerScreenDataCente
         }
         else
         {
-            tempType = ((pContex->cfgInfo_weightType[pContex->searchStartIndex_Use_WeightType / 2] >> 0) & 0x0F);
+            tempType = (eDataCenterClassificationType)((pContex->cfgInfo_weightType[pContex->searchStartIndex_Use_WeightType / 2] >> 0) & 0x0F);
             for(j = 0 ; j < D_C_CLASSIFICATION_NUM ; j++)
             {
-                if(tempType == pContex->searchUseWeightType[j])//high 4 bit
+                if(tempType == (eDataCenterClassificationType)pContex->searchUseWeightType[j])//high 4 bit
                 {
                     pContex->searchOutType = tempType;
                     pContex->searchOutIndex_Use_WeightType = pContex->searchStartIndex_Use_WeightType;
@@ -565,7 +578,7 @@ void innerScreenDataCenter_DisData_Time_Prepare(tInnerScreenDataCenterHandleStru
 void innerScreenDataCenter_DisDataPrepare(tInnerScreenDataCenterHandleStruct *pContex , uint8 offset)
 {
     uint8 i = 0 ;
-    uint8 i_offset = INNER_SCREEN_DATACENTER_LENOF_INDEX+INNER_SCREEN_DATACENTER_LENOF_BARCODE;
+    //uint8 i_offset = INNER_SCREEN_DATACENTER_LENOF_INDEX+INNER_SCREEN_DATACENTER_LENOF_BARCODE;
 
     //index
     for(i = 0 ; i < (INNER_SCREEN_DATACENTER_LENOF_INDEX-1) ; i++ )
@@ -623,7 +636,7 @@ void InnerScreenDataCenterHandle_PageAllIndexSearching(tInnerScreenDataCenterHan
 //PC1.when 1st goto data center , init it
 void InnerScreenDataCenterHandle_Searching_Page1Init(tInnerScreenDataCenterHandleStruct *pContex)
 {
-    uint16 i = 0;
+    //uint16 i = 0;
     pContex->searchStartIndex_Use_WeightType = 0 ;
     pContex->curPageNum = 0 ;
     pContex->targetPageNum = pContex->curPageNum + 1;
@@ -661,8 +674,8 @@ void InnerScreenDataCenterHandle_Searching_PageDown(tInnerScreenDataCenterHandle
 //PC3.when at data center page and touch page up
 void InnerScreenDataCenterHandle_Searching_PageUp(tInnerScreenDataCenterHandleStruct *pContex)
 {
-    uint16 i = 0;
-    uint8 ret = 0 ;
+    //uint16 i = 0;
+    //uint8 ret = 0 ;
     if(pContex->curPageNum > 1)
     {
         pContex->targetPageNum = pContex->curPageNum - 1;
@@ -908,7 +921,7 @@ uint8 InnerScreenDataCenterHandle_ClearAllData(tInnerScreenDataCenterHandleStruc
             pushOrder.totalLen = CLASSIFICATION_STORE_CFG_LEN_TOTAL;
             pushOrder.remainLen = CLASSIFICATION_STORE_CFG_LEN_TOTAL;
             pushOrder.writePtr = &pContex->cfgInfo_weightType[0];
-            pushOrder.timeout = 1000;
+            pushOrder.timeout = 100;
             ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_WEIGHTTYPE,&pushOrder);
             if(1 == ret)
             {
@@ -931,7 +944,7 @@ uint8 InnerScreenDataCenterHandle_ClearAllData(tInnerScreenDataCenterHandleStruc
             pushOrder.totalLen = CLASSIFICATION_STORE_CFG_TIME_TOTAL_LEN;
             pushOrder.remainLen = CLASSIFICATION_STORE_CFG_TIME_TOTAL_LEN;
             pushOrder.writePtr = &pContex->cfgInfo_utcTime[0];
-            pushOrder.timeout = 1000;
+            pushOrder.timeout = 100;
             ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_WEIGHTTYPE,&pushOrder);
             if(1 == ret)
             {
@@ -953,7 +966,7 @@ uint8 InnerScreenDataCenterHandle_QueueEntry(tInnerScreenDataCenterHandleStruct 
 {
     uint8 ret = 0 ;
     uint16 i = 0 , pos_offset = 0 , crc16 = 0 , high_low = 1;//1:high 0:low
-    eDataCenterClassificationType classType = 0 ;
+    //eDataCenterClassificationType classType = D_C_CLASSIFICATION_A ;
     uint8 *tempWeightType = 0 ;
     tExtFlashOrderStruct pushOrder;
 
@@ -997,7 +1010,7 @@ uint8 InnerScreenDataCenterHandle_QueueEntry(tInnerScreenDataCenterHandleStruct 
         pushOrder.totalLen = 1;
         pushOrder.remainLen = 1;
         pushOrder.writePtr = &pContex->cfgInfo_weightType[i];
-        pushOrder.timeout = 1000;
+        pushOrder.timeout = 100;
         ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_WEIGHTTYPE,&pushOrder);
         if(1 == ret)
         {
@@ -1017,7 +1030,7 @@ uint8 InnerScreenDataCenterHandle_QueueEntry(tInnerScreenDataCenterHandleStruct 
         pushOrder.totalLen = CLASSIFICATION_STORE_CFG_CRCLEN;
         pushOrder.remainLen = CLASSIFICATION_STORE_CFG_CRCLEN;
         pushOrder.writePtr = &pContex->cfgInfo_weightType[CLASSIFICATION_STORE_CFG_LEN+0];
-        pushOrder.timeout = 1000;
+        pushOrder.timeout = 100;
         ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_WEIGHTTYPE_CRC,&pushOrder);    
         if(1 == ret)
         {
@@ -1038,7 +1051,7 @@ uint8 InnerScreenDataCenterHandle_QueueEntry(tInnerScreenDataCenterHandleStruct 
         pushOrder.totalLen = CLASSIFICATION_STORE_CFG_TIME_TYPEBYTE;
         pushOrder.remainLen = CLASSIFICATION_STORE_CFG_TIME_TYPEBYTE;
         pushOrder.writePtr = &pContex->cfgInfo_utcTime[pContex->userDataStoreIndex * CLASSIFICATION_STORE_CFG_TIME_TYPEBYTE + 0];
-        pushOrder.timeout = 1000;
+        pushOrder.timeout = 100;
         ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_UTCTIMEE,&pushOrder);           
         if(1 == ret)
         {
@@ -1058,7 +1071,7 @@ uint8 InnerScreenDataCenterHandle_QueueEntry(tInnerScreenDataCenterHandleStruct 
         pushOrder.totalLen = CLASSIFICATION_STORE_CFG_CRCLEN;
         pushOrder.remainLen = CLASSIFICATION_STORE_CFG_CRCLEN;
         pushOrder.writePtr = &pContex->cfgInfo_utcTime[CLASSIFICATION_STORE_CFG_TIME_LEN+0];
-        pushOrder.timeout = 1000;
+        pushOrder.timeout = 100;
         ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_UTCTIMEE_CRC,&pushOrder);          
         if(1 == ret)
         {
@@ -1084,7 +1097,7 @@ uint8 InnerScreenDataCenterHandle_QueueEntry(tInnerScreenDataCenterHandleStruct 
         pushOrder.totalLen = CLASSIFICATION_STORE_DATA_SINGLE_LEN;
         pushOrder.remainLen = CLASSIFICATION_STORE_DATA_SINGLE_LEN;
         pushOrder.writePtr = &pContex->userDataStoreData[0];
-        pushOrder.timeout = 1000;
+        pushOrder.timeout = 100;
         ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD,&pushOrder);          
         if(1 == ret)
         {
@@ -1098,7 +1111,7 @@ uint8 InnerScreenDataCenterHandle_QueueEntry(tInnerScreenDataCenterHandleStruct 
 //clear all data when export all
 void InnerScreenDataCenterHandle_Clear_CfgInfo_WeightType(tInnerScreenDataCenterHandleStruct *pContex)
 {
-    uint16 i = 0 , crc16 = 0;
+    uint16 crc16 = 0;
     uint8 ret = 1 ;
     tExtFlashOrderStruct pushOrder;
     if(1 == ret)
@@ -1113,7 +1126,7 @@ void InnerScreenDataCenterHandle_Clear_CfgInfo_WeightType(tInnerScreenDataCenter
         pushOrder.totalLen = CLASSIFICATION_STORE_CFG_LEN + CLASSIFICATION_STORE_CFG_CRCLEN;
         pushOrder.remainLen = CLASSIFICATION_STORE_CFG_LEN + CLASSIFICATION_STORE_CFG_CRCLEN;
         pushOrder.writePtr = &pContex->cfgInfo_weightType[0];
-        pushOrder.timeout = 1000;
+        pushOrder.timeout = 100;
         ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_WEIGHTTYPE,&pushOrder);  
         if(1 == ret)
         {
@@ -1124,7 +1137,7 @@ void InnerScreenDataCenterHandle_Clear_CfgInfo_WeightType(tInnerScreenDataCenter
 //clear all data when export all
 void InnerScreenDataCenterHandle_Clear_CfgInfo_utcTime(tInnerScreenDataCenterHandleStruct *pContex)
 {
-    uint16 i = 0 , crc16 = 0;
+    uint16 crc16 = 0;
     uint8 ret = 1 ;
     tExtFlashOrderStruct pushOrder;
     if(1 == ret)
@@ -1139,7 +1152,7 @@ void InnerScreenDataCenterHandle_Clear_CfgInfo_utcTime(tInnerScreenDataCenterHan
         pushOrder.totalLen = CLASSIFICATION_STORE_CFG_TIME_LEN + CLASSIFICATION_STORE_CFG_CRCLEN;
         pushOrder.remainLen = CLASSIFICATION_STORE_CFG_TIME_LEN + CLASSIFICATION_STORE_CFG_CRCLEN;
         pushOrder.writePtr = &pContex->cfgInfo_utcTime[0];
-        pushOrder.timeout = 1000;
+        pushOrder.timeout = 100;
         ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_UTCTIMEE,&pushOrder);  
         if(1 == ret)
         {
@@ -1193,7 +1206,7 @@ uint8 InnerScreenDataCenterHandle_Init_OrderTriger(tInnerScreenDataCenterHandleS
     pushOrder.totalLen = CLASSIFICATION_STORE_CFG_LEN + 2;
     pushOrder.remainLen = CLASSIFICATION_STORE_CFG_LEN + 2;
     pushOrder.readPtr = &pContex->cfgInfo_weightType[0];
-    pushOrder.timeout = 2000;
+    pushOrder.timeout = 100;
     ret = ExFlashIf_Sync_Read(E_F_HANDLE_JOBID_R_DATACENTER_WEIGHTTYPE,&pushOrder);
     if(1 == ret)
     {
@@ -1207,7 +1220,7 @@ uint8 InnerScreenDataCenterHandle_Init_OrderTriger(tInnerScreenDataCenterHandleS
         pushOrder.totalLen = CLASSIFICATION_STORE_CFG_TIME_LEN + 2;
         pushOrder.remainLen = CLASSIFICATION_STORE_CFG_TIME_LEN + 2;
         pushOrder.readPtr = &pContex->cfgInfo_utcTime[0];
-        pushOrder.timeout = 2000;
+        pushOrder.timeout = 100;
         ret = ExFlashIf_Sync_Read(E_F_HANDLE_JOBID_R_DATACENTER_UTCTIMEE,&pushOrder);
         if(1 == ret)
         {
@@ -1222,7 +1235,7 @@ uint8 InnerScreenDataCenterHandle_Init_OrderTriger(tInnerScreenDataCenterHandleS
         pushOrder.totalLen = CLASSIFICATION_STORE_DATA_TOTAL_LEN;
         pushOrder.remainLen = CLASSIFICATION_STORE_DATA_TOTAL_LEN;
         pushOrder.readPtr = &pContex->dataCenterPayload[0];
-        pushOrder.timeout = 2000;
+        pushOrder.timeout = 100;
         ret = ExFlashIf_Sync_Read(E_F_HANDLE_JOBID_R_DATACENTER_DATAPAYLOAD,&pushOrder);
         if(1 == ret)
         {
@@ -1268,7 +1281,7 @@ void innerScreenDiwen_LSB2MSB(uint8 *pData,uint16 len)
 
 #if 0
 //data center
-void InnerScreenDataCenterHandle_MainFunction(void)
+void InnerScreenDataCenterHandle_MainFunction_Before(void)
 {
     static uint16 index_i = 0 , address=0x3500 , outLen = 0;
     uint8 ret = 0 , weightType;
@@ -1507,7 +1520,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
 //
 uint8 InnerScreenDataCenterHandle_CaculateCrc16_2025(tInnerScreenDataCenterHandleStruct *pContex)
 {
-
+	return 1;
 }
 uint8 InnerScreenDataCenterHandle_Init_OrderTriger2025(tInnerScreenDataCenterHandleStruct *pContex)
 {
@@ -1519,7 +1532,7 @@ uint8 InnerScreenDataCenterHandle_Init_OrderTriger2025(tInnerScreenDataCenterHan
     pushOrder.totalLen = CF_ATC24_USERDATA_STORE_LEN;
     pushOrder.remainLen = CF_ATC24_USERDATA_STORE_LEN;
     pushOrder.readPtr = &pContex->s_StoreData[0];
-    pushOrder.timeout = 20000;
+    pushOrder.timeout = 100;
     ret = ExFlashIf_Sync_Read(E_F_HANDLE_JOBID_R_DATACENTER_DATAPAYLOAD_2025,&pushOrder);
     if(1 == ret)
     {
@@ -1533,7 +1546,7 @@ uint8 InnerScreenDataCenterHandle_Init_OrderTriger2025(tInnerScreenDataCenterHan
         pushOrder.totalLen = CF_ATC24_USERDATA_BACKUP_STORE_LEN;
         pushOrder.remainLen = CF_ATC24_USERDATA_BACKUP_STORE_LEN;
         pushOrder.readPtr = &pContex->s_StoreData_Backup[0];
-        pushOrder.timeout = 20000;
+        pushOrder.timeout = 100;
         ret = ExFlashIf_Sync_Read(E_F_HANDLE_JOBID_R_DATACENTER_BACKUP_DATAPAYLOAD_2025,&pushOrder);
         if(1 == ret)
         {
@@ -1549,13 +1562,20 @@ void InnerScreenDataCenterHandle_MainFunction(void)
     uint16 offset = 0 , len = 0 , ret = 0;
     uint16 crc16;
     tExtFlashOrderStruct pushOrder;
-
+    static uint32 preWeight;
+    static uint32 weightHoldOnTime;
+    static uint16 l_CF_StoreMask = 0;
+    //struct tm lUTCDecodeTime;
+    pContex->ticks++;
     switch(pContex->handle)
     {
         case D_C_HANDLE_INIT:
-            pContex->initSuccess = 0 ;
-            memset(&pContex->singleStoreData[0],0,CF_STORE_TOTAL_LEN);//存储数据清零
-            pContex->handle = D_C_HANDLE_READUSERDATA;
+            if(pContex->ticks >= 500)
+            {
+                pContex->initSuccess = 0 ;
+                memset(&pContex->singleStoreData[0],0,CF_STORE_TOTAL_LEN);//存储数据清零
+                pContex->handle = D_C_HANDLE_READUSERDATA;                
+            }
         break;
 
         case D_C_HANDLE_READUSERDATA:
@@ -1566,37 +1586,62 @@ void InnerScreenDataCenterHandle_MainFunction(void)
         case D_C_HANDLE_READUSERDATA_WAIT_CPLT:
             if(1 == InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(pContex))
             {
+                InnerScreenDataCenterHandle_ClearAll_jobStatus(pContex);
+                //==开始校验第一份数据
                 pContex->crc16 = 0;
                 pContex->crc16 += pContex->s_StoreData[CF_ATC24_USERDATA_STORE_LEN - 2];//最后2字节CRC
                 pContex->crc16 <<= 8;
                 pContex->crc16 &= 0xff00;
                 pContex->crc16 += pContex->s_StoreData[CF_ATC24_USERDATA_STORE_LEN - 1];//最后2字节CRC
                 crc16 = EECRC16(&pContex->s_StoreData[0],(CF_ATC24_USERDATA_STORE_LEN-2));
-                if(crc16 == pContex->crc16)
+                if(crc16 == pContex->crc16)//第一份数据合法
                 {
-                    pContex->initSuccess = 1;
-                    //
+                    pContex->initSuccess |= 1;
+                    //获取存储位置
                     pContex->userStorePosition = 0;
                     pContex->userStorePosition += pContex->s_StoreData[CF_ATC24_USERDATA_STORE_LEN - 4];//最后3`4字节存储位置
-                    pContex->userStorePosition <= 8;
+                    pContex->userStorePosition <<= 8;
                     pContex->userStorePosition &= 0xff00;
                     pContex->userStorePosition += pContex->s_StoreData[CF_ATC24_USERDATA_STORE_LEN - 3];//最后3`4字节存储位置
+                    //判断第二份数据是否和第一份数据相同
+                    if(0 == memcmp(&pContex->s_StoreData[0],&pContex->s_StoreData_Backup[0],CF_ATC24_USERDATA_STORE_LEN))
+                    {
+                        //相同
+                    }
+                    else//不相同
+                    {
+                        //复制第一份数到第二份数据
+                        memcpy(&pContex->s_StoreData_Backup[0],&pContex->s_StoreData[0],CF_ATC24_USERDATA_STORE_LEN);
+                        //
+                        pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
+                        pushOrder.RegAddress = CF_ATC24_USERDATA_BACKUP_STORE_START_ADD;//第二份数据的地址
+                        pushOrder.totalLen = CF_ATC24_USERDATA_STORE_LEN;
+                        pushOrder.remainLen = CF_ATC24_USERDATA_STORE_LEN;
+                        pushOrder.writePtr = &pContex->s_StoreData_Backup[0];
+                        pushOrder.timeout = 100;
+                        ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_DATAPAYLOAD_2025,&pushOrder);    
+                        if(1 == ret)
+                        {
+                            InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_DATAPAYLOAD_2025);
+                        } 
+                   }
                 }
-                else//第一份数据有误
+                else//第一份数据不合法
                 {
+                    //开始校验第二份数据
                     pContex->crc16 = 0;
                     pContex->crc16 += pContex->s_StoreData_Backup[CF_ATC24_USERDATA_STORE_LEN - 2];//最后2字节CRC
                     pContex->crc16 <<= 8;
                     pContex->crc16 &= 0xff00;
                     pContex->crc16 += pContex->s_StoreData_Backup[CF_ATC24_USERDATA_STORE_LEN - 1];//最后2字节CRC
                     crc16 = EECRC16(&pContex->s_StoreData_Backup[0],(CF_ATC24_USERDATA_BACKUP_STORE_LEN-2));
-                    if(crc16 == pContex->crc16)
+                    if(crc16 == pContex->crc16)//第二份数据合法
                     {
-                        pContex->initSuccess = 1;
+                        pContex->initSuccess |= 1;
                         //
                         pContex->userStorePosition = 0;
                         pContex->userStorePosition += pContex->s_StoreData_Backup[CF_ATC24_USERDATA_STORE_LEN - 4];//最后3`4字节存储位置
-                        pContex->userStorePosition <= 8;
+                        pContex->userStorePosition <<= 8;
                         pContex->userStorePosition &= 0xff00;
                         pContex->userStorePosition += pContex->s_StoreData_Backup[CF_ATC24_USERDATA_STORE_LEN - 3];//最后3`4字节存储位置
                         //原始数据有误 备份数据正常 复制备份数据给原始数据 再进行存储
@@ -1607,52 +1652,50 @@ void InnerScreenDataCenterHandle_MainFunction(void)
                         pushOrder.totalLen = CF_ATC24_USERDATA_STORE_LEN;
                         pushOrder.remainLen = CF_ATC24_USERDATA_STORE_LEN;
                         pushOrder.writePtr = &pContex->s_StoreData[0];
-                        pushOrder.timeout = 20000;
+                        pushOrder.timeout = 100;
                         ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025,&pushOrder);    
                         if(1 == ret)
                         {
                             InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025);
                         } 
                     }
-                    else
+                    else//第二份数据依然不合法
                     {
                         offset = CF_ATC24_USERDATA_STORE_LEN - CF_ATC24_USERDATA_STORE_POSITION_LEN - CLASSIFICATION_STORE_CFG_CRCLEN;
                         len = CF_ATC24_USERDATA_STORE_LEN;
-                        //
+                        //清除第一份的全部数据 并计算CRC
                         memset(&pContex->s_StoreData[0],0,CF_ATC24_USERDATA_STORE_LEN);
                         pContex->crc16 = EECRC16(&pContex->s_StoreData[0],(CF_ATC24_USERDATA_STORE_LEN-2));
                         pContex->s_StoreData[offset + 2] = (pContex->crc16 >> 8) & 0xff;
                         pContex->s_StoreData[offset + 3] = (pContex->crc16 >> 0) & 0xff;
-                        memcpy(&pContex->s_StoreData_Backup[0],&pContex->s_StoreData[0],CF_ATC24_USERDATA_STORE_LEN);
-                        //
                         pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
                         pushOrder.RegAddress = CF_ATC24_USERDATA_STORE_START_ADD;
                         pushOrder.totalLen = CF_ATC24_USERDATA_STORE_LEN;
                         pushOrder.remainLen = CF_ATC24_USERDATA_STORE_LEN;
                         pushOrder.writePtr = &pContex->s_StoreData[0];
-                        pushOrder.timeout = 20000;
+                        pushOrder.timeout = 100;
                         ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025,&pushOrder);    
                         if(1 == ret)
                         {
                             InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025);
                         } 
-                        //
+
+                        //复制清除后的第一份数据到第二份数据
+                        memcpy(&pContex->s_StoreData_Backup[0],&pContex->s_StoreData[0],CF_ATC24_USERDATA_STORE_LEN);
+                        pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
+                        pushOrder.RegAddress = CF_ATC24_USERDATA_BACKUP_STORE_START_ADD;
+                        pushOrder.totalLen = CF_ATC24_USERDATA_BACKUP_STORE_LEN;
+                        pushOrder.remainLen = CF_ATC24_USERDATA_BACKUP_STORE_LEN;
+                        pushOrder.writePtr = &pContex->s_StoreData_Backup[0];
+                        pushOrder.timeout = 100;
+                        ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_DATAPAYLOAD_2025,&pushOrder);    
                         if(1 == ret)
                         {
-                            pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
-                            pushOrder.RegAddress = CF_ATC24_USERDATA_BACKUP_STORE_START_ADD;
-                            pushOrder.totalLen = CF_ATC24_USERDATA_BACKUP_STORE_LEN;
-                            pushOrder.remainLen = CF_ATC24_USERDATA_BACKUP_STORE_LEN;
-                            pushOrder.writePtr = &pContex->s_StoreData_Backup[0];
-                            pushOrder.timeout = 20000;
-                            ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_DATAPAYLOAD_2025,&pushOrder);    
-                            if(1 == ret)
-                            {
-                                InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_DATAPAYLOAD_2025);
-                            }    
-                        }
+                            InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_DATAPAYLOAD_2025);
+                        }                         
                     }
                 }
+
                 //==
                 if(0 == pContex->initSuccess)
                 {
@@ -1669,6 +1712,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
         case D_C_HANDLE_READUSERDATA_WAIT_ERR_HANDLE_CPLT:
             if(1 == InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(pContex))
             {
+                InnerScreenDataCenterHandle_ClearAll_jobStatus(pContex);
                 pContex->handle = D_C_HANDLE_MAX_NUM;
             }
         break;
@@ -1683,71 +1727,136 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             pContex->handle = D_C_HANDLE_BCCODE;
         break;
         case D_C_HANDLE_BCCODE:
-
-            //==
-            offset = CF_STORE_GONGHAO_TYPEBYTE;
-            len = CF_STORE_BCCODE_TYPEBYTE;
-            memcpy(&pContex->singleStoreData[offset],&pContex->bccode[0],len);
+            ret = USB_SMQ_GetDecodeData(&pContex->bccode[0],CF_STORE_BCCODE_TYPEBYTE,&pContex->bccodeValidLen);
+            if((1 == ret) && (CF_STORE_BCCODE_TYPEBYTE == pContex->bccodeValidLen))
+            {
+                l_CF_StoreMask |= CF_STORE_MASK_BCCODE;
+                //
+                offset = CF_STORE_GONGHAO_TYPEBYTE;
+                len = CF_STORE_BCCODE_TYPEBYTE;
+                memcpy(&pContex->singleStoreData[offset],&pContex->bccode[0],len);                
+            }
+            else
+            {
+                l_CF_StoreMask &= (~CF_STORE_MASK_BCCODE);
+            }
+            //
             pContex->handle = D_C_HANDLE_UTCTIME2CHAR;
         break;
         case D_C_HANDLE_UTCTIME2CHAR:
+            if(0xFFFFFFFF != gS64UTCTime)
+            {
+                l_CF_StoreMask |= (CF_STORE_MASK_TIME);
+                //
+                pContex->utctime[0] = (gS64UTCTime >> 24) & 0xFF;
+                pContex->utctime[1] = (gS64UTCTime >> 16) & 0xFF;
+                pContex->utctime[2] = (gS64UTCTime >> 8) & 0xFF;
+                pContex->utctime[3] = (gS64UTCTime >> 0) & 0xFF;
+                //==
+                offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE;
+                len = CF_STORE_CFG_TIME_TYPEBYTE;
+                memcpy(&pContex->singleStoreData[offset],&pContex->utctime[0],len);                
+            }
 
-            //==
-            offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE;
-            len = CF_STORE_CFG_TIME_TYPEBYTE;
-            memcpy(&pContex->singleStoreData[offset],&pContex->utctime[0],len);
             pContex->handle = D_C_HANDLE_WEIGHT;
         break;
         case D_C_HANDLE_WEIGHT:
-
-            //==
-            offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + CF_STORE_CFG_TIME_TYPEBYTE;
-            len = CF_STORE_WEIGHT_TYPEBYTE;
-            memcpy(&pContex->singleStoreData[offset],&pContex->weight[0],len);
+            pContex->weightVlu = hx711_getWeight(HX711Chanel_1);
+            if(preWeight != pContex->weightVlu)
+            {
+                preWeight = pContex->weightVlu;
+                weightHoldOnTime = get_SysTick_ByTimer();
+            }
+            else
+            {
+                if((get_SysTick_ByTimer() - weightHoldOnTime) >= 500)
+                {
+                    ret = 1;//数据已稳定500ms
+                }
+                else
+                {
+                    ret = 0;
+                }
+            }
+            //数据已稳定500ms
+            if(1 == ret)
+            {
+                l_CF_StoreMask |= (CF_STORE_MASK_WEIGHT);
+                //
+                pContex->weight[0] = ( pContex->weightVlu >> 8 ) & 0x00ff;
+                pContex->weight[1] = ( pContex->weightVlu >> 0 ) & 0x00ff;
+                //==
+                offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + CF_STORE_CFG_TIME_TYPEBYTE;
+                len = CF_STORE_WEIGHT_TYPEBYTE;
+                memcpy(&pContex->singleStoreData[offset],&pContex->weight[0],len);
+            }
+            else
+            {
+                l_CF_StoreMask &= (~CF_STORE_MASK_WEIGHT);
+            }
+            //
             pContex->handle = D_C_HANDLE_LEIXING;
         break;
         case D_C_HANDLE_LEIXING:
-
-            //==
+            l_CF_StoreMask |= (CF_STORE_MASK_LEIXING);
+            //
+            pContex->leixing[0] = pContex->classificationIndex;// 用户主界面的选择
             offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE;
             len = CF_STORE_LEIXING_TYPEBYTE;
             memcpy(&pContex->singleStoreData[offset],&pContex->leixing[0],len);
             pContex->handle = D_C_HANDLE_GUIGE;
         break;
         case D_C_HANDLE_GUIGE:
-
-            //==
-            offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE + CF_STORE_LEIXING_TYPEBYTE;
-            len = CF_STORE_GUIGE_TYPEBYTE;
-            memcpy(&pContex->singleStoreData[offset],&pContex->guige[0],len);
+            ret = InnerScreenDataCenterHandle_UseWeight_Classification(pContex->weightVlu,&pContex->classificationIndex);     
+            if(1 == ret)
+            {
+                l_CF_StoreMask |= (CF_STORE_MASK_GUIGE);
+                //==
+                offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE + CF_STORE_LEIXING_TYPEBYTE;
+                len = CF_STORE_GUIGE_TYPEBYTE;
+                memcpy(&pContex->singleStoreData[offset],&pContex->guige[0],len);
+            }
+            else
+            {
+                l_CF_StoreMask &= (~CF_STORE_MASK_GUIGE);
+            }
             pContex->handle = D_C_HANDLE_STORE2EE;
         break;
 
-
-
         //====开始存储 单次的数据
         case D_C_HANDLE_STORE2EE:
-            offset = pContex->userStorePosition * CF_STORE_TOTAL_LEN;
-            len = CF_STORE_TOTAL_LEN;
-            memcpy(&pContex->s_StoreData[offset],&pContex->singleStoreData[0],CF_STORE_TOTAL_LEN);
-            //
-            pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
-            pushOrder.RegAddress = CF_ATC24_USERDATA_STORE_START_ADD + offset;
-            pushOrder.totalLen = CF_STORE_TOTAL_LEN;
-            pushOrder.remainLen = CF_STORE_TOTAL_LEN;
-            pushOrder.writePtr = &pContex->s_StoreData[offset];
-            pushOrder.timeout = 1000;
-            ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025,&pushOrder);    
-            if(1 == ret)
+            if((l_CF_StoreMask & CF_STORE_MASK_CPLT) == CF_STORE_MASK_CPLT)//满足则进行存储
             {
-                InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025);
+                l_CF_StoreMask = 0;
+                //
+                offset = pContex->userStorePosition * CF_STORE_TOTAL_LEN;
+                len = CF_STORE_TOTAL_LEN;
+                memcpy(&pContex->s_StoreData[offset],&pContex->singleStoreData[0],CF_STORE_TOTAL_LEN);
+                //
+                pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
+                pushOrder.RegAddress = CF_ATC24_USERDATA_STORE_START_ADD + offset;
+                pushOrder.totalLen = CF_STORE_TOTAL_LEN;
+                pushOrder.remainLen = CF_STORE_TOTAL_LEN;
+                pushOrder.writePtr = &pContex->s_StoreData[offset];
+                pushOrder.timeout = 100;
+                ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025,&pushOrder);    
+                if(1 == ret)
+                {
+                    InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025);
+                }                
+                //==
+                pContex->handle = D_C_HANDLE_STORE2EE_WAIT;
             }
-            //==
-            pContex->handle = D_C_HANDLE_STORE2EE_WAIT;
+            else//不满足则回到获取员工号
+            {
+                l_CF_StoreMask = 0;
+                pContex->handle = D_C_HANDLE_YUANGONGHAO;
+            }
         break;
         case D_C_HANDLE_STORE2EE_WAIT:
             if(1 == InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(pContex))
             {
+                InnerScreenDataCenterHandle_ClearAll_jobStatus(pContex);
                 //==
                 pContex->handle = D_C_HANDLE_STORE2EE_CRC;
             }
@@ -1767,7 +1876,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             pushOrder.totalLen = len;
             pushOrder.remainLen = len;
             pushOrder.writePtr = &pContex->s_StoreData[offset];
-            pushOrder.timeout = 1000;
+            pushOrder.timeout = 100;
             ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_CRC_DATAPAYLOAD_2025,&pushOrder);    
             if(1 == ret)
             {
@@ -1779,10 +1888,12 @@ void InnerScreenDataCenterHandle_MainFunction(void)
         case D_C_HANDLE_STORE2EE_CRC_WAIT:
             if(1 == InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(pContex))
             {
+                InnerScreenDataCenterHandle_ClearAll_jobStatus(pContex);
                 //==
                 pContex->handle = D_C_HANDLE_STORE2EE_BACKUP;
             }
         break;
+
         //====开始存储备份区 单次的数据
         case D_C_HANDLE_STORE2EE_BACKUP:
             offset = pContex->userStorePosition * CF_STORE_TOTAL_LEN;
@@ -1794,7 +1905,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             pushOrder.totalLen = len;
             pushOrder.remainLen = len;
             pushOrder.writePtr = &pContex->s_StoreData_Backup[offset];
-            pushOrder.timeout = 1000;
+            pushOrder.timeout = 100;
             ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_DATAPAYLOAD_2025,&pushOrder);    
             if(1 == ret)
             {
@@ -1806,6 +1917,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
         case D_C_HANDLE_STORE2EE_BACKUP_WAIT:
             if(1 == InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(pContex))
             {
+                InnerScreenDataCenterHandle_ClearAll_jobStatus(pContex);
                 //==
                 pContex->handle = D_C_HANDLE_STORE2EE_BACKUP_CRC;
             }
@@ -1825,7 +1937,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             pushOrder.totalLen = len;
             pushOrder.remainLen = len;
             pushOrder.writePtr = &pContex->s_StoreData_Backup[offset];
-            pushOrder.timeout = 1000;
+            pushOrder.timeout = 100;
             ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_CRC_DATAPAYLOAD_2025,&pushOrder);    
             if(1 == ret)
             {
@@ -1837,6 +1949,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
         case D_C_HANDLE_STORE2EE_BACKUP_CRC_WAIT:
             if(1 == InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(pContex))
             {
+                InnerScreenDataCenterHandle_ClearAll_jobStatus(pContex);
                 //==
                 pContex->handle = D_C_HANDLE_MAX_NUM;
             }

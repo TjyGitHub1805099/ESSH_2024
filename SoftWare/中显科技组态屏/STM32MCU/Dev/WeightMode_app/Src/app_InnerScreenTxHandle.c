@@ -443,7 +443,7 @@ void innerScreenTxHandle_ScreenBcCode(T5LType *pSdwe)
 		#if(INNERSCREEN_TYPE==INNERSCREEN_TYPE_DIWEN)
 			innerScreenDiwenLSBChangeToMSB(pSdwe);
 		#endif
-		if(TRUE ==t5lWriteData(pSdwe,DMG_FUNC_BC_CODE_ADDRESS,&pSdwe->bcCodeVlu[0],((INNER_SCREEN_DATACENTER_LENOF_BARCODE+1)/2),0));//2*chanel_len:because each data type was 4 byte
+		if(TRUE ==t5lWriteData(pSdwe,DMG_FUNC_BC_CODE_ADDRESS,(INT16 *)&pSdwe->bcCodeVlu[0],((INNER_SCREEN_DATACENTER_LENOF_BARCODE+1)/2),0));//2*chanel_len:because each data type was 4 byte
 		{
 			pSdwe->bcCodeTriger = 0;
 			memcpy(&sUSBSMQHandleContex.decodeDataVaildPre,&sUSBSMQHandleContex.decodeDataVaild,USBSMQ_KEYBORD_MAX_NUM);
@@ -486,7 +486,7 @@ UINT8 innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle(T5LType *pSd
 
 		if(pSdwe->triggerSaveVlu != pSdwe->triggerSaveVluPre)
 		{
-			if(TRUE == t5lWriteData(pSdwe,0x3002,&pSdwe->triggerSaveVlu,1,0))
+			if(TRUE == t5lWriteData(pSdwe,0x3002,(INT16 *)&pSdwe->triggerSaveVlu,1,0))
 			{
 				pSdwe->triggerSaveVluPre = pSdwe->triggerSaveVlu;
 			}
@@ -502,7 +502,7 @@ UINT8 innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle(T5LType *pSd
 
 		if(111 == test_flag)
 		{
-			if(TRUE ==t5lWriteData(pSdwe,(address+test_i*0x80),testData,0x60,0));//2*chanel_len:because each data type was 4 byte
+			if(TRUE ==t5lWriteData(pSdwe,(address+test_i*0x80),(INT16 *)testData,0x60,0));//2*chanel_len:because each data type was 4 byte
 			{
 				test_flag = 0;
 			}

@@ -25,12 +25,13 @@ tUSBSMQHandle sUSBSMQHandleContex = {
 };
 
 //参考：https://blog.csdn.net/lin_lyfc/article/details/103432727
-#define KEYBORD_MAX_NUM (39)//LettersAndNumbersAndSpace
+//参考：https://blog.csdn.net/u012388993/article/details/116395497
+#define KEYBORD_MAX_NUM (40)//LettersAndNumbersAndSpace
 static UINT8 keyBordVlu_LettersAndNumbersAndSpace[KEYBORD_MAX_NUM][2]={
+{0x1E,'1'},{0x1F,'2'},{0x20,'3'},{0x21,'4'},{0x22,'5'},{0x23,'6'},{0x24,'7'},{0x25,'8'},{0x26,'9'},{0x27,'0'},
 {0x04,'A'},{0x05,'B'},{0x06,'C'},{0x07,'D'},{0x08,'E'},{0x09,'F'},{0x0A,'G'},{0x0B,'H'},{0x0C,'I'},{0x0D,'J'},
 {0x0E,'K'},{0x0F,'L'},{0x10,'M'},{0x11,'N'},{0x12,'O'},{0x13,'P'},{0x14,'Q'},{0x15,'R'},{0x16,'S'},{0x17,'T'},
-{0x18,'U'},{0x19,'V'},{0x1A,'W'},{0x1B,'X'},{0x1C,'Y'},{0x1D,'Z'},{0x1E,'1'},{0x1F,'2'},{0x20,'3'},{0x21,'4'},
-{0x22,'5'},{0x23,'6'},{0x24,'7'},{0x25,'8'},{0x26,'9'},{0x27,'0'},{0x2C,' '},{0x28,'*'},{0x00, 0 }
+{0x18,'U'},{0x19,'V'},{0x1A,'W'},{0x1B,'X'},{0x1C,'Y'},{0x1D,'Z'},{0x2C,' '},{0x2E,'='},{0x00, 0 },{0x28,'\r'}
 };
 
 
@@ -118,7 +119,7 @@ void USB_SMQ_Decode(tUSBSMQHandle *pCtx)
             //
             if(k < KEYBORD_MAX_NUM)//成功查找出
             {
-                if((0 != pCtx->decodeData[i]) && ('*' != pCtx->decodeData[i]))//不要空的 和回车
+                if((0 != pCtx->decodeData[i]) && ('\r' != pCtx->decodeData[i]))//不要空的 和回车
                 {
                     pCtx->decodeDataVaild[pCtx->decodeVaildLen++] = pCtx->decodeData[i];
                 }
@@ -161,10 +162,12 @@ void USB_SMQ_Handle_MainFunction(void)
     //
     switch(pCtx->handleType)
     {
-        case USBSMQ_HANDLE_INIT:// = 0,    /**< 初始化 */
+        /**< 初始化 */
+        case USBSMQ_HANDLE_INIT:  
             pCtx->handleType = USBSMQ_HANDLE_IDLE;
         break;
-        case USBSMQ_HANDLE_IDLE:// = 1,    /**< 空闲 */
+        /**< 空闲 */
+        case USBSMQ_HANDLE_IDLE: 
             if(1 == pCtx->RxFinishFlag)
             {
                 //==记录间隔时间 平均间隔时间 8 ms
@@ -206,10 +209,14 @@ void USB_SMQ_Handle_MainFunction(void)
                 }
             }
         break;
-        case USBSMQ_HANDLE_WAIT:// = 2,    /**< 等待 */
+
+        /**< 等待 */
+        case USBSMQ_HANDLE_WAIT:
 
         break;
-        case USBSMQ_HANDLE_RESET:// = 3,    /**< 触发复位 */
+
+        /**< 触发复位 */
+        case USBSMQ_HANDLE_RESET:
             /*
             状态 0/1 支持该命令，由下位机发送，上位机接收，有应答。 
             0x57 0xAB 0x82 0xA* 
@@ -233,12 +240,15 @@ void USB_SMQ_Handle_MainFunction(void)
             pCtx->uartDev->tx_bytes(pCtx->uartDev,pCtx->txData,11);
             pCtx->handleType = USBSMQ_HANDLE_IDLE;
         break;
+
+        /**< 解码 */
         case USBSMQ_HANDLE_DECODE:
             USB_SMQ_Decode(pCtx);
             pCtx->encodeDataOffset = 0 ;
             pCtx->decodeFinishFlag = 1;
             pCtx->handleType = USBSMQ_HANDLE_IDLE;
         break;
+
         default:
         break;
     }

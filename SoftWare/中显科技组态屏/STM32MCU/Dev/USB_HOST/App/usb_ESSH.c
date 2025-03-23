@@ -26,7 +26,7 @@ void MSC_Application(void)
 {
     FRESULT fres; // FatFs function common result code
     uint32_t byteswrite;
-    uint8_t str[] = "hello world!";
+    //uint8_t str[] = "hello world!";
  
     /* Register the file system object to the FatFs module */
     if( f_mount(&FatfsUDisk, (TCHAR const*)USBHPath, 0) != FR_OK)

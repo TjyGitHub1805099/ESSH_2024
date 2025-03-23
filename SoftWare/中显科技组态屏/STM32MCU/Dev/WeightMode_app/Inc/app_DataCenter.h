@@ -53,6 +53,8 @@ typedef enum
     D_C_CLASSIFICATION_F = 5,
     D_C_CLASSIFICATION_G = 6,
     D_C_CLASSIFICATION_H = 7,
+    D_C_CLASSIFICATION_I = 8,
+    D_C_CLASSIFICATION_J = 9,
     D_C_CLASSIFICATION_NUM
 }eDataCenterClassificationType;
 
@@ -61,7 +63,7 @@ typedef struct sClassificationStruct
     uint32 mid;
     uint32 min;
     uint32 max;
-    uint8 typeOutput;
+    uint32 typeOutput;
 }tClassificationStruct;
 
 typedef struct sInnerScreenDataCenterStruct
@@ -120,15 +122,23 @@ DATA_INFO	stroenum	    barcode	date	        weight	        CRC	addStart_dec	addS
 #define EEFLASH_SYS_PARA_END_ADD                    (EEFLASH_SYS_PARA_START_ADD + EEFLASH_SYS_PARA_LEN + 2)
 
 #if 1//20250319
+#define CF_STORE_MASK_GONGHAO   (0x0001)
+#define CF_STORE_MASK_BCCODE    (0x0002)
+#define CF_STORE_MASK_TIME      (0x0004)
+#define CF_STORE_MASK_WEIGHT    (0x0008)
+#define CF_STORE_MASK_LEIXING   (0x0010)
+#define CF_STORE_MASK_GUIGE     (0x0020)
+#define CF_STORE_MASK_CPLT      (0x003F)
+
 //STORE NUM
 #define CLASSIFICATION_STORE_MAX_NUM    (220)//最大存储220条
 //定义数据
 #define CF_STORE_GONGHAO_TYPEBYTE       ( 4)//1.员工工号：4字节 0000 - 9999
 #define CF_STORE_BCCODE_TYPEBYTE        (15)//2.献血条码：15位
-#define CF_STORE_CFG_TIME_TYPEBYTE      ( 4)//3.称重时间：utc time at 1970~2099 需要4字节
-#define CF_STORE_WEIGHT_TYPEBYTE        ( 2)//4.血浆重量：2字节重量 0~65535ml
-#define CF_STORE_LEIXING_TYPEBYTE       ( 1)//5.血浆类型：1字节 
-#define CF_STORE_GUIGE_TYPEBYTE         ( 1)//6.血浆规格：1字节
+#define CF_STORE_CFG_TIME_TYPEBYTE      ( 4)//3.称重时间：utc time at 1970~2099 存储到显示需要转换
+#define CF_STORE_WEIGHT_TYPEBYTE        ( 2)//4.血浆重量：2字节重量 0~65535ml    存储到显示需要转换
+#define CF_STORE_LEIXING_TYPEBYTE       ( 1)//5.血浆类型：1字节 存储到显示需要转换:0->P1鲜浆 , 1-> ..
+#define CF_STORE_GUIGE_TYPEBYTE         ( 1)//6.血浆规格：1字节 存储到显示需要转换:0->50 , 1->75 ..
 #define CF_STORE_TOTAL_LEN              (CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + \
     CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE + CF_STORE_LEIXING_TYPEBYTE + CF_STORE_GUIGE_TYPEBYTE )//27byte
 //原始数据
@@ -221,6 +231,7 @@ typedef enum
 //local data center handle
 typedef struct sInnerScreenDataCenterHandleStruct
 {
+    uint32 ticks;
     uint8 initSuccess;
     uint8 trigerStroreFromScreen;
     uint8 	weigthClassifyCplt;
@@ -264,8 +275,11 @@ typedef struct sInnerScreenDataCenterHandleStruct
     //
     //20250319
     eDataCenterHandleType handle;
+    uint16 weightVlu;
+    uint8 classificationIndex;
     uint8 yuangonghao[CF_STORE_GONGHAO_TYPEBYTE];
     uint8 bccode[CF_STORE_BCCODE_TYPEBYTE];
+    uint8 bccodeValidLen;
     uint8 utctime[CF_STORE_CFG_TIME_TYPEBYTE];
     uint8 weight[CF_STORE_WEIGHT_TYPEBYTE];
     uint8 leixing[CF_STORE_LEIXING_TYPEBYTE];
@@ -286,6 +300,7 @@ extern void InnerScreenDataCenterHandle_MainFunction(void);
 extern void DataCenterHandle_ClassificationVluSet(uint8 type , uint32 *pData);
 extern uint8 InnerScreenDataCenterHandle_Searching_Use_WeightType(tInnerScreenDataCenterHandleStruct *pContex);
 
+extern void InnerScreenDataCenterHandle_WeightClassification_Init(tInnerScreenDataCenterHandleStruct *pContex);
 
 
 #endif

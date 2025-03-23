@@ -65,3 +65,4 @@ software\app_main_task.o: ../Core/Inc/main.h
 software\app_main_task.o: ../WeightMode_app/Inc/app_smmz.h
 software\app_main_task.o: ../WeightMode_app/Inc/app_wzdyj.h
 software\app_main_task.o: ../WeightMode_app/Inc/app_usbsmq.h
+software\app_main_task.o: ../WeightMode_app/Inc/app_AT24C.h

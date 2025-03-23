@@ -548,7 +548,7 @@ UINT8 innerScreenRxHandle_Sizer_ClassifySet(T5LType *pSdwe)
 UINT8 innerScreenRxHandle_TriggerSave(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
-	UINT8 i = 0 , j = 0;
+	//UINT8 i = 0 , j = 0;
 	if(pSdwe->SetAdd == INNNERSCREEN_TRIGER_SAVE_ADDRESS)
 	{
 		if(INNNERSCREEN_TRIGER_SAVE_VLU == pSdwe->SetData)
@@ -566,7 +566,7 @@ UINT8 innerScreenRxHandle_TriggerSave(T5LType *pSdwe)
 UINT8 innerScreenRxHandle_SearchTimeSet(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
-	UINT8 i = 0 , j = 0 , offset = 0;
+	UINT8 offset = 0;
 	if((pSdwe->SetAdd >= INNERSCRENN_DATACENTER_SEARCH_TIME_ADDRESS) &&
 	   (pSdwe->SetAdd < INNERSCRENN_DATACENTER_SEARCH_TIME_ADDRESS+INNERSCRENN_DATACENTER_SEARCH_TIME_LEN))
 	{

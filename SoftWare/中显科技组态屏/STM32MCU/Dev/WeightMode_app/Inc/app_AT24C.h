@@ -72,7 +72,8 @@ typedef struct sExtFlashHandleStruct
 }tExtFlashHandleStruct;
 
 extern tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle;
-
-extern void ExFlash_MainFunction(void);
+extern sint8 ExFlashIf_Sync_Write(eExtFlashHandleJobIdType jobId,tExtFlashOrderStruct *pOrder);
+extern sint8 ExFlashIf_Sync_Read(eExtFlashHandleJobIdType jobId,tExtFlashOrderStruct *pOrder);
+extern void AT24C_MainFunction(void);
 
 #endif

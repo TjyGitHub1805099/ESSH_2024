@@ -19,9 +19,6 @@
 extern UINT32 get_SysTick_ByTimer(void);
 extern void app_main_task(void);
 
-extern struct tm gUTCDecodeTime;
-extern sint64 gS64UTCTime;
-extern struct tm localtm;
 /*
 //mcu version : 8.0  , diwen version :8.0
 1、上电后，通过MCU获取到迪文屏的版本信息，进而指示可以正常与屏通信
