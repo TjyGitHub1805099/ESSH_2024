@@ -40,13 +40,36 @@ tExtFlashHandleStruct ExtFlashHandleContex = {
     .orderQueueLock = 0,
     .orderQueuePushIndex = 0,
     .orderQueuePopIndex = 0,
-    .orderQueue = {{0,0,0,0,0,0,0,0,0,0}},
+    .orderQueue =   {{
+                .Order = E_F_ORDER_N,
+                .DevAddress = EXT_EEPROM_SLAVE_ADDRESS,
+                .RegAddress = 0,
+                .totalLen = 0,
+                .remainLen = 0,
+                .writePtr = 0,
+                .readPtr = 0,
+                .timeout = 0,
+                .jobId = E_F_HANDLE_JOBID_WR_MAX,
+                .extFlashIfCallback = 0
+                    }},
 
     //process handle info
-    .process = {0,0,0,0,0,0,0,0,0,0},
+    .process =  {
+            .Order = E_F_ORDER_N,
+            .DevAddress = EXT_EEPROM_SLAVE_ADDRESS,
+            .RegAddress = 0,
+            .totalLen = 0,
+            .remainLen = 0,
+            .writePtr = 0,
+            .readPtr = 0,
+            .timeout = 0,
+            .jobId = E_F_HANDLE_JOBID_WR_MAX,
+            .extFlashIfCallback = 0
+                },
     .onGoingOrder = E_F_ORDER_N,
     .processDelayTime = 0,
 
+    //datacenter callback
     .pDataCenterCallbackList = &dataCenterCallbackRegisterList[0],
 };
 

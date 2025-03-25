@@ -113,13 +113,13 @@ DATA_INFO	stroenum	    barcode	date	        weight	        CRC	addStart_dec	addS
 ------------------------------------------------------------------------------------------------------------------------------------------------											
                                                                                                                         Total	93.7988 15.0078 
 */
-#define CLASSIFICATION_STORE_CFG_CRCLEN             (2)//CRC16 
-#define EECRC16                                     cal_crc16
+#define CLASSIFICATION_STORE_CFG_CRCLEN     (2)//CRC16 
+#define EECRC16                             cal_crc16
 
 //SYS PARA REVERSE
-#define EEFLASH_SYS_PARA_START_ADD                  (0x0000u)
-#define EEFLASH_SYS_PARA_LEN                        (2046u)
-#define EEFLASH_SYS_PARA_END_ADD                    (EEFLASH_SYS_PARA_START_ADD + EEFLASH_SYS_PARA_LEN + 2)
+#define EEFLASH_SYS_PARA_START_ADD          (0x0000u)
+#define EEFLASH_SYS_PARA_LEN                (2046u)
+#define EEFLASH_SYS_PARA_END_ADD            (EEFLASH_SYS_PARA_START_ADD + EEFLASH_SYS_PARA_LEN + 2)
 
 #if 1//20250319
 #define CF_STORE_MASK_GONGHAO   (0x0001)
@@ -149,7 +149,7 @@ DATA_INFO	stroenum	    barcode	date	        weight	        CRC	addStart_dec	addS
 
 //备份数据
 #define CF_ATC24_USERDATA_BACKUP_STORE_START_ADD    (((CF_ATC24_USERDATA_STORE_END_ADD/EXT_FLASH_PROCESS_LEN) + 1)*EXT_FLASH_PROCESS_LEN)
-#define CF_ATC24_USERDATA_BACKUP_STORE_LEN          (CLASSIFICATION_STORE_MAX_NUM*CF_STORE_TOTAL_LEN + CLASSIFICATION_STORE_CFG_CRCLEN + CF_ATC24_USERDATA_STORE_POSITION_LEN)
+#define CF_ATC24_USERDATA_BACKUP_STORE_LEN          CF_ATC24_USERDATA_STORE_LEN
 #define CF_ATC24_USERDATA_BACKUP_STORE_END_ADD      (CF_ATC24_USERDATA_BACKUP_STORE_START_ADD + CF_ATC24_USERDATA_BACKUP_STORE_LEN)
 #endif
 
@@ -206,8 +206,9 @@ typedef enum
     D_C_HANDLE_READUSERDATA_WAIT_CPLT,
     D_C_HANDLE_READUSERDATA_WAIT_ERR_HANDLE_CPLT,
 
+    D_C_HANDLE_READUSERDATA_CPLT,
 
-
+    //需要存储的数据种类
     D_C_HANDLE_YUANGONGHAO,
     D_C_HANDLE_BCCODE,
     D_C_HANDLE_UTCTIME2CHAR,
@@ -215,16 +216,20 @@ typedef enum
     D_C_HANDLE_LEIXING,
     D_C_HANDLE_GUIGE,
 
+    D_C_HANDLE_WAIT_TRIGER_STORE,
+    //第一份数据中的单组数据 和 CRC
     D_C_HANDLE_STORE2EE,
     D_C_HANDLE_STORE2EE_WAIT,
     D_C_HANDLE_STORE2EE_CRC,
     D_C_HANDLE_STORE2EE_CRC_WAIT,
-
-
+    //第二份数据中的单组数据 和 CRC
     D_C_HANDLE_STORE2EE_BACKUP,
     D_C_HANDLE_STORE2EE_BACKUP_WAIT,
     D_C_HANDLE_STORE2EE_BACKUP_CRC,
     D_C_HANDLE_STORE2EE_BACKUP_CRC_WAIT,
+    //第一份数据和第二份数据 均存储完成
+    D_C_HANDLE_STORE2EE_ALL_CPLT,
+
     D_C_HANDLE_MAX_NUM
 }eDataCenterHandleType;
 
@@ -275,6 +280,7 @@ typedef struct sInnerScreenDataCenterHandleStruct
     //
     //20250319
     eDataCenterHandleType handle;
+    uint8 trigerToStore;
     uint16 weightVlu;
     uint8 classificationIndex;
     uint8 yuangonghao[CF_STORE_GONGHAO_TYPEBYTE];
@@ -301,6 +307,6 @@ extern void DataCenterHandle_ClassificationVluSet(uint8 type , uint32 *pData);
 extern uint8 InnerScreenDataCenterHandle_Searching_Use_WeightType(tInnerScreenDataCenterHandleStruct *pContex);
 
 extern void InnerScreenDataCenterHandle_WeightClassification_Init(tInnerScreenDataCenterHandleStruct *pContex);
-
+extern void appTrigerDatacenter2Store(void);
 
 #endif

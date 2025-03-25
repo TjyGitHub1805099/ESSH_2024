@@ -697,6 +697,23 @@ UINT8 innerScreenRxHandle_DataCenterPageHandle(T5LType *pSdwe)
 	return matched;
 }
 
+
+
+
+//0:主页事件处理
+UINT8 innerScreenRxHandle_HomePageHandle(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	if(pSdwe->SetAdd == DMG_FUNC_PAGE9_OUTPUT_CUR_PAGE_ADDRESS)
+	{
+		if(DMG_FUNC_PAGE9_PAGEDOWN_PAGE_VLU == pSdwe->SetData)
+		{
+
+		}
+	}
+	return matched;
+}
+
 //================================================================================================
 //===============================[函数列表：内屏数据接收后的事件处理]================================
 //================================================================================================
@@ -724,6 +741,7 @@ screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM]=
 	{0, 18,&innerScreenRxHandle_SearchTimeSet},
 	{0, 19,&innerScreenRxHandle_OutputAll2Upan},
 	{0, 20,&innerScreenRxHandle_DataCenterPageHandle},
+	{0, 21,&innerScreenRxHandle_HomePageHandle},
 	
 };
 

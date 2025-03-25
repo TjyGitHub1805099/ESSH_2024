@@ -1532,7 +1532,7 @@ uint8 InnerScreenDataCenterHandle_Init_OrderTriger2025(tInnerScreenDataCenterHan
     pushOrder.totalLen = CF_ATC24_USERDATA_STORE_LEN;
     pushOrder.remainLen = CF_ATC24_USERDATA_STORE_LEN;
     pushOrder.readPtr = &pContex->s_StoreData[0];
-    pushOrder.timeout = 100;
+    pushOrder.timeout = 100;//因为每次HAL取一个扇区字节 所以延时可以设定成100ms
     ret = ExFlashIf_Sync_Read(E_F_HANDLE_JOBID_R_DATACENTER_DATAPAYLOAD_2025,&pushOrder);
     if(1 == ret)
     {
@@ -1569,20 +1569,30 @@ void InnerScreenDataCenterHandle_MainFunction(void)
     pContex->ticks++;
     switch(pContex->handle)
     {
+        //上电500ms后开始初始化
         case D_C_HANDLE_INIT:
             if(pContex->ticks >= 500)
             {
                 pContex->initSuccess = 0 ;
-                memset(&pContex->singleStoreData[0],0,CF_STORE_TOTAL_LEN);//存储数据清零
+                memset(&pContex->singleStoreData[0],0,CF_STORE_TOTAL_LEN);//单次待存储数据清零
                 pContex->handle = D_C_HANDLE_READUSERDATA;                
             }
         break;
-
+        
+        //从外部FLASH读取存储的用户数据 可能时间较长
         case D_C_HANDLE_READUSERDATA:
             InnerScreenDataCenterHandle_Init_OrderTriger2025(pContex);
             pContex->handle = D_C_HANDLE_READUSERDATA_WAIT_CPLT;
         break;
 
+        //等到所有数据都读出后开始校验
+        //1.第一份数据CRC通过则用第一份数据，同时与第二份数据对比
+        //1.1.基于1如果第二份数据与第一份数据不相同，则用第一份数据覆盖第二份数据，触发第二份数据存储
+        //1.2.基于1如果第二份数据与第一份数据相同，不做处理
+
+        //2.第一份数据CRC没有通过，则校验第二份数据CRC
+        //2.1.基于2第二份数据如果CRC通过，则用第二份数据覆盖第一份数据，触发第一份数据存储
+        //3.2.基于2第二份数据CRC也没有通过，则清除第一份和第二份数据，触发第一份和第二份存储
         case D_C_HANDLE_READUSERDATA_WAIT_CPLT:
             if(1 == InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(pContex))
             {
@@ -1705,61 +1715,26 @@ void InnerScreenDataCenterHandle_MainFunction(void)
                 else
                 {
                     pContex->userStorePosition = pContex->userStorePosition % CLASSIFICATION_STORE_MAX_NUM;
-                    pContex->handle = D_C_HANDLE_MAX_NUM;
+                    pContex->handle = D_C_HANDLE_READUSERDATA_CPLT;
                 }
             }
         break;
+
+        //如果都用户数据出现需要存储，则在这里等待完成
         case D_C_HANDLE_READUSERDATA_WAIT_ERR_HANDLE_CPLT:
             if(1 == InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(pContex))
             {
                 InnerScreenDataCenterHandle_ClearAll_jobStatus(pContex);
-                pContex->handle = D_C_HANDLE_MAX_NUM;
+                pContex->handle = D_C_HANDLE_READUSERDATA_CPLT;
             }
         break;
 
-        //==开始正常控制
-        case D_C_HANDLE_YUANGONGHAO:
+        //上电后对用户数据读取完成
+        case D_C_HANDLE_READUSERDATA_CPLT:
+            pContex->handle = D_C_HANDLE_READUSERDATA_CPLT;
+        break;
 
-            //==
-            offset = 0;
-            len = CF_STORE_GONGHAO_TYPEBYTE;
-            memcpy(&pContex->singleStoreData[offset],&pContex->yuangonghao[0],len);
-            pContex->handle = D_C_HANDLE_BCCODE;
-        break;
-        case D_C_HANDLE_BCCODE:
-            ret = USB_SMQ_GetDecodeData(&pContex->bccode[0],CF_STORE_BCCODE_TYPEBYTE,&pContex->bccodeValidLen);
-            if((1 == ret) && (CF_STORE_BCCODE_TYPEBYTE == pContex->bccodeValidLen))
-            {
-                l_CF_StoreMask |= CF_STORE_MASK_BCCODE;
-                //
-                offset = CF_STORE_GONGHAO_TYPEBYTE;
-                len = CF_STORE_BCCODE_TYPEBYTE;
-                memcpy(&pContex->singleStoreData[offset],&pContex->bccode[0],len);                
-            }
-            else
-            {
-                l_CF_StoreMask &= (~CF_STORE_MASK_BCCODE);
-            }
-            //
-            pContex->handle = D_C_HANDLE_UTCTIME2CHAR;
-        break;
-        case D_C_HANDLE_UTCTIME2CHAR:
-            if(0xFFFFFFFF != gS64UTCTime)
-            {
-                l_CF_StoreMask |= (CF_STORE_MASK_TIME);
-                //
-                pContex->utctime[0] = (gS64UTCTime >> 24) & 0xFF;
-                pContex->utctime[1] = (gS64UTCTime >> 16) & 0xFF;
-                pContex->utctime[2] = (gS64UTCTime >> 8) & 0xFF;
-                pContex->utctime[3] = (gS64UTCTime >> 0) & 0xFF;
-                //==
-                offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE;
-                len = CF_STORE_CFG_TIME_TYPEBYTE;
-                memcpy(&pContex->singleStoreData[offset],&pContex->utctime[0],len);                
-            }
-
-            pContex->handle = D_C_HANDLE_WEIGHT;
-        break;
+        //==开始正常控制之1：等待重量稳定
         case D_C_HANDLE_WEIGHT:
             pContex->weightVlu = hx711_getWeight(HX711Chanel_1);
             if(preWeight != pContex->weightVlu)
@@ -1781,7 +1756,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             //数据已稳定500ms
             if(1 == ret)
             {
-                l_CF_StoreMask |= (CF_STORE_MASK_WEIGHT);
+
                 //
                 pContex->weight[0] = ( pContex->weightVlu >> 8 ) & 0x00ff;
                 pContex->weight[1] = ( pContex->weightVlu >> 0 ) & 0x00ff;
@@ -1789,69 +1764,138 @@ void InnerScreenDataCenterHandle_MainFunction(void)
                 offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + CF_STORE_CFG_TIME_TYPEBYTE;
                 len = CF_STORE_WEIGHT_TYPEBYTE;
                 memcpy(&pContex->singleStoreData[offset],&pContex->weight[0],len);
+                //
+                l_CF_StoreMask |= (CF_STORE_MASK_WEIGHT);
+                pContex->handle = D_C_HANDLE_GUIGE;
             }
             else
             {
                 l_CF_StoreMask &= (~CF_STORE_MASK_WEIGHT);
+                pContex->handle = D_C_HANDLE_WEIGHT;
             }
-            //
-            pContex->handle = D_C_HANDLE_LEIXING;
         break;
-        case D_C_HANDLE_LEIXING:
-            l_CF_StoreMask |= (CF_STORE_MASK_LEIXING);
-            //
-            pContex->leixing[0] = pContex->classificationIndex;// 用户主界面的选择
-            offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE;
-            len = CF_STORE_LEIXING_TYPEBYTE;
-            memcpy(&pContex->singleStoreData[offset],&pContex->leixing[0],len);
-            pContex->handle = D_C_HANDLE_GUIGE;
-        break;
+        //==开始正常控制之2：重量分类成功
         case D_C_HANDLE_GUIGE:
             ret = InnerScreenDataCenterHandle_UseWeight_Classification(pContex->weightVlu,&pContex->classificationIndex);     
             if(1 == ret)
             {
-                l_CF_StoreMask |= (CF_STORE_MASK_GUIGE);
+                pContex->guige[0] = pContex->classificationIndex;
                 //==
                 offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE + CF_STORE_LEIXING_TYPEBYTE;
                 len = CF_STORE_GUIGE_TYPEBYTE;
                 memcpy(&pContex->singleStoreData[offset],&pContex->guige[0],len);
+                //
+                l_CF_StoreMask |= (CF_STORE_MASK_GUIGE);
+                pContex->handle = D_C_HANDLE_LEIXING;
             }
             else
             {
+                //
                 l_CF_StoreMask &= (~CF_STORE_MASK_GUIGE);
+                pContex->handle = D_C_HANDLE_WEIGHT;
             }
-            pContex->handle = D_C_HANDLE_STORE2EE;
         break;
+        
+        //==开始正常控制之3：获取类型
+        case D_C_HANDLE_LEIXING:
+            //
+            pContex->leixing[0] = pContex->classificationIndex;//这里有误 。。需用 用户主界面的选择
+            offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE;
+            len = CF_STORE_LEIXING_TYPEBYTE;
+            memcpy(&pContex->singleStoreData[offset],&pContex->leixing[0],len);
+            //
+            l_CF_StoreMask |= (CF_STORE_MASK_LEIXING);
+            pContex->handle = D_C_HANDLE_YUANGONGHAO;
+        break;
+
+        //==开始正常控制之4：获取员工号
+        case D_C_HANDLE_YUANGONGHAO:
+            //==
+            offset = 0;
+            len = CF_STORE_GONGHAO_TYPEBYTE;
+            memcpy(&pContex->singleStoreData[offset],&pContex->yuangonghao[0],len);
+            //
+            l_CF_StoreMask |= CF_STORE_MASK_GONGHAO;
+            pContex->handle = D_C_HANDLE_BCCODE;
+        break;
+
+         //==开始正常控制之5：获取条码值
+        case D_C_HANDLE_BCCODE:
+            ret = USB_SMQ_GetDecodeData(&pContex->bccode[0],CF_STORE_BCCODE_TYPEBYTE,&pContex->bccodeValidLen);
+            if((1 == ret) && (CF_STORE_BCCODE_TYPEBYTE == pContex->bccodeValidLen))
+            {
+                offset = CF_STORE_GONGHAO_TYPEBYTE;
+                len = CF_STORE_BCCODE_TYPEBYTE;
+                memcpy(&pContex->singleStoreData[offset],&pContex->bccode[0],len);
+                //
+                l_CF_StoreMask |= CF_STORE_MASK_BCCODE; 
+                pContex->handle = D_C_HANDLE_UTCTIME2CHAR;
+            }
+            else
+            {
+                l_CF_StoreMask &= (~CF_STORE_MASK_BCCODE);
+                pContex->handle = D_C_HANDLE_WEIGHT;
+            }
+        break;
+
+        //==开始正常控制之6：获取当前时间
+        case D_C_HANDLE_UTCTIME2CHAR:
+            if(0xFFFFFFFF != gS64UTCTime)
+            {
+                pContex->utctime[0] = (gS64UTCTime >> 24) & 0xFF;
+                pContex->utctime[1] = (gS64UTCTime >> 16) & 0xFF;
+                pContex->utctime[2] = (gS64UTCTime >> 8) & 0xFF;
+                pContex->utctime[3] = (gS64UTCTime >> 0) & 0xFF;
+                //==
+                offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE;
+                len = CF_STORE_CFG_TIME_TYPEBYTE;
+                memcpy(&pContex->singleStoreData[offset],&pContex->utctime[0],len);
+                //
+                l_CF_StoreMask |= (CF_STORE_MASK_TIME);
+            }
+            else
+            {
+                l_CF_StoreMask &= (~CF_STORE_MASK_TIME);
+                pContex->handle = D_C_HANDLE_WEIGHT;
+            }
+        break;
+
+        //==等待屏幕触发存储
+        case D_C_HANDLE_WAIT_TRIGER_STORE:
+            if(((l_CF_StoreMask & CF_STORE_MASK_CPLT) == CF_STORE_MASK_CPLT)//满足则进行存储
+              && (TRUE == pContex->trigerToStore))//等待屏幕触发存储
+            {
+                l_CF_StoreMask &= (~CF_STORE_MASK_CPLT);
+                pContex->handle = D_C_HANDLE_STORE2EE;
+            }
+            else
+            {
+                l_CF_StoreMask  &= (~CF_STORE_MASK_CPLT);
+                pContex->handle = D_C_HANDLE_WEIGHT;
+            } 
+        break;
+
 
         //====开始存储 单次的数据
         case D_C_HANDLE_STORE2EE:
-            if((l_CF_StoreMask & CF_STORE_MASK_CPLT) == CF_STORE_MASK_CPLT)//满足则进行存储
+            //
+            offset = pContex->userStorePosition * CF_STORE_TOTAL_LEN;
+            len = CF_STORE_TOTAL_LEN;
+            memcpy(&pContex->s_StoreData[offset],&pContex->singleStoreData[0],CF_STORE_TOTAL_LEN);
+            //
+            pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
+            pushOrder.RegAddress = CF_ATC24_USERDATA_STORE_START_ADD + offset;
+            pushOrder.totalLen = CF_STORE_TOTAL_LEN;
+            pushOrder.remainLen = CF_STORE_TOTAL_LEN;
+            pushOrder.writePtr = &pContex->s_StoreData[offset];
+            pushOrder.timeout = 100;
+            ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025,&pushOrder);    
+            if(1 == ret)
             {
-                l_CF_StoreMask = 0;
-                //
-                offset = pContex->userStorePosition * CF_STORE_TOTAL_LEN;
-                len = CF_STORE_TOTAL_LEN;
-                memcpy(&pContex->s_StoreData[offset],&pContex->singleStoreData[0],CF_STORE_TOTAL_LEN);
-                //
-                pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
-                pushOrder.RegAddress = CF_ATC24_USERDATA_STORE_START_ADD + offset;
-                pushOrder.totalLen = CF_STORE_TOTAL_LEN;
-                pushOrder.remainLen = CF_STORE_TOTAL_LEN;
-                pushOrder.writePtr = &pContex->s_StoreData[offset];
-                pushOrder.timeout = 100;
-                ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025,&pushOrder);    
-                if(1 == ret)
-                {
-                    InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025);
-                }                
-                //==
-                pContex->handle = D_C_HANDLE_STORE2EE_WAIT;
-            }
-            else//不满足则回到获取员工号
-            {
-                l_CF_StoreMask = 0;
-                pContex->handle = D_C_HANDLE_YUANGONGHAO;
-            }
+                InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025);
+            }                
+            //==
+            pContex->handle = D_C_HANDLE_STORE2EE_WAIT;
         break;
         case D_C_HANDLE_STORE2EE_WAIT:
             if(1 == InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(pContex))
@@ -1951,13 +1995,28 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             {
                 InnerScreenDataCenterHandle_ClearAll_jobStatus(pContex);
                 //==
-                pContex->handle = D_C_HANDLE_MAX_NUM;
+                pContex->trigerToStore = FALSE;
+                pContex->userStorePosition++;
+                pContex->userStorePosition = pContex->userStorePosition % CLASSIFICATION_STORE_MAX_NUM;
+                //
+                pContex->handle = D_C_HANDLE_STORE2EE_ALL_CPLT;
             }
+        break;
+        
+        //第一份数据和第二份数据都存储完成（带CRC）
+        case D_C_HANDLE_STORE2EE_ALL_CPLT:
+            pContex->handle = D_C_HANDLE_STORE2EE_ALL_CPLT;
         break;
 
         default:
         break;
     }
+}
+
+void appTrigerDatacenter2Store(void)
+{
+    tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
+    pContex->trigerToStore = TRUE;
 }
 
 #endif
