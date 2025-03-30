@@ -17,6 +17,9 @@
 #include "app_BalancingDataHandle.h"
 #include "app_DataCenter.h"
 #include "app_usbsmq.h"
+
+InnerScreenEventType IS_Event = InnerScreenEventTypeDefault;
+
 //0.0内屏初始化
 UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
 {
@@ -71,17 +74,7 @@ UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
 			}
 		break;
 		case 0://send weight data to DW
-			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
-				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
-			{
-				len=0;
-				for(len=0;len<(2*T5L_MAX_CHANEL_LEN);len++)//每个通道是4字节变量
-				{
-					sendData[len] = 0;
-				}
-				t5lWriteVarible(pSdwe,DMG_FUNC_ASK_CHANEL_WEIGHT_ADDRESS,sendData,len,0);/**< 通道重量 */
 				pSdwe->sendSysParaDataToDiwenIndex = 7;
-			}
 		break;
 		case 7://send 0x1000 单位
 			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
@@ -131,17 +124,17 @@ UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
 				pSdwe->sendSysParaDataToDiwenIndex++;
 			}
 		break;
-		case 9://send 2100 DMG_FUNC_SET_CHANEL_NUM
+		case 9://校准界面 通道号
 			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
 				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
 			{
 				len=0;
 				sendData[len++] = pSdwe->CalibrateChanel;
-				t5lWriteVarible(pSdwe,DMG_FUNC_SET_CHANEL_NUM,sendData,len,0);/**< 校准的通道号 */  //2100
+				t5lWriteVarible(pSdwe,DMG_FUNC_SET_CHANEL_NUM,sendData,len,0);
 				pSdwe->sendSysParaDataToDiwenIndex++;
 			}
 		break;
-		case 10:
+		case 10://系统参数 分类设置1~10
 			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
 				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
 			{
@@ -153,7 +146,7 @@ UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
 						sendData[len++] = gSystemPara.Sizer_ClassifySet[i][j] & 0xffff;
 					}
 				}
-				t5lWriteVarible(pSdwe,INNERSCREEN_Sizer_ClassifySet_Address,sendData,len,0);/**< 校准的通道号 */  //2100
+				t5lWriteVarible(pSdwe,IS_ADD_CLASSFYSET_START,sendData,len,0);
 				pSdwe->sendSysParaDataToDiwenIndex++;
 			}		
 		break;
@@ -168,80 +161,11 @@ UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
 	return result;
 }
 
-//0内屏初始化 事件处理
-UINT8 innerScreenTxHandle_ScreenInit(T5LType *pSdwe)
-{
-	UINT8 matched = FALSE;
-	if(T5L_INITIAL_COMPLETE != pSdwe->sendSdweInit)
-	{
-		matched = TRUE;
-		if(TRUE == innerScreenTxHandle_Init(pSdwe))
-		{
-			pSdwe->sendSdweInit = T5L_INITIAL_COMPLETE;
-		}
-	}
-	return matched;
-}
 
-//1
-UINT8 innerScreenTxHandle_JumpToHomePage(T5LType *pSdwe)
-{
-	UINT8 matched = FALSE;
-	if(TRUE == pSdwe->sdweJumpToHomePage)
-	{
-		matched = TRUE;
-		if(0 != screenPublic_PageJump(pSdwe,pSdwe->screenHomePageNum))
-		{
-			pSdwe->sdweJumpToHomePage = FALSE;
-		}
-	}
-	return matched;
-}
 
-//2
-UINT8 innerScreenTxHandle_JumpToBanlingPage(T5LType *pSdwe)
-{
-	UINT8 matched = FALSE;
-	if(TRUE == pSdwe->sdweJumpToBanlingPage)
-	{
-		matched = TRUE;
-		if(0 != screenPublic_PageJump(pSdwe,1))
-		{
-			pSdwe->sdweJumpToBanlingPage = FALSE;
-		}
-	}
-	return matched;
-}
 
-//3
-UINT8 innerScreenTxHandle_JumpToCalibrationPage(T5LType *pSdwe)
-{
-	UINT8 matched = FALSE;
-	if(TRUE == pSdwe->sdweJumpToCalitrationPage)
-	{
-		matched = TRUE;
-		if(0 != screenPublic_PageJump(pSdwe,pSdwe->screenCalibrationPage))
-		{
-			pSdwe->sdweJumpToCalitrationPage = FALSE;
-		}
-	}
-	return matched;
-}
 
-//4
-UINT8 innerScreenTxHandle_JumpToActivePage(T5LType *pSdwe)
-{
-	UINT8 matched = FALSE;
-	if(TRUE == pSdwe->sdweJumpActivePage)
-	{
-		matched = TRUE;
-		if(0 != screenPublic_PageJump(pSdwe,2))
-		{
-			pSdwe->sdweJumpActivePage = FALSE;
-		}
-	}
-	return matched;
-}
+
 
 //5
 UINT8 innerScreenTxHandle_JumpToSysParaPage(T5LType *pSdwe)
@@ -258,113 +182,10 @@ UINT8 innerScreenTxHandle_JumpToSysParaPage(T5LType *pSdwe)
 	return matched;
 }
 
-//6
-UINT8 innerScreenTxHandle_JumpToBanlingMainPage(T5LType *pSdwe)
-{
-	UINT8 matched = FALSE;
-	if(TRUE == pSdwe->sdweJumpBalancingMainPage)
-	{
-		matched = TRUE;
-		if(0 != screenPublic_PageJump(pSdwe,1))
-		{
-			pSdwe->sdweJumpBalancingMainPage = FALSE;
-		}
-	}
-	return matched;
-}
-//7
-UINT8 innerScreenTxHandle_JumpToBalancingCleanPage(T5LType *pSdwe)
-{
-	UINT8 matched = FALSE;
-	if(TRUE == pSdwe->sdweJumpBalancing_cleanpagee)
-	{
-		matched = TRUE;
-		if(0 != screenPublic_PageJump(pSdwe,0))
-		{
-			pSdwe->sdweJumpBalancing_cleanpagee = FALSE;
-		}
-	}
-	return matched;
-}
 
-//8
-UINT8 innerScreenTxHandle_JumpToBalancingHomePage(T5LType *pSdwe)
-{
-	UINT8 matched = FALSE;
-	if(TRUE == pSdwe->sdweJumpBalancing_home)
-	{
-		matched = TRUE;
-		if(0 != screenPublic_PageJump(pSdwe,2))
-		{
-			pSdwe->sdweJumpBalancing_home = FALSE;
-		}
-	}
-	return matched;
-}
 
-//9
-UINT8 innerScreenTxHandle_FreshScreenLight(T5LType *pSdwe)
-{
-	UINT8 matched = FALSE;
-	if(TRUE == pSdwe->sdweFreshScreenLight)
-	{
-		matched = TRUE;
-		if(0 != screenPublic_ScreenLight(pSdwe))
-		{
-			pSdwe->sdweFreshScreenLight = FALSE;
-		}
-	}
-	return matched;
-}
 
-//10
-UINT8 innerScreenTxHandle_ChangeDisplayPosition(T5LType *pSdwe)
-{
-	UINT8 matched = FALSE;
-	//
-	if(TRUE == pSdwe->sdweChangeDescriblePoint)
-	{
-		matched = TRUE;
-		if(0 == pSdwe->freshDP)//先修改重量单元的描述指针
-		{
-			if(0 != screenPublic_FreshDisplayPosition_Of_WeightVlu(pSdwe))
-			{
-				pSdwe->freshDP = 1;
-			}
-		}
-		else if(1 == pSdwe->freshDP)//其次修改帮助信息的描述指针
-		{
-			if(0 != screenPublic_FreshDisplayPosition_Of_HelpVlu(pSdwe))
-			{
-				pSdwe->freshDP = 2;
-			}
-			
-		}
-		else if(2 == pSdwe->freshDP)//其次修改帮助信息的描述指针
-		{
-			if(0 != screenPublic_FreshDisplayPosition_Of_WeightIndex(pSdwe))
-			{
-				pSdwe->freshDP = 3;
-			}
-		}
-		else if(3 == pSdwe->freshDP)//修改文本信息： 单位 精度
-		{
-			if(0 != screenPublic_FreshDisplayPosition_Of_OtherMisc(pSdwe))
-			{
-				pSdwe->freshDP = 0;
-				//
-				pSdwe->sdweChangeDescriblePoint = FALSE;
-				matched = FALSE;
-			}
-		}
-		else
-		{
-			/*nothing*/
-			pSdwe->freshDP = 0 ;
-		}
-	}
-	return matched;
-}
+
 
 //公共函数：校准时 单点触发 处理
 UINT8 innerScreenTxHandle_IsCascadTriggerHandle(T5LType *pSdwe)
@@ -443,7 +264,7 @@ void innerScreenTxHandle_ScreenBcCode(T5LType *pSdwe)
 		#if(INNERSCREEN_TYPE==INNERSCREEN_TYPE_DIWEN)
 			innerScreenDiwenLSBChangeToMSB(pSdwe);
 		#endif
-		if(TRUE ==t5lWriteData(pSdwe,DMG_FUNC_BC_CODE_ADDRESS,(INT16 *)&pSdwe->bcCodeVlu[0],((INNER_SCREEN_DATACENTER_LENOF_BARCODE+1)/2),0));//2*chanel_len:because each data type was 4 byte
+		if(TRUE ==t5lWriteData(pSdwe,IS_ADD_BCCODE,(INT16 *)&pSdwe->bcCodeVlu[0],((INNER_SCREEN_DATACENTER_LENOF_BARCODE+1)/2),0));//2*chanel_len:because each data type was 4 byte
 		{
 			pSdwe->bcCodeTriger = 0;
 			memcpy(&sUSBSMQHandleContex.decodeDataVaildPre,&sUSBSMQHandleContex.decodeDataVaild,USBSMQ_KEYBORD_MAX_NUM);
@@ -457,66 +278,77 @@ UINT8 innerScreenDataCenter_Display(T5LType *pSdwe)
 	UINT8 ret = 0 ;
 	return ret;
 }
-//
-UINT8 innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle(T5LType *pSdwe)
-{
-	static UINT16 testData[0x80];
-	static uint16 address=0x3500 , test_i = 0 ,test_flag = 0; 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//==20250330 序号0 内屏初始化 事件处理
+UINT8 innerScreenTxHandle_ScreenInit(T5LType *pSdwe)
+{
 	UINT8 matched = FALSE;
-	if(g_sysLocked == STM32MCU_UNLOCKED)
+	if(T5L_INITIAL_COMPLETE != pSdwe->sendSdweInit)
 	{
 		matched = TRUE;
-		#if (0 == SCREEN_BALANCINGDATA_HANDLE_MODE)
-			screenPublic_sendBalancingWeightAndColor(pSdwe);
-			screenPublic_HelpDataMainFunction(pSdwe);
-			screenPublic_VoicePrintfMainfunction(pSdwe);
-		#else
-			BalancingData_WeightData_Handle_PrepareAndJudgeAndSendToScreen(pSdwe);
-			//BalancingData_ColorData_Handle_PrepareAndJudgeAndSendToScreen(pSdwe);
-			//BalancingData_HelpData_Handle_PrepareAndJudgeAndSendToScreen(pSdwe);
-			//screenPublic_VoicePrintfMainfunction(pSdwe);
-			if(1 == USB_SMQ_DataDiffCheck())
-			{
-				pSdwe->bcCodeTriger = 1;
-				innerScreenTxHandle_ScreenBcCode(pSdwe);
-			}
-		#endif
-
-
-		if(pSdwe->triggerSaveVlu != pSdwe->triggerSaveVluPre)
+		if(TRUE == innerScreenTxHandle_Init(pSdwe))
 		{
-			if(TRUE == t5lWriteData(pSdwe,0x3002,(INT16 *)&pSdwe->triggerSaveVlu,1,0))
-			{
-				pSdwe->triggerSaveVluPre = pSdwe->triggerSaveVlu;
-			}
+			pSdwe->sendSdweInit = T5L_INITIAL_COMPLETE;
 		}
-
-		if(pSdwe->dataCenterDisplayPage != pSdwe->dataCenterDisplayPagePre)
+	}
+	return matched;
+}
+//====20250330 序号2 跳转至校准界面 密码正确 处理
+UINT8 innerScreenTxHandle_JumpToCalibrationPage(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	if(TRUE == pSdwe->sdweJumpToCalitrationPage)
+	{
+		matched = TRUE;
+		if(0 != screenPublic_PageJump(pSdwe,pSdwe->screenCalibrationPage))
 		{
-			if(TRUE == innerScreenDataCenter_Display(pSdwe))
-			{
-				pSdwe->dataCenterDisplayPagePre = pSdwe->dataCenterDisplayPage;
-			}
+			pSdwe->sdweJumpToCalitrationPage = FALSE;
 		}
-
-		if(111 == test_flag)
-		{
-			if(TRUE ==t5lWriteData(pSdwe,(address+test_i*0x80),(INT16 *)testData,0x60,0));//2*chanel_len:because each data type was 4 byte
-			{
-				test_flag = 0;
-			}
-		}
-
-
-	}	
+	}
 	return matched;
 }
 
-
-
-//3
-UINT8 innerScreenTxHandle_JumpToDataCenterPage(T5LType *pSdwe)
+//==20250330 序号7 跳转至数据中心前处理
+UINT8 ISTxHandle_Event_JumpToDataCenterPage(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
 	if(TRUE == pSdwe->jumpToDataCenterHandle)
@@ -532,21 +364,167 @@ UINT8 innerScreenTxHandle_JumpToDataCenterPage(T5LType *pSdwe)
 	return matched;
 }
 
+//==20250330 序号8 工号录入处理
+UINT8 ISTxHandle_Page_GongHaoLuRu(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	UINT8 needSend = 0;
+	UINT8 ret = 0 ;
+	//
+	UINT8 u8gonghao[2*IS_LEN_GONGHAO] , i = 0 , validLen;
+	static UINT8 u8gonghao_pre[2*IS_LEN_GONGHAO]={0xff};
+	//
+	UINT16 u16gonghaoBuf[IS_LEN_GONGHAO];
+	//如果当前页面是：工号录入页
+	if(IS_PAGE_19_0X13_GONGHAO == pSdwe->curPage)
+	{
+		ret = USB_SMQ_GetDecodeData(u8gonghao,2*IS_LEN_GONGHAO,&validLen);
+		if((1 == ret) && (0 != memcmp(u8gonghao_pre,u8gonghao,2*IS_LEN_GONGHAO)))
+		{
+			needSend = 1;
+			for( i = 0 ; i < IS_LEN_GONGHAO ; i++)
+			{
+				u16gonghaoBuf[i] = u8gonghao[2*i + 0];
+				u16gonghaoBuf[i] <<= 8;
+				u16gonghaoBuf[i] &= 0xff00;
+				u16gonghaoBuf[i] += u8gonghao[2*i + 1];
+			}
+		}
+		if(1 == needSend)
+		{
+			if(TRUE == t5lWriteData(pSdwe,IS_ADD_GONGHAO,(INT16 *)u16gonghaoBuf,IS_LEN_GONGHAO,0))
+			{
+				matched = TRUE;
+				memcpy(u8gonghao_pre,u8gonghao,2*IS_LEN_GONGHAO);
+			}
+		}
+	}
+	else
+	{
+		matched = FALSE;
+	}
+	//
+	return matched;
+}
+//==20250330 序号9 血浆类型选择处理
+enumISPopupWindowType u8xuejiangleixing_OK = IS_PopupWindow_Max ;
+UINT16 u16xuejiangleixing[IS_LEN_XUEJIANG_LEIXING] = {0xFF};
+UINT16 u16xuejiangleixingUsed[IS_LEN_XUEJIANG_LEIXING] = {0x01};//1->P1鲜浆 , 2->P2冰浆 , 3->P3病灭鲜浆 , 4->P4冰灭冰浆
+UINT8 ISTxHandle_Page_XueJiangLeiXingXuanZhe(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE , needSend = 0;
+	//
+	if(IS_PopupWindow_OK == u8xuejiangleixing_OK)
+	{
+		if(u16xuejiangleixingUsed[0] != u16xuejiangleixing[0])
+		{
+			needSend = TRUE;
+		}
+		if(TRUE == needSend)
+		{
+			if(TRUE == t5lWriteData(pSdwe,IS_ADD_XUEJIANG_LEIXING,(INT16 *)u16xuejiangleixing,IS_LEN_XUEJIANG_LEIXING,0))
+			{
+				matched = TRUE;
+				u16xuejiangleixingUsed[0] = u16xuejiangleixing[0];
+				u8xuejiangleixing_OK = IS_PopupWindow_Max;
+			}
+		}
+	}
+	//
+	return matched;
+}
+//==20250330 序号10 周期数据发送处理
+UINT16 u16_IS_CycleData[IS_LEN_HOMEPAGE_CYCLE_DATA]={0};
+UINT16 u16_IS_CycleData_Pre[IS_LEN_HOMEPAGE_CYCLE_DATA]={0xff};
+UINT8 ISTxHandle_Page_Home_CycleDataHandle(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE  , i = 0 , offset = 0;
+	static UINT8 needSend = FALSE;
+	//测试用
+	static UINT16 testData[IS_LEN_DATACENTER_SINGLE];
+	static uint16 address=IS_ADD_DATACENTER_GROUP_START , test_i = 0 ,test_flag = 0; 
+	//周期数据
+	float weight = 0;
+	static UINT32 weightCycleSendTick = 0 , weightCycleSendTick_Offset = 500;//至少500ms刷新一次
+    tUSBSMQHandle *pUSBCtx = &sUSBSMQHandleContex;
+
+	if(IS_PAGE_00_0X00_HOMEPAGEE == pSdwe->curPage)
+	{
+		matched = TRUE;
+
+		//重量
+		weight = hx711_getWeight(HX711Chanel_1);
+		//重量转ml
+		if((0 != gSystemPara.mlYugBiLv) && (SYS_ML_G_WAS_ML == gSystemPara.uint))
+		{
+			weight *= 1000;
+			weight /= gSystemPara.mlYugBiLv;
+		}
+		//1.重量
+		u16_IS_CycleData[0] = (UINT16)weight;
+		//2.重量的分类
+		u16_IS_CycleData[1] = InnerScreenDataCenter_GetClassfication();
+		//3.执行状态
+
+		//4.条码值
+		offset = 3;
+		for( i = 0 ; i < IS_LEN_BCCODE ; i ++)
+		{
+			u16_IS_CycleData[offset+i] = pUSBCtx->decodeDataVaild[2*i + 0];
+			u16_IS_CycleData[offset+i] <<= 8;
+			u16_IS_CycleData[offset+i] &= 0xFF00;
+			u16_IS_CycleData[offset+i] += pUSBCtx->decodeDataVaild[2*i + 1];
+		}
+		//
+		if(FALSE == needSend)
+		{
+			if(pSdwe->CurTick > (weightCycleSendTick + weightCycleSendTick_Offset))
+			{
+				needSend = TRUE;
+			}
+			else if (0 !=memcmp((UINT8 *)&u16_IS_CycleData,(UINT8 *)&u16_IS_CycleData_Pre,2*IS_LEN_HOMEPAGE_CYCLE_DATA))
+			{
+				needSend = TRUE;
+			}			
+		}
+		else
+		{
+			if(TRUE == t5lWriteData(pSdwe,IS_ADD_HOMEPAGE_CYCLE_DATA,(INT16 *)&u16_IS_CycleData,IS_LEN_HOMEPAGE_CYCLE_DATA,0))
+			{
+				memcpy((UINT8 *)&u16_IS_CycleData_Pre,(UINT8 *)&u16_IS_CycleData,2*IS_LEN_HOMEPAGE_CYCLE_DATA);
+				needSend = FALSE;
+			}			
+		}
+
+
+		if(123 == test_flag)
+		{
+			if(TRUE ==t5lWriteData(pSdwe,(address+test_i*IS_LEN_DATACENTER_SINGLE),(INT16 *)testData,IS_LEN_DATACENTER_SINGLE,0));
+			{
+				test_flag = 0;
+			}
+		}
+
+	}	
+	return matched;
+}
 //================================================================================================
 //===============================[函数列表：内屏初始化+事件处理+周期数据]============================
 //================================================================================================
 screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM]=
 {
 	//priority index func_add
-	{0,	0, &innerScreenTxHandle_ScreenInit},	//==C1 event arrive:At Calibration Page , chanel changed trigerd
-	{0,	1, &screenPublic_ChanelChangedTrigerHandle},	//==C1 event arrive:At Calibration Page , chanel changed trigerd
-	{0,	2, &screenPublic_ResetCalibrationTrigerHandle},//==C2 event arrive:At Calibration Page , calibration reset trigerd 
-	{0,	3, &screenPublic_PointTrigerHandle},//==C3 event arrive:At Calibration Page , point trigerd
-	{0,	4, &screenPublic_RemoveWeightTrigerHandle},//==C3 event arrive:At Calibration Page , point trigerd
-	{0 ,5, &innerScreenTxHandle_JumpToCalibrationPage},
-	{0 ,6, &innerScreenTxHandle_JumpToDataCenterPage},
-	{0,	7, &innerScreenTxHandle_ScreenWeightAndColorAndHelpAndVoiceHandle},//normaly weight color voice handle
-
+	{0 , 0, &innerScreenTxHandle_ScreenInit},				//初始化给屏幕发送数据
+	{0 , 1, &innerScreenTxHandle_JumpToCalibrationPage},	//==Cx 要执行校准必须先输入密码2021
+	{0 , 2, &screenPublic_ChanelChangedTrigerHandle},		//==C1 event arrive:At Calibration Page , chanel changed trigerd
+	{0 , 3, &screenPublic_ResetCalibrationTrigerHandle},	//==C2 event arrive:At Calibration Page , calibration reset trigerd 
+	{0 , 4, &screenPublic_PointTrigerHandle},				//==C3 event arrive:At Calibration Page , point trigerd
+	{0 , 5, &screenPublic_RemoveWeightTrigerHandle},		//==C4 event arrive:At Calibration Page , point trigerd
+	{0 , 6, &screenPublic_Cycle_GetCurPage},				//当前页面获取
+	{0 , 7, &ISTxHandle_Event_JumpToDataCenterPage},		//跳转至数据中心界面
+	{0 , 8, &ISTxHandle_Page_GongHaoLuRu},					//工号录入界面
+	{0 , 9, &ISTxHandle_Page_XueJiangLeiXingXuanZhe},		//血浆类型确认后发送给主页
+	{0 ,10, &ISTxHandle_Page_Home_CycleDataHandle},			//正常周期数据
 };
 
 #endif// end of _APP_INNER_SCREEN_TX_HANDLE_C_

@@ -36,6 +36,39 @@ UINT8 innerScreenRxHandle_Version(T5LType *pSdwe)
 	}
 	return matched;
 }
+//0
+UINT8 innerScreenRxHandle_CurPage(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	if((INNER_SCREEN_CURPAGE_GET_ADD+1) == pSdwe->SetAdd)
+	{
+		pSdwe->curPage = (enumISPageType)pSdwe->SetData;
+		matched = TRUE;
+	}
+	return matched;
+}
+
+extern UINT8 u8xuejiangleixing_OK;
+extern UINT16 u16xuejiangleixing[IS_LEN_XUEJIANG_LEIXING];
+UINT8 innerScreenRxHandle_Xuejiangleixing(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	if((IS_ADD_TYPECHOICE_PAGE_EVENT) == pSdwe->SetAdd)
+	{
+		if(IS_VLU_TYPECHOICE_PAGE_EVENT_OK == pSdwe->SetData)
+		{
+			u8xuejiangleixing_OK = IS_PopupWindow_OK;
+			matched = TRUE;
+		}		
+	}
+	if((IS_ADD_XUEJIANG_LEIXING_CHONGICE) == pSdwe->SetAdd)
+	{
+		u16xuejiangleixing[0] = pSdwe->SetData;
+		matched = TRUE;		
+	}
+	return matched;
+}
+
 #if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
 UINT8 innerScreenRxHandle_RTC_YMDHMS(T5LType *pSdwe)
 {
@@ -278,50 +311,9 @@ UINT8 innerScreenRxHandle_SysPara(T5LType *pSdwe)
 	return matched;
 }
 
-//3
-UINT8 innerScreenRxHandle_JumpToBalancingClearnPage(T5LType *pSdwe)
-{
-	UINT8 matched = FALSE;
-	if(DMG_FUNC_Balancing_CLEARPAGE_SET_ADDRESS == pSdwe->SetAdd)
-	{
-		matched = TRUE;
-		if(DMG_FUNC_Balancing_CLEARPAGE_SET_VALUE == (UINT16)pSdwe->SetData)
-		{
-			pSdwe->sdweJumpBalancing_cleanpagee = TRUE;
-		}
-	}
-	return matched;
-}
 
-//4
-UINT8 innerScreenRxHandle_JumpToBalancingHomePage(T5LType *pSdwe)
-{
-	UINT8 matched = FALSE;
-	if(DMG_FUNC_Balancing_HOME_SET_ADDRESS == pSdwe->SetAdd)
-	{
-		matched = TRUE;
-		if(DMG_FUNC_Balancing_HOME_SET_VALUE == (UINT16)pSdwe->SetData)
-		{
-			pSdwe->sdweJumpBalancing_home = TRUE;
-		}
-	}
-	return matched;
-}
 
-//5
-UINT8 innerScreenRxHandle_JumpToBalancingPage(T5LType *pSdwe)
-{
-	UINT8 matched = FALSE;
-	if(DMG_FUNC_Balancing_SET_ADDRESS == pSdwe->SetAdd)
-	{
-		matched = TRUE;
-		if(DMG_FUNC_Balancing_SET_VALUE == (UINT16)pSdwe->SetData)
-		{
-			pSdwe->sdweJumpToBanlingPage = TRUE;
-		}
-	}
-	return matched;
-}
+
 
 //6
 UINT8 innerScreenRxHandle_CalibrateChanelSet(T5LType *pSdwe)
@@ -370,12 +362,12 @@ UINT8 innerScreenRxHandle_JumpToCalibrateOrActivePage(T5LType *pSdwe)
 		if(DMG_FUNC_JUNPTO_CALIBRATION_VAL == (UINT16)pSdwe->SetData)
 		{
 			matched = TRUE;
-			pSdwe->sdweJumpToCalitrationPage = TRUE;//jump to page 53
+			pSdwe->sdweJumpToCalitrationPage = TRUE;//跳转至校准界面
 		}
 		else if(DMG_FUNC_JUNPTO_ACTIVE_VAL == (UINT16)pSdwe->SetData)
 		{
 			matched = TRUE;
-			pSdwe->sdweJumpActivePage = TRUE;//jump to page 56
+			pSdwe->sdweJumpActivePage = TRUE;//跳转至激活界面
 		}
 	}
 	return matched;
@@ -401,6 +393,7 @@ UINT8 innerScreenRxHandle_RemoveWeightTriger(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
 	T5LType *pSdweSmaller = &g_T5LCtx[ScreenIndex_Smaller];
+	//去皮功能
 	if(DMG_FUNC_REMOVE_WEIGHT_ADDRESS == pSdwe->SetAdd)
 	{
 		if(DMG_FUNC_REMOVE_WEIGHT_VAL == (UINT16)pSdwe->SetData)
@@ -411,14 +404,37 @@ UINT8 innerScreenRxHandle_RemoveWeightTriger(T5LType *pSdwe)
 			//
 			setModbusSelfRemoveFlag(TRUE);
 		}
+	}
+
+	return matched;
+}
+
+UINT8 innerScreenRxHandle_JumpToDataCenterTriger(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	T5LType *pSdweSmaller = &g_T5LCtx[ScreenIndex_Smaller];
+	//1.快捷菜单 点击 数据中心
+	if(DMG_FUNC_JUMPTO_DATA_PAGE_ADDRESS == pSdwe->SetAdd)
+	{
 		if(DMG_FUNC_JUMPTO_DATA_PAGE_VAL == (UINT16)pSdwe->SetData)
 		{
 			pSdweSmaller->jumpToDataCenterHandle = TRUE;
+			matched = TRUE;
 		}
-
 	}
+	//2.数据筛选界面 点击 数据筛选预览
+	if(IS_ADD_DATACHOICE_PAGE_EVENT == pSdwe->SetAdd)
+	{
+		if(IS_VLU_DATACHOICE_PAGE_EVENT_SHOWCHOICE == (UINT16)pSdwe->SetData)
+		{
+			pSdweSmaller->jumpToDataCenterHandle = TRUE;
+			matched = TRUE;
+		}
+	}
+	//
 	return matched;
 }
+
 
 //11
 UINT8 innerScreenRxHandle_CalibratePointSet(T5LType *pSdwe)
@@ -498,17 +514,7 @@ UINT8 innerScreenRxHandle_CalibratePointSampleAndSet(T5LType *pSdwe)
 	return matched;
 }
 
-//13
-UINT8 innerScreenRxHandle_VoicePrintfStatusFromScreen(T5LType *pSdwe)
-{
-	UINT8 matched = FALSE;
-	if(pSdwe->SetAdd == DMG_SYS_STATUS_OF_VOICE_PRINTF_00A1)
-	{
-		matched = TRUE;
-		g_u8InnerScreenVoicePrintfStatus = pSdwe->SetData;
-	}
-	return matched;
-}
+
 
 //14
 UINT8 innerScreenRxHandle_SystemReset(T5LType *pSdwe)
@@ -530,12 +536,12 @@ UINT8 innerScreenRxHandle_Sizer_ClassifySet(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
 	UINT8 i = 0 , j = 0;
-	if((pSdwe->SetAdd >= INNERSCREEN_Sizer_ClassifySet_Address)	&& 
-	   (pSdwe->SetAdd < (INNERSCREEN_Sizer_ClassifySet_Address + SIZER_CLASSIFY_GROUP_NUM*SIZER_CLASSIFY_MEMBER_NUM)))
+
+	if((pSdwe->SetAdd >= IS_ADD_CLASSFYSET_START) && (pSdwe->SetAdd <= IS_ADD_CLASSFYSET_END))
 	{
 		matched = TRUE;
-		i = (pSdwe->SetAdd - INNERSCREEN_Sizer_ClassifySet_Address)/SIZER_CLASSIFY_MEMBER_NUM;
-		j = (pSdwe->SetAdd - INNERSCREEN_Sizer_ClassifySet_Address)%SIZER_CLASSIFY_MEMBER_NUM;
+		i = (pSdwe->SetAdd - IS_ADD_CLASSFYSET_START)/SIZER_CLASSIFY_MEMBER_NUM;
+		j = (pSdwe->SetAdd - IS_ADD_CLASSFYSET_START)%SIZER_CLASSIFY_MEMBER_NUM;
 		gSystemPara.Sizer_ClassifySet[i][j] = pSdwe->SetData;
 		//
 		InnerScreenDataCenterHandle_WeightClassification_Init(&InnerScreenDataCenteHandle);
@@ -545,25 +551,24 @@ UINT8 innerScreenRxHandle_Sizer_ClassifySet(T5LType *pSdwe)
 	return matched;
 }
 //16
-UINT8 innerScreenRxHandle_TriggerSave(T5LType *pSdwe)
+UINT8 innerScreenRxHandle_PageHomeTriggerSingleSave(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
-	//UINT8 i = 0 , j = 0;
-	if(pSdwe->SetAdd == INNNERSCREEN_TRIGER_SAVE_ADDRESS)
+	if(pSdwe->SetAdd == IS_ADD_HOME_PAGE_EVENT)
 	{
-		if(INNNERSCREEN_TRIGER_SAVE_VLU == pSdwe->SetData)
+		if(IS_VLU_HOME_PAGE_EVENT_TRIGER_SAVE == pSdwe->SetData)
 		{
 			if(1 == InnerScreenDataCenteHandle.weigthClassifyCplt)
 			{
-				InnerScreenDataCenteHandle.trigerStroreFromScreen = 1;
+				appTrigerDatacenter2Store();
 			}
+			matched = TRUE;	
 		}
-		matched = TRUE;
 	}
 	return matched;
 }
 //17
-UINT8 innerScreenRxHandle_SearchTimeSet(T5LType *pSdwe)
+UINT8 innerScreenRxHandle_SearchSet(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
 	UINT8 offset = 0;
@@ -572,7 +577,7 @@ UINT8 innerScreenRxHandle_SearchTimeSet(T5LType *pSdwe)
 	{
 		offset = pSdwe->SetAdd -INNERSCRENN_DATACENTER_SEARCH_TIME_ADDRESS;
 		gSystemPara.TimerSearch[offset/6][offset%6] = pSdwe->SetData;
-		//
+		//起止时间-开始
 		localtm.tm_sec  = gSystemPara.TimerSearch[0][5];
 		localtm.tm_min  = gSystemPara.TimerSearch[0][4];
 		localtm.tm_hour = gSystemPara.TimerSearch[0][3];
@@ -580,7 +585,7 @@ UINT8 innerScreenRxHandle_SearchTimeSet(T5LType *pSdwe)
 		localtm.tm_mon  = gSystemPara.TimerSearch[0][1];
 		localtm.tm_year = gSystemPara.TimerSearch[0][0];
 		InnerScreenDataCenteHandle.searchUseUTCTimeStart =  mymktime(&localtm);
-		//
+		//起止时间-结束
 		localtm.tm_sec  = gSystemPara.TimerSearch[1][5];
 		localtm.tm_min  = gSystemPara.TimerSearch[1][4];
 		localtm.tm_hour = gSystemPara.TimerSearch[1][3];
@@ -588,17 +593,19 @@ UINT8 innerScreenRxHandle_SearchTimeSet(T5LType *pSdwe)
 		localtm.tm_mon  = gSystemPara.TimerSearch[1][1];
 		localtm.tm_year = gSystemPara.TimerSearch[1][0];
 		InnerScreenDataCenteHandle.searchUseUTCTimeEnd =  mymktime(&localtm);
+		//
 		matched = TRUE;
 	}
+	//
 	return matched;
 }
 //18
 UINT8 innerScreenRxHandle_OutputAll2Upan(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE , i = 0;
-	if(pSdwe->SetAdd == DMG_FUNC_PAGE9_OUTPUT_CUR_PAGE_ADDRESS)
+	if(pSdwe->SetAdd == IS_ADD_DATACHOICE_PAGE_EVENT)
 	{
-		if(DMG_FUNC_PAGE9_OUTPUT_ALL_PAGE_VLU == pSdwe->SetData)
+		if(IS_VLU_DATACHOICE_PAGE_EVENT_OUTPUTCHOICE == pSdwe->SetData)
 		{
 			matched = TRUE;
 			InnerScreenDataCenterHandle_WeightClassification_Init(&InnerScreenDataCenteHandle);
@@ -618,10 +625,10 @@ UINT8 innerScreenRxHandle_OutputAll2Upan(T5LType *pSdwe)
 UINT8 innerScreenRxHandle_DataCenterPageHandle(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
-	if(pSdwe->SetAdd == DMG_FUNC_PAGE9_OUTPUT_CUR_PAGE_ADDRESS)
+	if(pSdwe->SetAdd == IS_ADD_DATACENTER_PAGE_EVENT)
 	{
 		//下一页
-		if(DMG_FUNC_PAGE9_PAGEDOWN_PAGE_VLU == pSdwe->SetData)
+		if(IS_VLU_DATACENTER_PAGE_EVENT_PAGEDOWN == pSdwe->SetData)
 		{
 			InnerScreenDataCenteHandle.curPageNum = 0 ;
 			InnerScreenDataCenteHandle.targetPageNum = 1 ;
@@ -650,7 +657,8 @@ UINT8 innerScreenRxHandle_DataCenterPageHandle(T5LType *pSdwe)
 			//
 			matched = TRUE;
 		}
-		if(DMG_FUNC_PAGE9_PAGEUP_PAGE_VLU == pSdwe->SetData)
+		//上一页
+		else if(IS_VLU_DATACENTER_PAGE_EVENT_PAGEUP == pSdwe->SetData)
 		{
 			InnerScreenDataCenteHandle.curPageNum = 1 ;
 			InnerScreenDataCenteHandle.targetPageNum = 0 ;
@@ -687,7 +695,7 @@ UINT8 innerScreenRxHandle_DataCenterPageHandle(T5LType *pSdwe)
 			}
 			matched = TRUE;
 		}	
-		if(DMG_FUNC_PAGE9_DELET_ALL_DATA_VLU == pSdwe->SetData)
+		else if(DMG_FUNC_PAGE9_DELET_ALL_DATA_VLU == pSdwe->SetData)
 		{
 			//删除所有数据
 			InnerScreenDataCenteHandle.needToStore = 0xFE;
@@ -714,34 +722,94 @@ UINT8 innerScreenRxHandle_HomePageHandle(T5LType *pSdwe)
 	return matched;
 }
 
+#if 0
+
+//事件入队
+static sint8 IS_EVENT_Order_Push(T5LType *pSdwe , tInnerScreenEventStruct *pPushOrder)
+{
+    sint8 ret = 0 ;
+    if(0 == pSdwe->RxEventTable->orderQueueLock)
+    {
+        pSdwe->RxEventTable->orderQueueLock = 1;
+        if(1 == pSdwe->RxEventTable->orderQueueLock)
+        {
+            pSdwe->RxEventTable->orderQueuePushIndex = pSdwe->RxEventTable->orderQueuePushIndex%IN_RX_EVENT_QUEUE_MAX_NUM;
+            if( IS_RX_EVENT_N == pSdwe->RxEventTable->orderQueue[pSdwe->RxEventTable->orderQueuePushIndex].Order)
+            {
+                pSdwe->RxEventTable->orderQueue[pSdwe->RxEventTable->orderQueuePushIndex] = *pPushOrder;
+                pSdwe->RxEventTable->orderQueuePushIndex++;
+                pSdwe->RxEventTable->orderQueuePushIndex = pSdwe->RxEventTable->orderQueuePushIndex%IN_RX_EVENT_QUEUE_MAX_NUM;
+                ret = 1;
+            }
+        }
+        pSdwe->RxEventTable->orderQueueLock = 0;
+    }
+    //
+    return ret;
+}
+
+
+//事件清除
+static void IS_EVENT_Order_Clear(tInnerScreenEventStruct *pClearOrder)
+{
+    pClearOrder->Order = IS_RX_EVENT_N;
+}
+
+//事件出队
+static sint8 IS_EVENT_Order_Pop(T5LType *pSdwe , tInnerScreenEventStruct *pPopOrder)
+{
+    sint8 ret = 0 ;
+    pSdwe->RxEventTable->orderQueuePopIndex = pSdwe->RxEventTable->orderQueuePopIndex%IN_RX_EVENT_QUEUE_MAX_NUM;
+    if( IS_RX_EVENT_N != pSdwe->RxEventTable->orderQueue[pSdwe->RxEventTable->orderQueuePopIndex].Order)
+    {
+        *pPopOrder = pSdwe->RxEventTable->orderQueue[pSdwe->RxEventTable->orderQueuePopIndex];
+        IS_EVENT_Order_Clear(&pSdwe->RxEventTable->orderQueue[pSdwe->RxEventTable->orderQueuePopIndex]);
+        //
+        pSdwe->RxEventTable->orderQueuePopIndex++;
+        pSdwe->RxEventTable->orderQueuePopIndex = pSdwe->RxEventTable->orderQueuePopIndex%IN_RX_EVENT_QUEUE_MAX_NUM;
+        ret = 1;
+    }
+    //
+    return ret;
+}
+#endif
 //================================================================================================
 //===============================[函数列表：内屏数据接收后的事件处理]================================
 //================================================================================================
 screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM]=
 {
 	//priority index func_add
-	{0,	0, &innerScreenRxHandle_Version},//开机时MCU获取到屏幕版本时，代表屏幕可以正常通讯
-	{0,	1, &innerScreenRxHandle_SysPassWord},//密码管理
-	{0,	2 ,&innerScreenRxHandle_SysPara},//系统参数管理
-	{0,	3, &innerScreenRxHandle_JumpToBalancingClearnPage},//配平清爽界面
-	{0,	4, &innerScreenRxHandle_JumpToBalancingHomePage},//配平主界面界面 ， 它与清爽界面来会切换，当点击屏幕时
-	{0,	5, &innerScreenRxHandle_JumpToBalancingPage},//配平界面 ， 其他界面跳回配平界面时用
-	{0,	6, &innerScreenRxHandle_CalibrateChanelSet},//校准界面 ，通道号设置
-	{0,	7 ,&innerScreenRxHandle_CalibrateAddressSet},//校准界面 ，地址设置
-	{0,	8 ,&innerScreenRxHandle_JumpToCalibrateOrActivePage},//跳转校准界面
-	{0,	9, &innerScreenRxHandle_JumpToSysParaPage},//跳转系统参数设置界面
-	{0,	10,&innerScreenRxHandle_RemoveWeightTriger},//去皮事件触发
-	{0,	11,&innerScreenRxHandle_CalibratePointSet},//校准界面，校准点参考值设置
-	{0,	12,&innerScreenRxHandle_CalibratePointSampleAndSet},//校准界面，校准点采样及设置
-	{0,	13,&innerScreenRxHandle_VoicePrintfStatusFromScreen},//屏幕语音控制后状态返回
-	{0,	14,&innerScreenRxHandle_SystemReset},//屏幕语音控制后状态返回
-	{0,	15,&innerScreenRxHandle_RTC_YMDHMS},//屏幕RTC获取状态返回
-	{0, 16,&innerScreenRxHandle_Sizer_ClassifySet},
-	{0, 17,&innerScreenRxHandle_TriggerSave},
-	{0, 18,&innerScreenRxHandle_SearchTimeSet},
-	{0, 19,&innerScreenRxHandle_OutputAll2Upan},
+	{0,	0, &innerScreenRxHandle_Version},		//开机后开始获取屏幕版本,成功返回代表屏幕可以正常通讯
+	{0,	1, &innerScreenRxHandle_SysPassWord},	//密码管理
+	{0,	2 ,&innerScreenRxHandle_SysPara},		//系统参数管理
+
+	{0,	3, 0},//
+	{0,	4, 0},//
+	{0,	5, 0},//
+
+	{0,	6 ,&innerScreenRxHandle_JumpToCalibrateOrActivePage},	//跳转-校准界面
+	{0,	7, &innerScreenRxHandle_CalibrateChanelSet},			//收到-校准界面 - 通道号设置
+	{0,	8 ,&innerScreenRxHandle_CalibrateAddressSet},			//收到-校准界面 - 地址设置
+	{0,	9 ,&innerScreenRxHandle_CalibratePointSet},				//收到-校准界面 - 校准点参考值设置
+	{0,	10,&innerScreenRxHandle_CalibratePointSampleAndSet},	//收到-校准界面 - 校准点采样及设置
+
+	{0,	11, &innerScreenRxHandle_JumpToSysParaPage},	//跳转系统参数设置界面
+	{0,	12,&innerScreenRxHandle_RemoveWeightTriger},	//去皮事件触发
+
+	{0,	13,0},//
+	{0,	14,&innerScreenRxHandle_SystemReset},			//收到-重启系统
+	{0,	15,&innerScreenRxHandle_RTC_YMDHMS},			//收到-更新RTC值
+	{0, 16,&innerScreenRxHandle_Sizer_ClassifySet},		//收到-数据筛选(是否选择)+系统参数(分类设置)界面 - 分类区间设置
+	{0, 17,&innerScreenRxHandle_SearchSet},				//收到-数据筛选界面 - 时间区间设置 - 分类选择设置
+	{0, 28,&innerScreenRxHandle_JumpToDataCenterTriger},//跳转-数据中心
+
+	{0, 18,&innerScreenRxHandle_PageHomeTriggerSingleSave},		//收到-主界面 点击 存储按钮		
+	{0, 19,&innerScreenRxHandle_OutputAll2Upan},		
 	{0, 20,&innerScreenRxHandle_DataCenterPageHandle},
 	{0, 21,&innerScreenRxHandle_HomePageHandle},
+	{0, 22,&innerScreenRxHandle_CurPage},
+	{0, 23,&innerScreenRxHandle_Xuejiangleixing},
+
 	
 };
 

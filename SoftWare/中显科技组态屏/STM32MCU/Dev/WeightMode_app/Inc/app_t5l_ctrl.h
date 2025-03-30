@@ -1,108 +1,239 @@
 #ifndef _APP_T5L_CTRL_H_
 #define _APP_T5L_CTRL_H_
-
+#include "app_main_task.h"
 #include "app_sdwe_ctrl.h"
 #include "hal_uart.h"
 #include "app_hx711_ctrl.h"
 #include "app_InnerScreen_Cfg.h"
 #include "app_ExternalScreen_Cfg.h"
 #include "app_modbus_rtu_ctrl.h"
-#include "app_DataCenter.h"
-
-
 
 #define SCREEN_BALANCINGDATA_HANDLE_MODE	(1)//0：之前的方式 1：新方式20240623
+
 
 #define T5L_DMG_UART_TX_USE_DMA	(1)
 #define T5L_DMG_UART_DATA_LEN	(0X100)
 
 
 
+#define INNERSCREEN_DATACENTER_GROUP_START_ADD  (IS_ADD_DATACENTER_GROUP_START)
+#define INNERSCREEN_DATACENTER_GROUP_NUM        7//(IS_NUM_DATACENTER_GROUP)
+#define INNERSCREEN_DATACENTER_GROUP_OFFSET     0x20//(IS_LEN_DATACENTER_SINGLE)
+
+#define INNER_SCREEN_DATACENTER_LENOF_INDEX     (4u) // 4 ,Address[0x5000 ~ 0x5003] ,such as [0000]
+#define INNER_SCREEN_DATACENTER_LENOF_BARCODE   (13u)//13 ,Address[0x5004 ~ 0x5010] ,such as [639382000393]
+#define INNER_SCREEN_DATACENTER_LENOF_RECTIME   (32u)//19 ,Address[0x5011 ~ 0x5023] ,such as [2024/12/12 08:08:08]
+#define INNER_SCREEN_DATACENTER_LENOF_WEIGHT    (12u)// 8 ,Address[0x5024 ~ 0x502B] ,such as [2222(ml)]
+#define INNER_SCREEN_DATACENTER_LENOF_TYPE      (4u) // 1 ,Address[0x502C ~ 0x502C] ,such as [2222]
+#define INNER_SCREEN_DATACENTER_LENOF_RANGE     (11u)//13 ,Address[0x502D ~ 0x5039] ,such as [1111 ~ 2222]
 
 
 
 #if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
+//弹窗处理
+typedef enum
+{
+	IS_PopupWindow_OK  = 0 ,
+	IS_PopupWindow_CLOSE = 1 ,
+	IS_PopupWindow_BACK = 2,	
+	IS_PopupWindow_Max,
+}enumISPopupWindowType;
+typedef enum ZHONGXIANPageType
+{
+	IS_PAGE_00_0X00_HOMEPAGEE = 0,
+	IS_PAGE_18_0X12_XUEJIANGLEIXING = 18,
+	IS_PAGE_19_0X13_GONGHAO = 19,
+	IS_PAGE_IVALID = 0xff,
+}enumISPageType;
+typedef struct structISPopupWindowType
+{
+	enumISPageType Page;
+	enumISPopupWindowType Result;
+}ISPopupWindowType;
+#define IS_PopupWindow_MAX_HANDLE	(3)
+#define ISPopupWindowDefault   { \
+	{IS_PAGE_00_0X00_HOMEPAGEE			,	IS_PopupWindow_Max},\
+	{IS_PAGE_18_0X12_XUEJIANGLEIXING	,	IS_PopupWindow_Max},\
+	{IS_PAGE_19_0X13_GONGHAO			,	IS_PopupWindow_Max},\
+}
+extern ISPopupWindowType IS_PopupWindow[IS_PopupWindow_MAX_HANDLE];
+#endif
+
+#if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
+
+//页面跳转：公共变量
+#define IS_ADD_PAGE_CHANGED								(0x0011)
+#define IS_ADD_BAT_PERCENT								(0x0025)
+#define IS_ADD_TRIGER_STORE_ICON						(0x0104)
+#define IS_ADD_XUEJIANG_LEIXING							(0x0105)
+#define IS_ADD_XUEJIANG_LEIXING_CHONGICE				(0x0115)
+#define IS_LEN_XUEJIANG_LEIXING							(1)
+
+#define IS_ADD_RTC_DISPLAY								(0x0200)
+
+
 //页面0 0主页：相关事件
-#define IS_HOME_PAGE_EVENT_ADDRESS						(0x0500)
-#define IS_HOME_PAGE_EVENT_VLU_0011_REMOVE_WEIGHT		(0x0011)//去皮
-#define IS_HOME_PAGE_EVENT_VLU_0022_TRIGER_SAVE			(0x0022)//触发存储
+#define IS_ADD_HOME_PAGE_EVENT							(0x0500)
+#define IS_VLU_HOME_PAGE_EVENT_REMOVE_WEIGHT			(0x0011)//去皮
+#define IS_VLU_HOME_PAGE_EVENT_TRIGER_SAVE				(0x0022)//触发存储
 
 //页面4 4系统参数：相关事件
-#define IS_SYSPARA_PAGE_EVENT_ADDRESS					(0x0504)
-#define IS_SYSPARA_PAGE_EVENT_VLU_0411_PAGEUP			(0x0411)//上一页
-#define IS_SYSPARA_PAGE_EVENT_VLU_0422_PAGEDOWN			(0x0422)//下一页
+#define IS_ADD_SYSPARA_PAGE_EVENT						(0x0504)
+#define IS_VLU_SYSPARA_PAGE_EVENT_PAGEUP				(0x0411)//上一页
+#define IS_VLU_SYSPARA_PAGE_EVENT_PAGEDOWN				(0x0422)//下一页
 
 //页面5 5数据筛选：相关事件
-#define IS_DATACHOICE_PAGE_EVENT_ADDRESS					(0x0505)
-#define IS_DATACHOICE_PAGE_EVENT_VLU_0511_SHOWCHOICE		(0x0511)//选中筛选预览
-#define IS_DATACHOICE_PAGE_EVENT_VLU_0522_OUTPUTCHOICE		(0x0522)//选中筛选导出
-#define IS_DATACHOICE_PAGE_EVENT_VLU_0555_DELETECHOICE		(0x0555)//选中筛选删除
+#define IS_ADD_DATACHOICE_PAGE_EVENT					(0x0505)
+#define IS_VLU_DATACHOICE_PAGE_EVENT_SHOWCHOICE			(0x0511)//选中筛选预览
+#define IS_VLU_DATACHOICE_PAGE_EVENT_OUTPUTCHOICE		(0x0522)//选中筛选导出
+#define IS_VLU_DATACHOICE_PAGE_EVENT_DELETECHOICE		(0x0555)//选中筛选删除
 
 //页面9 9数据中心：相关事件
-#define IS_DATACENTER_PAGE_EVENT_ADDRESS					(0x0509)
-#define IS_DATACENTER_PAGE_EVENT_VLU_0912_SHOWCHOICE		(0x0912)//导出本页
-#define IS_DATACENTER_PAGE_EVENT_VLU_0923_OUTPUTCHOICE		(0x0923)//导出全部
-#define IS_DATACENTER_PAGE_EVENT_VLU_0934_DELETECHOICE		(0x0934)//上一页
-#define IS_DATACENTER_PAGE_EVENT_VLU_0945_DELETECHOICE		(0x0945)//下一页
+#define IS_ADD_DATACENTER_PAGE_EVENT					(0x0509)
+#define IS_VLU_DATACENTER_PAGE_EVENT_SHOWCHOICE			(0x0912)//导出本页
+#define IS_VLU_DATACENTER_PAGE_EVENT_OUTPUTCHOICE		(0x0923)//导出全部
+#define IS_VLU_DATACENTER_PAGE_EVENT_PAGEUP				(0x0934)//上一页
+#define IS_VLU_DATACENTER_PAGE_EVENT_PAGEDOWN			(0x0945)//下一页
 
 //页面10 10系统参数2：相关事件
-#define IS_SYSPARA2_PAGE_EVENT_ADDRESS						(0x0510)
-#define IS_SYSPARA2_PAGE_EVENT_VLU_1001_PAGEUP				(0x1001)//上一页
-#define IS_SYSPARA2_PAGE_EVENT_VLU_1012_PAGEDOWN			(0x1012)//下一页
+#define IS_ADD_SYSPARA2_PAGE_EVENT						(0x0510)
+#define IS_VLU_SYSPARA2_PAGE_EVENT_PAGEUP				(0x1001)//上一页
+#define IS_VLU_SYSPARA2_PAGE_EVENT_PAGEDOWN				(0x1012)//下一页
 
 //页面11 11发现U盘：相关事件
-#define IS_FINDUPAN_PAGE_EVENT_ADDRESS						(0x0511)
-#define IS_FINDUPAN_PAGE_EVENT_VLU_1111_OK					(0x1111)//确认键
-#define IS_FINDUPAN_PAGE_EVENT_VLU_1111_CLOSE				(0x1111)//关闭键
-#define IS_FINDUPAN_PAGE_EVENT_VLU_1111_BACK				(0x1111)//返回键
+#define IS_ADD_FINDUPAN_PAGE_EVENT						(0x0511)
+#define IS_VLU_FINDUPAN_PAGE_EVENT_OK					(0x1101)//确认键
+#define IS_VLU_FINDUPAN_PAGE_EVENT_CLOSE				(0x1112)//关闭键
+#define IS_VLU_FINDUPAN_PAGE_EVENT_BACK					(0x1123)//返回键
 
 //页面12 12U盘已移除：相关事件
-#define IS_YICHUUPAN_PAGE_EVENT_ADDRESS						(0x0512)
-#define IS_YICHUUPAN_PAGE_EVENT_VLU_1212_OK					(0x1212)//确认键
-#define IS_YICHUUPAN_PAGE_EVENT_VLU_1212_CLOSE				(0x1212)//关闭键
-#define IS_YICHUUPAN_PAGE_EVENT_VLU_1212_BACK				(0x1212)//返回键
+#define IS_ADD_YICHUUPAN_PAGE_EVENT						(0x0512)
+#define IS_VLU_YICHUUPAN_PAGE_EVENT_OK					(0x1201)//确认键
+#define IS_VLU_YICHUUPAN_PAGE_EVENT__CLOSE				(0x1212)//关闭键
+#define IS_VLU_YICHUUPAN_PAGE_EVENT__BACK				(0x1223)//返回键
 
 //页面13 13选中筛选删除完成：相关事件
-#define IS_DELETECHOICE_PAGE_EVENT_ADDRESS					(0x0513)
-#define IS_DELETECHOICE_PAGE_EVENT_VLU_1313_OK				(0x1313)//确认键
-#define IS_DELETECHOICE_PAGE_EVENT_VLU_1313_CLOSE			(0x1313)//关闭键
-#define IS_DELETECHOICE_PAGE_EVENT_VLU_1313_BACK			(0x1313)//返回键
+#define IS_ADD_DELETECHOICE_PAGE_EVENT					(0x0513)
+#define IS_VLU_DELETECHOICE_PAGE_EVENT_OK				(0x1301)//确认键
+#define IS_VLU_DELETECHOICE_PAGE_EVENT_CLOSE			(0x1312)//关闭键
+#define IS_VLU_DELETECHOICE_PAGE_EVENT_BACK				(0x1323)//返回键
 
 //页面14 14单条删除完成：相关事件
-#define IS_DELETE1CHOICE_PAGE_EVENT_ADDRESS					(0x0514)
-#define IS_DELETE1CHOICE_PAGE_EVENT_VLU_1414_OK				(0x1414)//确认键
-#define IS_DELETE1CHOICE_PAGE_EVENT_VLU_1414_CLOSE			(0x1414)//关闭键
-#define IS_DELETE1CHOICE_PAGE_EVENT_VLU_1414_BACK			(0x1414)//返回键
+#define IS_ADD_DELETE1CHOICE_PAGE_EVENT					(0x0514)
+#define IS_VLU_DELETE1CHOICE_PAGE_EVENT_OK				(0x1401)//确认键
+#define IS_VLU_DELETE1CHOICE_PAGE_EVENT_CLOSE			(0x1412)//关闭键
+#define IS_VLU_DELETE1CHOICE_PAGE_EVENT_BACK			(0x1423)//返回键
 
 //页面15 15选中筛选导出完成：相关事件
-#define IS_OUTPUTCHOICE_PAGE_EVENT_ADDRESS					(0x0515)
-#define IS_OUTPUTCHOICE_PAGE_EVENT_VLU_1515_OK				(0x1515)//确认键
-#define IS_OUTPUTCHOICE_PAGE_EVENT_VLU_1515_CLOSE			(0x1515)//关闭键
-#define IS_OUTPUTCHOICE_PAGE_EVENT_VLU_1515_BACK			(0x1515)//返回键
+#define IS_ADD_ADD_OUTPUTCHOICE_PAGE_EVENT				(0x0515)
+#define IS_VLU_OUTPUTCHOICE_PAGE_EVENT_OK				(0x1501)//确认键
+#define IS_VLU_OUTPUTCHOICE_PAGE_EVENT_CLOSE			(0x1512)//关闭键
+#define IS_VLU_OUTPUTCHOICE_PAGE_EVENT_BACK				(0x1523)//返回键
 
 //页面16 16当前页面导出完成：相关事件
-#define IS_OUTPUTCUR_PAGE_EVENT_ADDRESS						(0x0516)
-#define IS_OUTPUTCUR_PAGE_EVENT_VLU_1616_OK					(0x1616)//确认键
-#define IS_OUTPUTCUR_PAGE_EVENT_VLU_1616_CLOSE				(0x1616)//关闭键
-#define IS_OUTPUTCUR_PAGE_EVENT_VLU_1616_BACK				(0x1616)//返回键
+#define IS_ADD_OUTPUTCUR_PAGE_EVENT						(0x0516)
+#define IS_VLU_OUTPUTCUR_PAGE_EVENT_OK					(0x1601)//确认键
+#define IS_VLU_OUTPUTCUR_PAGE_EVENT_CLOSE				(0x1612)//关闭键
+#define IS_VLU_OUTPUTCUR_PAGE_EVENT_BACK				(0x1623)//返回键
 
 //页面17 17是否删除选中数据：相关事件
-#define IS_IFDELETECHOICE_PAGE_EVENT_ADDRESS				(0x0517)
-#define IS_IFDELETECHOICE_PAGE_EVENT_VLU_1717_OK			(0x1717)//确认键
-#define IS_IFDELETECHOICE_PAGE_EVENT_VLU_1702_CLOSE			(0x1702)//关闭键
-#define IS_IFDELETECHOICE_PAGE_EVENT_VLU_1701_BACK			(0x1701)//返回键
+#define IS_ADD_IFDELETECHOICE_PAGE_EVENT				(0x0517)
+#define IS_VLU_IFDELETECHOICE_PAGE_EVENT_OK				(0x1701)//确认键
+#define IS_VLU_IFDELETECHOICE_PAGE_EVENT_CLOSE			(0x1723)//关闭键
+#define IS_VLU_IFDELETECHOICE_PAGE_EVENT_BACK			(0x1723)//返回键
 
 //页面18 18血浆类型选择：相关事件
-#define IS_TYPECHOICE_PAGE_EVENT_ADDRESS1					(0x0518)
-#define IS_TYPECHOICE_PAGE_EVENT_VLU_1802_OK				(0x1802)//确认键
-#define IS_TYPECHOICE_PAGE_EVENT_VLU_1802_CLOSE				(0x1802)//关闭键
-#define IS_TYPECHOICE_PAGE_EVENT_VLU_1802_BACK				(0x1802)//返回键
+#define IS_ADD_TYPECHOICE_PAGE_EVENT					(0x0518)
+#define IS_VLU_TYPECHOICE_PAGE_EVENT_OK					(0x1801)//确认键
+#define IS_VLU_TYPECHOICE_PAGE_EVENT_CLOSE				(0x1812)//关闭键
+#define IS_VLU_TYPECHOICE_PAGE_EVENT_BACK				(0x1823)//返回键
 
 //页面19 19工号录入：相关事件
-#define IS_INPUTGONGHAO_PAGE_EVENT_ADDRESS					(0x0519)
-#define IS_INPUTGONGHAO_PAGE_EVENT_VLU_1902_OK				(0x1902)//确认键
-#define IS_INPUTGONGHAO_PAGE_EVENT_VLU_1902_CLOSE			(0x1902)//关闭键
-#define IS_INPUTGONGHAO_PAGE_EVENT_VLU_1902_BACK			(0x1902)//返回键
+#define IS_ADD_INPUTGONGHAO_PAGE_EVENT					(0x0519)
+#define IS_VLU_INPUTGONGHAO_PAGE_EVENT_OK				(0x1901)//确认键
+#define IS_VLU_INPUTGONGHAO_PAGE_EVENT_CLOSE			(0x1912)//关闭键
+#define IS_VLU_INPUTGONGHAO_PAGE_EVENT_BACK				(0x1923)//返回键
+
+#define DMG_FUNC_SET_UNIT_ADDRESS				(0X1000)//0x1000 2024-10-06
+
+#define DMG_FUNC_SET_MIN_RANGE_ADDRESS			(0X100A)//0x100A 2024-10-06
+#define DMG_FUNC_SET_MAX_RANGE_ADDRESS			(0X100B)//0x100B 2024-10-06
+
+#define DMG_FUNC_SET_ERR_RANGE_ADDRESS			(0X100C)//0x100C == 未使用
+#define DMG_FUNC_SET_isCascade_ADDRESS			(0X100D)//0x100D == 未使用
+#define DMG_FUNC_SET_isLedIndicate_ADDRESS		(0X100E)//0x100E == 未使用
+#define DMG_FUNC_SET_COLOR_START_ADDRESS		(0X100F)//0x100F == 未使用
+#define DMG_FUNC_SET_COLOR_END_ADDRESS			(0X1012)//0x1012 == 未使用
+
+#define DMG_FUNC_SET_ZERO_RANGE_ADDRESS			(0X1013)//0x1013 2024-10-06
+
+#define DMG_FUNC_SET_SCREEN_LIGHT_ADDRESS		(0X1014)//0x1014 == 未使用
+#define DMG_FUNC_SET_VOICE_NUM_TOUCH_ADDRESS 	(0X1015)//0x1015 == 未使用
+#define DMG_FUNC_SET_VOICE_NUM_ADDRESS			(0X1016)//0x1016 == 未使用
+#define DMG_FUNC_SET_VOICE_SWITCH_ADDRESS		(0X1017)//0x1017 == 未使用
+#define DMG_FUNC_SET_CAST_SWITCH_ADDRESS		(0X1018)//0x1018 == 未使用
+#define DMG_FUNC_SET_FLASH_ERASEE_TIMES_ADDRESS	(0X1019)//0x1019 == 未使用
+
+#define DMG_FUNC_MCU_VERSION_ADDRESS			(0X101A)//0x101A 2024-10-06
+#define DMG_FUNC_DIWEN_VERSION_ADDRESS			(0X101B)//0x101B 2024-10-06
+
+#define DMG_FUNC_DIWEN_XIAOSHU_ADDRESS			(0X101C)//0X101C 小数使能 2024-10-06
+#define DMG_FUNC_DIWEN_BILV_ADDRESS				(0X101D)//0X101D ml/g比率 2024-10-06
+
+#define DMG_FUNC_DIWEN_DAPING_ADDRESS			(0X101E)//0X101E 大屏显示 == 未使用
+#define DMG_FUNC_DIWEN_WEIGHTNUM_ADDRESS		(0X101F)//0X101F 单台数量 == 未使用
+
+#define IS_ADD_DATACENTER_SEARCH_TIME_START		(0x1800)//0x1800~180B时间筛选：年月日-时分秒 ~ 年月日-时分秒
+#define IS_ADD_DATACENTER_SEARCH_TIME_END		(0x180B)//0x1800~180B时间筛选：年月日-时分秒 ~ 年月日-时分秒
+
+//页面10 系统参数 筛选页面：相关
+#define IS_ADD_CLASSFYSET_START					(0x1810)//共10组*4=40个地址
+#define IS_ADD_CLASSFYSET_END					(0x1837)
+
+//页面7 称重校准页面：相关
+//==(update:20210328):address of set chanel number : 0->all chanel set  ; (1~8)->single chanel set
+#define DMG_FUNC_SET_CHANEL_NUM								(0X2100)//2024-10-06
+//==(update:20210328):address of reset calibration of choice chanel number : 0->all chanel set  ; (1~x)->single chanel set
+#define DMG_FUNC_RESET_CALIBRATION_ADDRESS					(0X2101)//2024-10-06
+//==(update:20210328):value of reset calibration of choice chanel number:2021 reset calibration
+#define DMG_FUNC_RESET_CALIBRATION_VAL	 					(2021)
+//==(update:20210428):address of remove weight
+#define DMG_FUNC_JUNPTO_CALIBRATION_ADDRESS					(0X2103)//2024-10-06
+#define DMG_FUNC_JUNPTO_CALIBRATION_VAL						(2021)
+#define DMG_FUNC_JUNPTO_ACTIVE_VAL							(1202)
+//==(update:20210328):address of set point(weight value) of chanel : (0~9)-> point of chanel set (:g)
+#define DMG_FUNC_SET_CHANEL_POINT_ADDRESS					(0X2200)//0x2200~0x2209 2024-10-06
+//==(update:20210328):address of triger COLOR back to DMG : (0~9)-> COLOR of point of chanel set triger(val=0x00:white(not triger),val=0x01green(triger))
+#define DMG_FUNC_ASK_CHANEL_POINT_TRIG_BACK_COLOR_ADDRESS	(0X2300)//0x2300~0x2309 2024-10-06
+//==(update:20210328):address of triger sample back to DMG : (0~9)-> COLOR of point of chanel set triger(val=0x00:white(not triger),val=0x01green(triger))
+#define DMG_FUNC_ASK_CHANEL_POINT_TRIG_SAMPLE_DATA_ADDRESS	(0X2400)//0x2400~0x2409 2024-10-06
+//==(update:20210328):address of set point of chanel triger : (0~9)-> point of chanel set triger(val=0x12FE(DMG triger MCU))
+#define DMG_FUNC_SET_CHANEL_POINT_TRIG_ADDRESS				(0X2500)//0x2500~0x2509 2024-10-06
+#define DMG_FUNC_SET_CHANEL_POINT_TRIG_VAL					(0X12FE)
+
+//页面0 主页
+#define IS_ADD_CUR_WEIGHT								(0x3000)
+#define IS_ADD_FENLEI_RESULT							(0x3001)
+#define IS_ADD_EXE_STORE								(0x3002)
+#define IS_ADD_BCCODE									(0x3003)
+#define IS_LEN_BCCODE									(8)
+#define IS_ADD_HOMEPAGE_CYCLE_DATA						(IS_ADD_CUR_WEIGHT)
+#define IS_LEN_HOMEPAGE_CYCLE_DATA						(IS_LEN_BCCODE + 4)
+
+//页面19 工号录入
+#define IS_ADD_GONGHAO									(0x3020)//主页面显示
+#define IS_ADD_GONGHAO_CHOICE							(0x3040)//工号显示页面
+#define IS_LEN_GONGHAO									(8)
+
+//页面9：数据中心 显示7组数据
+#define IS_ADD_DATACENTER_GROUP_START        			(0x3500)
+#define IS_NUM_DATACENTER_GROUP        					(7)
+#define IS_LEN_DATACENTER_SINGLE        				(0x20)//员工工号 + ...
+
+//
+#define IS_ADD_NAMEOF_UPAN_SAVE_FILENAME				(0X3600)//0x3600 == 未使用
+#define IS_LEN_NAMEOF_UPAN_SAVE_FILENAME				(20)//20个字符 == 未使用
+
 
 #endif
 
@@ -115,43 +246,29 @@
 #define DMG_WAIT_COLOR_HELP_SEND_TIME			(1000)//当重量信息发给屏幕后颜色信息最长这个时间段内要发送给屏幕
 //================================================================================================
 
-//系统参数 筛选页面：相关
-#define INNERSCREEN_Sizer_ClassifySet_Address	(0x1810)
 
-//称重校准页面：相关
-//==(update:20210328):address of set chanel number : 0->all chanel set  ; (1~8)->single chanel set
-#define DMG_FUNC_SET_CHANEL_NUM					(0X2100)//2024-10-06
-//==(update:20210328):address of reset calibration of choice chanel number : 0->all chanel set  ; (1~x)->single chanel set
-#define DMG_FUNC_RESET_CALIBRATION_ADDRESS		(0X2101)//2024-10-06
-//==(update:20210328):value of reset calibration of choice chanel number:2021 reset calibration
-#define DMG_FUNC_RESET_CALIBRATION_VAL	 		(2021)
-//==(update:20210428):address of remove weight
-#define DMG_FUNC_JUNPTO_CALIBRATION_ADDRESS		(0X2103)//2024-10-06
-#define DMG_FUNC_JUNPTO_CALIBRATION_VAL			(2021)
-#define DMG_FUNC_JUNPTO_ACTIVE_VAL				(1202)
-//==(update:20210328):address of set point(weight value) of chanel : (0~9)-> point of chanel set (:g)
-#define DMG_FUNC_SET_CHANEL_POINT_ADDRESS					(0X2200)//0x2200~0x2209 2024-10-06
-//==(update:20210328):address of triger COLOR back to DMG : (0~9)-> COLOR of point of chanel set triger(val=0x00:white(not triger),val=0x01green(triger))
-#define DMG_FUNC_ASK_CHANEL_POINT_TRIG_BACK_COLOR_ADDRESS	(0X2300)//0x2300~0x2309 2024-10-06
-//==(update:20210328):address of triger sample back to DMG : (0~9)-> COLOR of point of chanel set triger(val=0x00:white(not triger),val=0x01green(triger))
-#define DMG_FUNC_ASK_CHANEL_POINT_TRIG_SAMPLE_DATA_ADDRESS	(0X2400)//0x2400~0x2409 2024-10-06
-//==(update:20210328):address of set point of chanel triger : (0~9)-> point of chanel set triger(val=0x12FE(DMG triger MCU))
-#define DMG_FUNC_SET_CHANEL_POINT_TRIG_ADDRESS	(0X2500)//0x2500~0x2509 2024-10-06
-#define DMG_FUNC_SET_CHANEL_POINT_TRIG_VAL		(0X12FE)
+
+
 
 //page0:主页相关
-//==(update:20241012):address of remove weight
+//去皮功能
+#if(INNERSCREEN_TYPE_ZHONGXIAN == INNERSCREEN_TYPE)
+#define DMG_FUNC_REMOVE_WEIGHT_ADDRESS				(IS_ADD_HOME_PAGE_EVENT)
+#define DMG_FUNC_REMOVE_WEIGHT_VAL					(IS_VLU_HOME_PAGE_EVENT_REMOVE_WEIGHT)
+#define DMG_FUNC_JUMPTO_DATA_PAGE_ADDRESS			(0X0011)
+#define DMG_FUNC_JUMPTO_DATA_PAGE_VAL				(0X0009)
+#else
 #define DMG_FUNC_REMOVE_WEIGHT_ADDRESS				(0X8000)
 #define DMG_FUNC_REMOVE_WEIGHT_VAL					(0X0012)
-
 #define DMG_FUNC_JUMPTO_DATA_PAGE_ADDRESS			(0X8000)
 #define DMG_FUNC_JUMPTO_DATA_PAGE_VAL				(0X0034)
+#endif
 
 
 
-//page5:数据筛选
-#define DMG_FUNC_PAGE5_OUPUT_ALL_ADDRESS			(0X8005)
-#define DMG_FUNC_PAGE5_OUPUT_ALL_VAL				(0X0512)
+
+
+
 
 //page9:数据中心
 #define DMG_FUNC_PAGE9_DELET_ALL_DATA_ADDRESS		(0X8009)
@@ -166,14 +283,11 @@
 #define DMG_FUNC_PAGE9_PAGEDOWN_PAGE_VLU			(0X0945)
 
 #if(INNERSCREEN_TYPE_ZHONGXIAN == INNERSCREEN_TYPE)
-#define INNERSCRENN_DATACENTER_SEARCH_TIME_ADDRESS	(0x1800)
+#define INNERSCRENN_DATACENTER_SEARCH_TIME_ADDRESS	(IS_ADD_DATACENTER_SEARCH_TIME_START)
 #else
 #define INNERSCRENN_DATACENTER_SEARCH_TIME_ADDRESS	(0x5000)
 #endif
-#define INNERSCRENN_DATACENTER_SEARCH_TIME_LEN		(6*2)
-
-
-#define INNERSCREEN_DATACENTER_START_ADD        (0x3500)
+#define INNERSCRENN_DATACENTER_SEARCH_TIME_LEN		(IS_ADD_DATACENTER_SEARCH_TIME_END - IS_ADD_DATACENTER_SEARCH_TIME_START + 1)
 
 
 //==(update:20211119):address of syspara entry
@@ -181,56 +295,14 @@
 #define DMG_FUNC_JUNPTO_SYSPAR_VAL				(1010)
 
 
-//==(update:20210328):address of weight back to DMG : (0~7)-> weight of chanel(val:g)
-#define DMG_FUNC_ASK_CHANEL_WEIGHT_ADDRESS		(0X3000)//0x3000~0x300F 4byte each chanel
-//==(update:20210328):address of color back to DMG : (0~7)-> color of chanel(val:g)
-#define DMG_FUNC_ASK_CHANEL_COLOR_ADDRESS		(0X3100)//0x3100~0x3107
-
-
-
-
-
-
 //==(update:20210411):address of unit min max ...
-#define DMG_FUNC_SET_UNIT_ADDRESS				(0X1000)//0x1000 2024-10-06
-#define DMG_FUNC_SET_MIN_RANGE_ADDRESS			(0X100A)//0x100A 2024-10-06
-#define DMG_FUNC_SET_MAX_RANGE_ADDRESS			(0X100B)//0x100B 2024-10-06
-#define DMG_FUNC_SET_ERR_RANGE_ADDRESS			(0X100C)//0x100C
-#define DMG_FUNC_SET_isCascade_ADDRESS			(0X100D)//0x100D
-#define DMG_FUNC_SET_isLedIndicate_ADDRESS		(0X100E)//0x100E
-#define DMG_FUNC_SET_COLOR_START_ADDRESS		(0X100F)//0x100F
-#define DMG_FUNC_SET_COLOR_END_ADDRESS			(0X1012)//0x1012
-#define DMG_FUNC_SET_ZERO_RANGE_ADDRESS			(0X1013)//0x1013 2024-10-06
-#define DMG_FUNC_SET_SCREEN_LIGHT_ADDRESS		(0X1014)//0x1014
-#define DMG_FUNC_SET_VOICE_NUM_TOUCH_ADDRESS 	(0X1015)//0x1015
-#define DMG_FUNC_SET_VOICE_NUM_ADDRESS			(0X1016)//0x1016
-#define DMG_FUNC_SET_VOICE_SWITCH_ADDRESS		(0X1017)//0x1017
-#define DMG_FUNC_SET_CAST_SWITCH_ADDRESS		(0X1018)//0x1018
-#define DMG_FUNC_SET_FLASH_ERASEE_TIMES_ADDRESS	(0X1019)//0x1019
-#define DMG_FUNC_MCU_VERSION_ADDRESS			(0X101A)//0x101A 2024-10-06
-#define DMG_FUNC_DIWEN_VERSION_ADDRESS			(0X101B)//0x101B 2024-10-06
-#define DMG_FUNC_DIWEN_XIAOSHU_ADDRESS			(0X101C)//0X101C 小数使能 2024-10-06
-#define DMG_FUNC_DIWEN_BILV_ADDRESS				(0X101D)//0X101D ml/g比率 2024-10-06
-#define DMG_FUNC_DIWEN_DAPING_ADDRESS			(0X101E)//0X101E 大屏显示
-#define DMG_FUNC_DIWEN_WEIGHTNUM_ADDRESS		(0X101F)//0X101F 单台数量
-
 #define DMG_FUNC_MCUID_ADDRESS					(0X1500)//0x1500
-
 #define DMG_FUNC_PASSORD_SET_ADDRESS			(0X1510)//0x1510
 
-#define DMG_FUNC_Balancing_SET_ADDRESS				(0X1101)//0x1101
-#define DMG_FUNC_Balancing_SET_VALUE				(0X1101)//0x1101 main page
-#define DMG_FUNC_Balancing_HOME_SET_ADDRESS			(0X1102)//0x1102
-#define DMG_FUNC_Balancing_HOME_SET_VALUE			(0X1102)//0x1102
-#define DMG_FUNC_Balancing_CLEARPAGE_SET_ADDRESS	(0X1103)//0x1103
-#define DMG_FUNC_Balancing_CLEARPAGE_SET_VALUE		(0X1103)//0x1103
 
 #define DMG_FUNC_HELP_TO_JUDGE_SET_ADDRESS	(0X1201)//0x1201
 
-#define DMG_FUNC_SAVE_FILE_NAME_SET_ADDRESS	(0X1300)//0x1200
-#define DMG_FUNC_SAVE_FILE_NAME_SET_LEN		(20)//20个字符
 
-#define DMG_FUNC_BC_CODE_ADDRESS			(0x3003)
 
 #define DMG_SYS_STATUS_OF_VOICE_PRINTF_00A1	(0X00A1)
 
@@ -253,6 +325,10 @@
 #if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
 #define INNER_SCREEN_VERSION_GET_ADD		(0X00)//读取版本信息，串口下发指令 A5 5A 03 81 00 01
 #define INNER_SCREEN_VERSION_GET_LEN		(0X01)
+
+#define INNER_SCREEN_CURPAGE_GET_ADD		(0X03)//读取版本信息，串口下发指令 A5 5A 03 81 03 02
+#define INNER_SCREEN_CURPAGE_GET_LEN		(0X02)
+
 #else
 #define INNER_SCREEN_VERSION_GET_ADD		(0X000E)//读取版本信息，串口下发指令 5A A5 04 83 000E 02 , 
 #define INNER_SCREEN_VERSION_GET_LEN		(0X02)
@@ -298,8 +374,8 @@
 
 
 #if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
-#define INNNERSCREEN_TRIGER_SAVE_ADDRESS	(0x8000)
-#define INNNERSCREEN_TRIGER_SAVE_VLU		(0x0023)
+#define INNNERSCREEN_TRIGER_SAVE_ADDRESS	(IS_ADD_DATACHOICE_PAGE_EVENT)
+#define INNNERSCREEN_TRIGER_SAVE_VLU		(IS_VLU_DATACHOICE_PAGE_EVENT_OUTPUTCHOICE)
 #else
 #define INNNERSCREEN_TRIGER_SAVE_ADDRESS	(0x8000)
 #define INNNERSCREEN_TRIGER_SAVE_VLU		(0x0023)
@@ -331,6 +407,7 @@ typedef enum
 //DMG PageType
 typedef enum DMGPageType
 {
+
 	DMG_FUNC_Balancing_6_PAGE = 49,
 	DMG_FUNC_Balancing_12_PAGE = 55,
 	DMG_FUNC_Balancing_12_HOME_PAGE =58,
@@ -353,6 +430,14 @@ typedef enum DMGPageType
 	EXTERNAL_SCREEN_Balancing_16_HOME_PAGE = 2,
 
 }enumDMGPageType;
+
+
+
+
+
+
+
+
 
 //语音队列：深度
 #define T5L_VOICE_MAX_PRINTF_NUM		(6)
@@ -514,10 +599,51 @@ typedef struct structScreenCycleType
 	INT16 *needSendHelp;
 	INT16 *handle_i;//发送描述指针给屏幕
 	INT16 *rmTrigerInnerSts;//去皮按钮按下时处理
+	//中显小称
 }ScreenCycleType;
+
+
+
+
+
+#define IN_RX_EVENT_QUEUE_MAX_NUM	(10)
+typedef enum
+{
+	IS_RX_EVENT_N=0x00,//none
+	IS_RX_EVENT_REMOVE_WEIGHT = 0X01,
+	IS_RX_EVENT_MAX
+}enumInnerScreenRxEventType;
+typedef struct sInnerScreenEventStruct
+{
+    enumInnerScreenRxEventType Order;
+} tInnerScreenEventStruct;
+typedef struct structInnerScreenEventType
+{
+    //order inpur info
+    uint8 orderQueueLock;
+    uint8 orderQueuePushIndex;
+    uint8 orderQueuePopIndex;
+    tInnerScreenEventStruct orderQueue[IN_RX_EVENT_QUEUE_MAX_NUM];
+
+    //process handle info
+    tInnerScreenEventStruct onGoingOrder;
+}InnerScreenEventType;
+
+#define InnerScreenEventTypeDefault   { \
+	.orderQueueLock = 0,\
+	.orderQueuePushIndex = 0,\
+	.orderQueuePopIndex = 0,\
+	.orderQueue = {IS_RX_EVENT_MAX},\
+	.onGoingOrder = IS_RX_EVENT_MAX,\
+}
+
+extern InnerScreenEventType IS_Event;
+
+
 /** 定义从机串口设备类型 */
 typedef struct structSdweType
 {
+	enumISPageType curPage;
 	UINT8 frameHeadH;/**< 与屏幕通信帧头 高字节 */
 	UINT8 frameHeadL;/**< 与屏幕通信帧头 低字节 */
 
@@ -597,99 +723,102 @@ typedef struct structSdweType
 	UINT16 	dataCenterDisplayPagePre;
 
 	UINT8   jumpToDataCenterHandle;
+	ISPopupWindowType *PopupWindow;
+	InnerScreenEventType *RxEventTable;
 
 }T5LType;
 
 #define ScreenCycleTypeDefault   { \
 	/*chanel_len*/\
-	0,\
+	.chanel_len = 0,\
 	/*weight data*/\
-	0,\
-	0,\
-	0,\
+	.pData = 0,\
+	.pDataPre = 0,\
+	.pDataSendToDiWen = 0,\
 	/*color data*/\
-	0,\
-	0,\
-	0,\
+	.pColor = 0,\
+	.pColorPre = 0,\
+	.pColorOtherCh = 0,\
 	/*help data*/\
-	0,\
-	0,\
-	0,\
-	0,\
+	.pSortWeight = 0,\
+	.pSortArry = 0,\
+	.pHelp = 0,\
+	.pHelpPre = 0,\
 	/*weight and color send to screen*/\
-	0,\
-	0,\
-	0,\
+	.handleStatus = 0,\
+	.weightHoldOn = 0,\
+	.needSendHelp = 0,\
 	/*发送描述指针给屏幕*/\
-	0,\
+	.handle_i = 0,\
 	/*去皮按钮按下时处理*/\
-	0,\
+	.rmTrigerInnerSts = 0,\
 }
 
 
 /** ModbusRtu设备默认配置 */
 #define T5LDataDefault   { \
-	0xA5,\
-	0x5A,\
+	.curPage = IS_PAGE_IVALID,\
+	.frameHeadH = 0xA5,\
+	.frameHeadL = 0x5A,\
 	\
-	SCREEN_STATUS_GET_VERSION,/*status ：sdwe 状态*/\
-	0,\
-	0,\
-	0,\
-	0,\
-	ScreenCycleTypeDefault,\
-	innerScreenCfg,\
-	0,/**/\
-	0,/**/\
+	.status = SCREEN_STATUS_GET_VERSION,/*status ：sdwe 状态*/\
+	.screenWeightHandleStatus = 0,\
+	.screenWeightHandleHoldOn = 0,\
+	.screenColorHandleStatus = 0,\
+	.screenHelpHandleStatus = 0,\
+	.screenCycle = ScreenCycleTypeDefault,\
+	.screenCfg = innerScreenCfg,\
+	.sendSdweInit = 0,/**/\
+	.readSdweInit = 0,/**/\
 	\
-	UART_INNER_SCREEN,/**< uartIndex ： 串口的序号 */\
-	&g_UartDevice[UART_INNER_SCREEN],/**< pUartDevice：串口设备 */\
+	.uartIndex = UART_INNER_SCREEN,/**< uartIndex ： 串口的序号 */\
+	.pUartDevice = &g_UartDevice[UART_INNER_SCREEN],/**< pUartDevice：串口设备 */\
 	\
-	0,/**< version：屏幕的版本值 */\
+	.version = 0,/**< version：屏幕的版本值 */\
 	\
-	{0},/**< rxData：接收到屏幕的缓存 */\
-	{0},/**< txData：发送到屏幕的缓存 */\
-	0,/**< RxLength ：接收字节数 */\
-	0,/**< RxFinishFlag ：接收完成标志 */\
+	.rxData = {0},/**< rxData：接收到屏幕的缓存 */\
+	.txData = {0},/**< txData：发送到屏幕的缓存 */\
+	.RxLength = 0,/**< RxLength ：接收字节数 */\
+	.RxFinishFlag = 0,/**< RxFinishFlag ：接收完成标志 */\
 	\
-	0XFFFF,/**/\
-	0,/**/\
-	0,/**/\
+	.SetAdd = 0XFFFF,/**/\
+	.DataLen = 0,/**/\
+	.SetData = 0,/**/\
 	\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	88,/**/\
-	0,/**/\
-	{0},/**< CalibratePointArry：称重校准的校准点数组 */\
+	.sdweRemoveWeightTriger = 0,/**/\
+	.sdwePointTriger = 0,/**/\
+	.sdweResetTriger = 0,/**/\
+	.ResetTrigerValid = 0,/**/\
+	.sdweChanelChanged = 0,/**/\
+	.ColorClen = 0,/**/\
+	.CalibrateChanel = 88,/**/\
+	.CalibratePoint = 0,/**/\
+	.CalibratePointArry = {0},/**< CalibratePointArry：称重校准的校准点数组 */\
 	\
-	0,/**/\
-	0,/**< LastSendTick：上次发送给屏幕的时间 */\
+	.CurTick = 0,/**/\
+	.LastSendTick = 0,/**< LastSendTick：上次发送给屏幕的时间 */\
 	\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0xF0,/**< sendSysParaDataToDiwenIndex：(事件)初始化屏幕时的序号*/\
-	DMG_FUNC_HomePage,\
-	INNER_SCREEN_Balancing_6_HOME_PAGE,\
-	DMG_FUNC_CalibrationPage,\
-	DMG_FUNC_ActivePage,\
-	DMG_FUNC_SysParaPage,\
-	DMG_FUNC_BalancingCleanPage,\
-	DMG_FUNC_BalancingMainPage,\
+	.sdweJumpToCalitrationPage = 0,/**/\
+	.sdweJumpToHomePage = 0,/**/\
+	.sdweJumpToBanlingPage = 0,/**/\
+	.sdweJumpActivePage = 0,/**/\
+	.sdweJumpBalancingMainPage = 0,/**/\
+	.sdweJumpBalancing_home = 0,/**/\
+	.sdweJumpBalancing_cleanpagee = 0,/**/\
+	.sdweJumpToSysParaPage = 0,/**/\
+	.sdweFreshScreenLight = 0,/**/\
+	.sdweChangeDescriblePoint = 0,/**/\
+	.sdwePowerOn = 0,/**/\
+	.sdweHX711FirstSampleCoplt = 0,/**/\
+	.needStore = 0,/**/\
+	.sendSysParaDataToDiwenIndex = 0xF0,/**< sendSysParaDataToDiwenIndex：(事件)初始化屏幕时的序号*/\
+	.screenHomePageNum = DMG_FUNC_HomePage,\
+	.screenBanlingPageNum = INNER_SCREEN_Balancing_6_HOME_PAGE,\
+	.screenCalibrationPage = DMG_FUNC_CalibrationPage,\
+	.screenActivePage = DMG_FUNC_ActivePage,\
+	.screenSysParaPage = DMG_FUNC_SysParaPage,\
+	.screenBalancingCleanPage = DMG_FUNC_BalancingCleanPage,\
+	.screenBalancingMainPage = DMG_FUNC_BalancingMainPage,\
 	.freshDP=0,\
 	.isCascadTrigger=0,\
 	.isWriteWeightIndexTrigger=0,\
@@ -701,77 +830,89 @@ typedef struct structSdweType
 	.dataCenterDisplayPage = 0,\
 	.dataCenterDisplayPagePre = 0xff ,\
 	.jumpToDataCenterHandle = 0 ,\
+	.PopupWindow = &IS_PopupWindow[0],\
+	.RxEventTable = &IS_Event,\
 }
 
 /** ModbusRtu设备默认配置 */
 #define T5LDataDefault2   { \
-	0xA5,\
-	0x5A,\
-	SCREEN_STATUS_GET_VERSION,/*status ：sdwe 状态*/\
-	0,\
-	0,\
-	0,\
-	0,\
-	ScreenCycleTypeDefault,\
-	externalScreenCfg,\
-	0,/**/\
-	0,/**/\
+	.curPage = IS_PAGE_IVALID,\
+	.frameHeadH = 0xA5,\
+	.frameHeadL = 0x5A,\
 	\
-	UART_EXTERNAL_SCREEN,/**< uartIndex ： 串口的序号 */\
-	&g_UartDevice[UART_EXTERNAL_SCREEN],/**< pUartDevice：串口设备 */\
+	.status = SCREEN_STATUS_GET_VERSION,/*status ：sdwe 状态*/\
+	.screenWeightHandleStatus = 0,\
+	.screenWeightHandleHoldOn = 0,\
+	.screenColorHandleStatus = 0,\
+	.screenHelpHandleStatus = 0,\
+	.screenCycle = ScreenCycleTypeDefault,\
+	.screenCfg = externalScreenCfg,\
+	.sendSdweInit = 0,/**/\
+	.readSdweInit = 0,/**/\
 	\
-	0,/**< version：屏幕的版本值 */\
+	.uartIndex = UART_EXTERNAL_SCREEN,/**< uartIndex ： 串口的序号 */\
+	.pUartDevice = &g_UartDevice[UART_EXTERNAL_SCREEN],/**< pUartDevice：串口设备 */\
 	\
-	{0},/**< rxData：接收到屏幕的缓存 */\
-	{0},/**< txData：发送到屏幕的缓存 */\
-	0,/**< RxLength ：接收字节数 */\
-	0,/**< RxFinishFlag ：接收完成标志 */\
+	.version = 0,/**< version：屏幕的版本值 */\
 	\
-	0XFFFF,/**/\
-	0,/**/\
-	0,/**/\
+	.rxData = {0},/**< rxData：接收到屏幕的缓存 */\
+	.txData = {0},/**< txData：发送到屏幕的缓存 */\
+	.RxLength = 0,/**< RxLength ：接收字节数 */\
+	.RxFinishFlag = 0,/**< RxFinishFlag ：接收完成标志 */\
 	\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	88,/**/\
-	0,/**/\
-	{0},/**< CalibratePointArry：称重校准的校准点数组 */\
+	.SetAdd = 0XFFFF,/**/\
+	.DataLen = 0,/**/\
+	.SetData = 0,/**/\
 	\
-	0,/**/\
-	0,/**< LastSendTick：上次发送给屏幕的时间 */\
+	.sdweRemoveWeightTriger = 0,/**/\
+	.sdwePointTriger = 0,/**/\
+	.sdweResetTriger = 0,/**/\
+	.ResetTrigerValid = 0,/**/\
+	.sdweChanelChanged = 0,/**/\
+	.ColorClen = 0,/**/\
+	.CalibrateChanel = 88,/**/\
+	.CalibratePoint = 0,/**/\
+	.CalibratePointArry = {0},/**< CalibratePointArry：称重校准的校准点数组 */\
 	\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0,/**/\
-	0x80,/**< sendSysParaDataToDiwenIndex：(事件)初始化屏幕时的序号*/\
-	DMG_FUNC_HomePage,\
-	EXTERNAL_SCREEN_Balancing_8_HOME_PAGE,\
-	DMG_FUNC_CalibrationPage,\
-	DMG_FUNC_ActivePage,\
-	DMG_FUNC_SysParaPage,\
-	DMG_FUNC_BalancingCleanPage,\
-	DMG_FUNC_BalancingMainPage,\
+	.CurTick = 0,/**/\
+	.LastSendTick = 0,/**< LastSendTick：上次发送给屏幕的时间 */\
+	\
+	.sdweJumpToCalitrationPage = 0,/**/\
+	.sdweJumpToHomePage = 0,/**/\
+	.sdweJumpToBanlingPage = 0,/**/\
+	.sdweJumpActivePage = 0,/**/\
+	.sdweJumpBalancingMainPage = 0,/**/\
+	.sdweJumpBalancing_home = 0,/**/\
+	.sdweJumpBalancing_cleanpagee = 0,/**/\
+	.sdweJumpToSysParaPage = 0,/**/\
+	.sdweFreshScreenLight = 0,/**/\
+	.sdweChangeDescriblePoint = 0,/**/\
+	.sdwePowerOn = 0,/**/\
+	.sdweHX711FirstSampleCoplt = 0,/**/\
+	.needStore = 0,/**/\
+	.sendSysParaDataToDiwenIndex = 0x80,/**< sendSysParaDataToDiwenIndex：(事件)初始化屏幕时的序号*/\
+	.screenHomePageNum = DMG_FUNC_HomePage,\
+	.screenBanlingPageNum = EXTERNAL_SCREEN_Balancing_8_HOME_PAGE,\
+	.screenCalibrationPage = DMG_FUNC_CalibrationPage,\
+	.screenActivePage = DMG_FUNC_ActivePage,\
+	.screenSysParaPage = DMG_FUNC_SysParaPage,\
+	.screenBalancingCleanPage = DMG_FUNC_BalancingCleanPage,\
+	.screenBalancingMainPage = DMG_FUNC_BalancingMainPage,\
 	.freshDP=0,\
 	.isCascadTrigger=0,\
 	.isWriteWeightIndexTrigger=0,\
 	.bcCodeVlu = {0},\
 	.bcCodeTriger = 0,\
-	.bcCodeLen = 0,\
+	.bcCodeLen = 0 ,\
+	.triggerSaveVlu = 0 ,\
+	.triggerSaveVluPre = 0,\
+	.dataCenterDisplayPage = 0,\
+	.dataCenterDisplayPagePre = 0xff ,\
+	.jumpToDataCenterHandle = 0 ,\
+	.PopupWindow = &IS_PopupWindow[0],\
+	.RxEventTable = &IS_Event,\
 }
+
 //================================================================================================
 
 
@@ -795,8 +936,8 @@ typedef struct structScreenHandleType
 	screenRxTxHandleType *sendScreenHadlleCtx;
 }ScreenHandleType;
 
-#define SCREEN_RX_HANDLE_TOTAL_NUM	(22)	/**< 屏幕RX数据处理事件数量 */
-#define SCREEN_TX_HANDLE_TOTAL_NUM	(8)	/**< 屏幕TX数据处理事件数量 */
+#define SCREEN_RX_HANDLE_TOTAL_NUM	(25)	/**< 屏幕RX数据处理事件数量 */
+#define SCREEN_TX_HANDLE_TOTAL_NUM	(11)	/**< 屏幕TX数据处理事件数量 */
 extern screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM];
 extern screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM];
 
@@ -897,5 +1038,6 @@ extern enumLedColorType getSysColorWhichUsable(void);
 extern void releaseSysColor(enumLedColorType color);
 extern void releaseSysColor(enumLedColorType color);
 extern INT16 g_i16ColorBuff[T5L_MAX_CHANEL_LEN];//从机指示灯颜色需要设置
+extern UINT8 screenPublic_Cycle_GetCurPage(T5LType *pSdwe);
 
 #endif

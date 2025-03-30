@@ -90,20 +90,43 @@ tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle =
     .pRealTimeData =&InnerScreenDataCenter,
     .dataCenterDisData = {{0}},
     .singleClassifyGroupData = {0},
+
+    //
+    .handle = D_C_HANDLE_MAX_NUM,\
+    .screenTrigerToSingleStore = 0,\
+    .weightVlu = 0,\
+    .classificationIndex = D_C_CLASSIFICATION_NUM,\
+    .yuangonghao = {0},\
+    .bccode = {0},\
+    .bccodeValidLen = 0 ,\
+    .utctime = {0},\
+    .weight = {0},\
+    .leixing = {0},\
+    .guige = {0},\
+    .singleStoreData = {0},\
+    //
+    .s_StoreData = {0},\
+    .s_StoreData_Backup = {0},\
+    //
+    .userStorePosition = 0,\
+    .crc16 = 0,\
+    //
+    .dataCenterSearchIndex = 0,\
+    .u8dataCenterSearchOut = {0},\
 };
 
 #if 1
 tClassificationStruct ClassificationCfg[D_C_CLASSIFICATION_NUM] = {
-    {37  , 50  , 62  , 'A'},
-    {62  , 75  , 87  , 'B'},
-    {87  , 100 , 112 , 'C'},
-    {112 , 125 , 137 , 'D'},
-    {137 , 150 , 162 , 'E'},
-    {162 , 175 , 187 , 'F'},
-    {187 , 200 , 212 , 'G'},
-    {212 , 225 , 237 , 'H'},
-    {237 , 250 , 262 , 'I'},
-    {262 , 275 , 287 , 'J'}
+	{37  , 50  , 62  , TRUE},
+    {62  , 75  , 87  , TRUE},
+    {87  , 100 , 112 , TRUE},
+    {112 , 125 , 137 , TRUE},
+    {137 , 150 , 162 , TRUE},
+    {162 , 175 , 187 , TRUE},
+    {187 , 200 , 212 , TRUE},
+    {212 , 225 , 237 , TRUE},
+    {237 , 250 , 262 , TRUE},
+    {262 , 275 , 287 , TRUE}
 };
 #endif
 /**********************************************************************************************************************
@@ -201,22 +224,22 @@ void InnerScreenDataCenterHandle_Set_jobStatus(tInnerScreenDataCenterHandleStruc
 //use weight classification
 uint8 InnerScreenDataCenterHandle_UseWeight_Classification(float weight , uint8 *type)
 {
-    uint8 i = 0 ,ret = 0 ;
+    uint8 i = 0 ,ret = FALSE ;
     tClassificationStruct *cfg = &ClassificationCfg[0];
-    if(weight > 5)
+    if(weight > gSystemPara.zeroRange)
     {
         for(i = 0 ; i < D_C_CLASSIFICATION_NUM ; i++)
         {
-            if((cfg->min <= weight) && (weight < cfg->max))
+            if((TRUE == cfg->clssSelected) && (cfg->min <= weight) && (weight < cfg->max))
             {
                 break;
-            }
+            }                
             cfg++;
         }
-        if(i < CLASSIFICATION_SEARCH_DISPLAY_NUM )
+        if(i < D_C_CLASSIFICATION_NUM)
         {
-            *type = i;
-            ret = 1;
+            *type = cfg->mid & 0xFF;
+            ret = TRUE;
         }     
     }
     return ret;
@@ -921,7 +944,7 @@ uint8 InnerScreenDataCenterHandle_ClearAllData(tInnerScreenDataCenterHandleStruc
             pushOrder.totalLen = CLASSIFICATION_STORE_CFG_LEN_TOTAL;
             pushOrder.remainLen = CLASSIFICATION_STORE_CFG_LEN_TOTAL;
             pushOrder.writePtr = &pContex->cfgInfo_weightType[0];
-            pushOrder.timeout = 100;
+            pushOrder.timeout = 1000;
             ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_WEIGHTTYPE,&pushOrder);
             if(1 == ret)
             {
@@ -944,7 +967,7 @@ uint8 InnerScreenDataCenterHandle_ClearAllData(tInnerScreenDataCenterHandleStruc
             pushOrder.totalLen = CLASSIFICATION_STORE_CFG_TIME_TOTAL_LEN;
             pushOrder.remainLen = CLASSIFICATION_STORE_CFG_TIME_TOTAL_LEN;
             pushOrder.writePtr = &pContex->cfgInfo_utcTime[0];
-            pushOrder.timeout = 100;
+            pushOrder.timeout = 1000;
             ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_WEIGHTTYPE,&pushOrder);
             if(1 == ret)
             {
@@ -1010,7 +1033,7 @@ uint8 InnerScreenDataCenterHandle_QueueEntry(tInnerScreenDataCenterHandleStruct 
         pushOrder.totalLen = 1;
         pushOrder.remainLen = 1;
         pushOrder.writePtr = &pContex->cfgInfo_weightType[i];
-        pushOrder.timeout = 100;
+        pushOrder.timeout = 1000;
         ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_WEIGHTTYPE,&pushOrder);
         if(1 == ret)
         {
@@ -1030,7 +1053,7 @@ uint8 InnerScreenDataCenterHandle_QueueEntry(tInnerScreenDataCenterHandleStruct 
         pushOrder.totalLen = CLASSIFICATION_STORE_CFG_CRCLEN;
         pushOrder.remainLen = CLASSIFICATION_STORE_CFG_CRCLEN;
         pushOrder.writePtr = &pContex->cfgInfo_weightType[CLASSIFICATION_STORE_CFG_LEN+0];
-        pushOrder.timeout = 100;
+        pushOrder.timeout = 1000;
         ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_WEIGHTTYPE_CRC,&pushOrder);    
         if(1 == ret)
         {
@@ -1051,7 +1074,7 @@ uint8 InnerScreenDataCenterHandle_QueueEntry(tInnerScreenDataCenterHandleStruct 
         pushOrder.totalLen = CLASSIFICATION_STORE_CFG_TIME_TYPEBYTE;
         pushOrder.remainLen = CLASSIFICATION_STORE_CFG_TIME_TYPEBYTE;
         pushOrder.writePtr = &pContex->cfgInfo_utcTime[pContex->userDataStoreIndex * CLASSIFICATION_STORE_CFG_TIME_TYPEBYTE + 0];
-        pushOrder.timeout = 100;
+        pushOrder.timeout = 1000;
         ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_UTCTIMEE,&pushOrder);           
         if(1 == ret)
         {
@@ -1071,7 +1094,7 @@ uint8 InnerScreenDataCenterHandle_QueueEntry(tInnerScreenDataCenterHandleStruct 
         pushOrder.totalLen = CLASSIFICATION_STORE_CFG_CRCLEN;
         pushOrder.remainLen = CLASSIFICATION_STORE_CFG_CRCLEN;
         pushOrder.writePtr = &pContex->cfgInfo_utcTime[CLASSIFICATION_STORE_CFG_TIME_LEN+0];
-        pushOrder.timeout = 100;
+        pushOrder.timeout = 1000;
         ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_UTCTIMEE_CRC,&pushOrder);          
         if(1 == ret)
         {
@@ -1097,7 +1120,7 @@ uint8 InnerScreenDataCenterHandle_QueueEntry(tInnerScreenDataCenterHandleStruct 
         pushOrder.totalLen = CLASSIFICATION_STORE_DATA_SINGLE_LEN;
         pushOrder.remainLen = CLASSIFICATION_STORE_DATA_SINGLE_LEN;
         pushOrder.writePtr = &pContex->userDataStoreData[0];
-        pushOrder.timeout = 100;
+        pushOrder.timeout = 1000;
         ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD,&pushOrder);          
         if(1 == ret)
         {
@@ -1126,7 +1149,7 @@ void InnerScreenDataCenterHandle_Clear_CfgInfo_WeightType(tInnerScreenDataCenter
         pushOrder.totalLen = CLASSIFICATION_STORE_CFG_LEN + CLASSIFICATION_STORE_CFG_CRCLEN;
         pushOrder.remainLen = CLASSIFICATION_STORE_CFG_LEN + CLASSIFICATION_STORE_CFG_CRCLEN;
         pushOrder.writePtr = &pContex->cfgInfo_weightType[0];
-        pushOrder.timeout = 100;
+        pushOrder.timeout = 1000;
         ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_WEIGHTTYPE,&pushOrder);  
         if(1 == ret)
         {
@@ -1152,7 +1175,7 @@ void InnerScreenDataCenterHandle_Clear_CfgInfo_utcTime(tInnerScreenDataCenterHan
         pushOrder.totalLen = CLASSIFICATION_STORE_CFG_TIME_LEN + CLASSIFICATION_STORE_CFG_CRCLEN;
         pushOrder.remainLen = CLASSIFICATION_STORE_CFG_TIME_LEN + CLASSIFICATION_STORE_CFG_CRCLEN;
         pushOrder.writePtr = &pContex->cfgInfo_utcTime[0];
-        pushOrder.timeout = 100;
+        pushOrder.timeout = 1000;
         ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_UTCTIMEE,&pushOrder);  
         if(1 == ret)
         {
@@ -1206,7 +1229,7 @@ uint8 InnerScreenDataCenterHandle_Init_OrderTriger(tInnerScreenDataCenterHandleS
     pushOrder.totalLen = CLASSIFICATION_STORE_CFG_LEN + 2;
     pushOrder.remainLen = CLASSIFICATION_STORE_CFG_LEN + 2;
     pushOrder.readPtr = &pContex->cfgInfo_weightType[0];
-    pushOrder.timeout = 100;
+    pushOrder.timeout = 1000;
     ret = ExFlashIf_Sync_Read(E_F_HANDLE_JOBID_R_DATACENTER_WEIGHTTYPE,&pushOrder);
     if(1 == ret)
     {
@@ -1220,7 +1243,7 @@ uint8 InnerScreenDataCenterHandle_Init_OrderTriger(tInnerScreenDataCenterHandleS
         pushOrder.totalLen = CLASSIFICATION_STORE_CFG_TIME_LEN + 2;
         pushOrder.remainLen = CLASSIFICATION_STORE_CFG_TIME_LEN + 2;
         pushOrder.readPtr = &pContex->cfgInfo_utcTime[0];
-        pushOrder.timeout = 100;
+        pushOrder.timeout = 1000;
         ret = ExFlashIf_Sync_Read(E_F_HANDLE_JOBID_R_DATACENTER_UTCTIMEE,&pushOrder);
         if(1 == ret)
         {
@@ -1235,7 +1258,7 @@ uint8 InnerScreenDataCenterHandle_Init_OrderTriger(tInnerScreenDataCenterHandleS
         pushOrder.totalLen = CLASSIFICATION_STORE_DATA_TOTAL_LEN;
         pushOrder.remainLen = CLASSIFICATION_STORE_DATA_TOTAL_LEN;
         pushOrder.readPtr = &pContex->dataCenterPayload[0];
-        pushOrder.timeout = 100;
+        pushOrder.timeout = 1000;
         ret = ExFlashIf_Sync_Read(E_F_HANDLE_JOBID_R_DATACENTER_DATAPAYLOAD,&pushOrder);
         if(1 == ret)
         {
@@ -1517,11 +1540,6 @@ void InnerScreenDataCenterHandle_MainFunction_Before(void)
 }
 
 #else//20250319
-//
-uint8 InnerScreenDataCenterHandle_CaculateCrc16_2025(tInnerScreenDataCenterHandleStruct *pContex)
-{
-	return 1;
-}
 uint8 InnerScreenDataCenterHandle_Init_OrderTriger2025(tInnerScreenDataCenterHandleStruct *pContex)
 {
     uint8 ret = 0 ;
@@ -1532,7 +1550,7 @@ uint8 InnerScreenDataCenterHandle_Init_OrderTriger2025(tInnerScreenDataCenterHan
     pushOrder.totalLen = CF_ATC24_USERDATA_STORE_LEN;
     pushOrder.remainLen = CF_ATC24_USERDATA_STORE_LEN;
     pushOrder.readPtr = &pContex->s_StoreData[0];
-    pushOrder.timeout = 100;//因为每次HAL取一个扇区字节 所以延时可以设定成100ms
+    pushOrder.timeout = 10000;//因为每次HAL取一个扇区字节 所以延时可以设定成100ms
     ret = ExFlashIf_Sync_Read(E_F_HANDLE_JOBID_R_DATACENTER_DATAPAYLOAD_2025,&pushOrder);
     if(1 == ret)
     {
@@ -1546,7 +1564,7 @@ uint8 InnerScreenDataCenterHandle_Init_OrderTriger2025(tInnerScreenDataCenterHan
         pushOrder.totalLen = CF_ATC24_USERDATA_BACKUP_STORE_LEN;
         pushOrder.remainLen = CF_ATC24_USERDATA_BACKUP_STORE_LEN;
         pushOrder.readPtr = &pContex->s_StoreData_Backup[0];
-        pushOrder.timeout = 100;
+        pushOrder.timeout = 10000;
         ret = ExFlashIf_Sync_Read(E_F_HANDLE_JOBID_R_DATACENTER_BACKUP_DATAPAYLOAD_2025,&pushOrder);
         if(1 == ret)
         {
@@ -1556,11 +1574,19 @@ uint8 InnerScreenDataCenterHandle_Init_OrderTriger2025(tInnerScreenDataCenterHan
     return ret;
 }
 
+uint8 InnerScreenDataCenter_GetClassfication(void)
+{
+    tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
+    return pContex->classificationIndex;
+}
+
+extern UINT16 u16xuejiangleixingUsed[IS_LEN_XUEJIANG_LEIXING];//1->P1鲜浆 , 2->P2冰浆 , 3->P3病灭鲜浆 , 4->P4冰灭冰浆
 void InnerScreenDataCenterHandle_MainFunction(void)
 {
     tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
     uint16 offset = 0 , len = 0 , ret = 0;
     uint16 crc16;
+    float weight;
     tExtFlashOrderStruct pushOrder;
     static uint32 preWeight;
     static uint32 weightHoldOnTime;
@@ -1628,7 +1654,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
                         pushOrder.totalLen = CF_ATC24_USERDATA_STORE_LEN;
                         pushOrder.remainLen = CF_ATC24_USERDATA_STORE_LEN;
                         pushOrder.writePtr = &pContex->s_StoreData_Backup[0];
-                        pushOrder.timeout = 100;
+                        pushOrder.timeout = 10000;
                         ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_DATAPAYLOAD_2025,&pushOrder);    
                         if(1 == ret)
                         {
@@ -1662,7 +1688,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
                         pushOrder.totalLen = CF_ATC24_USERDATA_STORE_LEN;
                         pushOrder.remainLen = CF_ATC24_USERDATA_STORE_LEN;
                         pushOrder.writePtr = &pContex->s_StoreData[0];
-                        pushOrder.timeout = 100;
+                        pushOrder.timeout = 10000;
                         ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025,&pushOrder);    
                         if(1 == ret)
                         {
@@ -1683,7 +1709,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
                         pushOrder.totalLen = CF_ATC24_USERDATA_STORE_LEN;
                         pushOrder.remainLen = CF_ATC24_USERDATA_STORE_LEN;
                         pushOrder.writePtr = &pContex->s_StoreData[0];
-                        pushOrder.timeout = 100;
+                        pushOrder.timeout = 10000;
                         ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025,&pushOrder);    
                         if(1 == ret)
                         {
@@ -1697,7 +1723,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
                         pushOrder.totalLen = CF_ATC24_USERDATA_BACKUP_STORE_LEN;
                         pushOrder.remainLen = CF_ATC24_USERDATA_BACKUP_STORE_LEN;
                         pushOrder.writePtr = &pContex->s_StoreData_Backup[0];
-                        pushOrder.timeout = 100;
+                        pushOrder.timeout = 10000;
                         ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_DATAPAYLOAD_2025,&pushOrder);    
                         if(1 == ret)
                         {
@@ -1734,9 +1760,18 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             pContex->handle = D_C_HANDLE_READUSERDATA_CPLT;
         break;
 
+
+        //==============================================================================================================
         //==开始正常控制之1：等待重量稳定
         case D_C_HANDLE_WEIGHT:
-            pContex->weightVlu = hx711_getWeight(HX711Chanel_1);
+            weight = hx711_getWeight(HX711Chanel_1);
+            if((0 != gSystemPara.mlYugBiLv) && (SYS_ML_G_WAS_ML == gSystemPara.uint))
+            {
+                weight *= 1000;
+                weight /= gSystemPara.mlYugBiLv;
+            }
+            //
+            pContex->weightVlu = weight;
             if(preWeight != pContex->weightVlu)
             {
                 preWeight = pContex->weightVlu;
@@ -1756,7 +1791,6 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             //数据已稳定500ms
             if(1 == ret)
             {
-
                 //
                 pContex->weight[0] = ( pContex->weightVlu >> 8 ) & 0x00ff;
                 pContex->weight[1] = ( pContex->weightVlu >> 0 ) & 0x00ff;
@@ -1776,8 +1810,8 @@ void InnerScreenDataCenterHandle_MainFunction(void)
         break;
         //==开始正常控制之2：重量分类成功
         case D_C_HANDLE_GUIGE:
-            ret = InnerScreenDataCenterHandle_UseWeight_Classification(pContex->weightVlu,&pContex->classificationIndex);     
-            if(1 == ret)
+            pContex->weigthClassifyCplt = InnerScreenDataCenterHandle_UseWeight_Classification(pContex->weightVlu,&pContex->classificationIndex);     
+            if(TRUE == pContex->weigthClassifyCplt)
             {
                 pContex->guige[0] = pContex->classificationIndex;
                 //==
@@ -1799,7 +1833,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
         //==开始正常控制之3：获取类型
         case D_C_HANDLE_LEIXING:
             //
-            pContex->leixing[0] = pContex->classificationIndex;//这里有误 。。需用 用户主界面的选择
+            pContex->leixing[0] = u16xuejiangleixingUsed[0];
             offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE;
             len = CF_STORE_LEIXING_TYPEBYTE;
             memcpy(&pContex->singleStoreData[offset],&pContex->leixing[0],len);
@@ -1844,8 +1878,9 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             {
                 pContex->utctime[0] = (gS64UTCTime >> 24) & 0xFF;
                 pContex->utctime[1] = (gS64UTCTime >> 16) & 0xFF;
-                pContex->utctime[2] = (gS64UTCTime >> 8) & 0xFF;
-                pContex->utctime[3] = (gS64UTCTime >> 0) & 0xFF;
+                pContex->utctime[2] = (gS64UTCTime >> 8 ) & 0xFF;
+                pContex->utctime[3] = (gS64UTCTime >> 0 ) & 0xFF;
+
                 //==
                 offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE;
                 len = CF_STORE_CFG_TIME_TYPEBYTE;
@@ -1863,7 +1898,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
         //==等待屏幕触发存储
         case D_C_HANDLE_WAIT_TRIGER_STORE:
             if(((l_CF_StoreMask & CF_STORE_MASK_CPLT) == CF_STORE_MASK_CPLT)//满足则进行存储
-              && (TRUE == pContex->trigerToStore))//等待屏幕触发存储
+              && (TRUE == pContex->screenTrigerToSingleStore))//等待屏幕主界面触发存储
             {
                 l_CF_StoreMask &= (~CF_STORE_MASK_CPLT);
                 pContex->handle = D_C_HANDLE_STORE2EE;
@@ -1874,7 +1909,6 @@ void InnerScreenDataCenterHandle_MainFunction(void)
                 pContex->handle = D_C_HANDLE_WEIGHT;
             } 
         break;
-
 
         //====开始存储 单次的数据
         case D_C_HANDLE_STORE2EE:
@@ -1888,7 +1922,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             pushOrder.totalLen = CF_STORE_TOTAL_LEN;
             pushOrder.remainLen = CF_STORE_TOTAL_LEN;
             pushOrder.writePtr = &pContex->s_StoreData[offset];
-            pushOrder.timeout = 100;
+            pushOrder.timeout = 1000;
             ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_DATAPAYLOAD_2025,&pushOrder);    
             if(1 == ret)
             {
@@ -1920,7 +1954,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             pushOrder.totalLen = len;
             pushOrder.remainLen = len;
             pushOrder.writePtr = &pContex->s_StoreData[offset];
-            pushOrder.timeout = 100;
+            pushOrder.timeout = 1000;
             ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_CRC_DATAPAYLOAD_2025,&pushOrder);    
             if(1 == ret)
             {
@@ -1949,7 +1983,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             pushOrder.totalLen = len;
             pushOrder.remainLen = len;
             pushOrder.writePtr = &pContex->s_StoreData_Backup[offset];
-            pushOrder.timeout = 100;
+            pushOrder.timeout = 1000;
             ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_DATAPAYLOAD_2025,&pushOrder);    
             if(1 == ret)
             {
@@ -1981,7 +2015,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             pushOrder.totalLen = len;
             pushOrder.remainLen = len;
             pushOrder.writePtr = &pContex->s_StoreData_Backup[offset];
-            pushOrder.timeout = 100;
+            pushOrder.timeout = 1000;
             ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_CRC_DATAPAYLOAD_2025,&pushOrder);    
             if(1 == ret)
             {
@@ -1995,7 +2029,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             {
                 InnerScreenDataCenterHandle_ClearAll_jobStatus(pContex);
                 //==
-                pContex->trigerToStore = FALSE;
+                pContex->screenTrigerToSingleStore = FALSE;
                 pContex->userStorePosition++;
                 pContex->userStorePosition = pContex->userStorePosition % CLASSIFICATION_STORE_MAX_NUM;
                 //
@@ -2016,8 +2050,196 @@ void InnerScreenDataCenterHandle_MainFunction(void)
 void appTrigerDatacenter2Store(void)
 {
     tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
-    pContex->trigerToStore = TRUE;
+    pContex->screenTrigerToSingleStore = TRUE;
 }
+
+//数据中心 数据准备 
+UINT8  DataCenterDisplay_Prepare_OneGroupData(void)
+{
+    tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
+    UINT8 ret = 0 ;
+    uint16 j = 0 ;
+    uint16 store_base = 0 , store_offset = 0 , store_pos = 0 ;
+    struct tm lUTCDecodeTime;
+    //
+    sint64 store_utc64 = 0;
+    uint8 store_guige = 0 ;
+    uint16 store_weight = 0 ;
+    //
+    uint8 searchResult_guige = FALSE ; //25 50 75 ....
+    uint8 searchResult_utctime = FALSE ; // t1 ~ t2
+    uint8 searchResult_Leixing = 0 ;
+    uint8 append_offset = 0 , append_i = 0;
+    //
+    uint8 searchResult_Nums = 0 ; 
+    //查询整个区间都不够7组时退出
+    uint16 thisForEnd_dataCenterSearchIndex = pContex->dataCenterSearchIndex;
+    while(0 == searchResult_Nums)
+    {
+        searchResult_guige = FALSE;
+        searchResult_utctime = FALSE;
+        //=====
+        if(pContex->dataCenterSearchIndex < CLASSIFICATION_STORE_MAX_NUM)
+        {
+            store_base = CF_STORE_TOTAL_LEN*pContex->dataCenterSearchIndex;
+        }
+        #if 1 //utc时间 存储是8个字节
+        store_offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE;
+        store_pos = store_base + store_offset;
+        store_utc64 = 0;
+        store_utc64 +=  pContex->s_StoreData[store_pos+0];
+        store_utc64 <<= 8;
+        store_utc64 +=  pContex->s_StoreData[store_pos+1];
+        store_utc64 <<= 8;
+        store_utc64 +=  pContex->s_StoreData[store_pos+2];
+        store_utc64 <<= 8;
+        store_utc64 +=  pContex->s_StoreData[store_pos+3];
+        #endif
+        #if 1 //规格     
+        store_offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + \
+                 CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE + \
+                 CF_STORE_LEIXING_TYPEBYTE + CF_STORE_GUIGE_TYPEBYTE;
+        store_pos = store_base + store_offset;
+        store_guige = pContex->s_StoreData[store_pos+0];
+        #endif
+        #if 1 //类型
+        store_offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + \
+                 CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE ;
+        store_pos = store_base + store_offset;
+        searchResult_Leixing = pContex->s_StoreData[store_pos+0];
+        #endif
+        #if 1//重量
+        store_offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + \
+                 CF_STORE_CFG_TIME_TYPEBYTE;
+        store_pos = store_base + store_offset;
+        store_weight = 0;
+        store_weight +=  pContex->s_StoreData[store_pos+0];
+        store_weight <<= 8;
+        store_weight +=  pContex->s_StoreData[store_pos+1];
+        #endif
+        #if 1//1.查询《规格》匹配
+        for(j = 0 ; j < SIZER_CLASSIFY_GROUP_NUM ; j++)
+        {
+            if(TRUE == gSystemPara.Sizer_ClassifySet[j][3])
+            {
+                if((store_guige == gSystemPara.Sizer_ClassifySet[j][1]) ||
+                    ((store_weight >= gSystemPara.Sizer_ClassifySet[j][0]) && (store_weight <= gSystemPara.Sizer_ClassifySet[j][2])))
+                {
+                    searchResult_guige = TRUE;//重量满足 或则规格序号满足
+                    break;
+                }
+            }
+        }
+        #endif
+        #if 1
+        //2.查询《时间区间》匹配
+        if((pContex->searchUseUTCTimeStart <= store_utc64) &&
+            (pContex->searchUseUTCTimeEnd >= store_utc64))
+        {
+            searchResult_utctime = TRUE;
+        }
+        #endif
+        //====
+        if((TRUE == searchResult_guige) && (TRUE == searchResult_utctime))
+        {
+            //准备发送的数据
+            //#define CF_STORE_GONGHAO_TYPEBYTE       ( 4)//1.员工工号：4字节 0000 - 9999
+            //#define CF_STORE_BCCODE_TYPEBYTE        (15+1)//2.献血条码：15位 在加=号
+            //#define CF_STORE_CFG_TIME_TYPEBYTE      ( 4)//3.称重时间：utc time at 1970~2099 存储到显示需要转换
+            //#define CF_STORE_WEIGHT_TYPEBYTE        ( 2)//4.血浆重量：2字节重量 0~65535ml    存储到显示需要转换
+            //#define CF_STORE_LEIXING_TYPEBYTE       ( 1)//5.血浆类型：1字节 存储到显示需要转换:1->P1鲜浆 , 2->P2冰浆 , 3->P3病灭鲜浆 , 4->P4冰灭冰浆
+            //#define CF_STORE_GUIGE_TYPEBYTE         ( 1)//6.血浆规格：1字节 存储到显示需要转换:0->50 , 1->75 ..
+            //1.工号 存储只存了4个字节 但是发送需要8个字节
+            pContex->u8dataCenterSearchOut[0] = pContex->s_StoreData[store_base+0];
+            pContex->u8dataCenterSearchOut[1] = pContex->s_StoreData[store_base+1];
+            pContex->u8dataCenterSearchOut[2] = pContex->s_StoreData[store_base+2];
+            pContex->u8dataCenterSearchOut[3] = pContex->s_StoreData[store_base+3];
+            pContex->u8dataCenterSearchOut[4] = 0;
+            pContex->u8dataCenterSearchOut[5] = 0;
+            pContex->u8dataCenterSearchOut[6] = 0;
+            pContex->u8dataCenterSearchOut[7] = 0;            
+            //2.条码值 16位
+            append_offset = 8;
+            store_offset = 4;
+            for(append_i = 0 ; append_i < CF_STORE_BCCODE_TYPEBYTE ; append_i++)
+            {
+                pContex->u8dataCenterSearchOut[append_offset + append_i] = pContex->s_StoreData[store_base+store_offset+append_i];
+ 
+            }
+            //3.utc时间 存储4字节
+            append_offset = 8 + CF_STORE_BCCODE_TYPEBYTE;
+            lUTCDecodeTime = *(mygmtime(&store_utc64));
+            pContex->u8dataCenterSearchOut[append_offset + 0] = '0' + lUTCDecodeTime.tm_year/1000;
+            pContex->u8dataCenterSearchOut[append_offset + 1] = '0' + lUTCDecodeTime.tm_year%1000/100;
+            pContex->u8dataCenterSearchOut[append_offset + 2] = '0' + lUTCDecodeTime.tm_year%100/10;
+            pContex->u8dataCenterSearchOut[append_offset + 3] = '0' + lUTCDecodeTime.tm_year%10;
+            pContex->u8dataCenterSearchOut[append_offset + 4] = '/';
+            pContex->u8dataCenterSearchOut[append_offset + 5] = '0' + lUTCDecodeTime.tm_mon%100/10;
+            pContex->u8dataCenterSearchOut[append_offset + 6] = '0' + lUTCDecodeTime.tm_mon%10;
+            pContex->u8dataCenterSearchOut[append_offset + 7] = '/';
+            pContex->u8dataCenterSearchOut[append_offset + 8] = '0' + lUTCDecodeTime.tm_mday%100/10;
+            pContex->u8dataCenterSearchOut[append_offset + 9] = '0' + lUTCDecodeTime.tm_mday%10;
+            pContex->u8dataCenterSearchOut[append_offset + 10] = ' ';
+            pContex->u8dataCenterSearchOut[append_offset + 11] = '0' + lUTCDecodeTime.tm_hour%100/10;
+            pContex->u8dataCenterSearchOut[append_offset + 12] = '0' + lUTCDecodeTime.tm_hour%10;
+            pContex->u8dataCenterSearchOut[append_offset + 13] = ':';
+            pContex->u8dataCenterSearchOut[append_offset + 14] = '0' + lUTCDecodeTime.tm_min%100/10;
+            pContex->u8dataCenterSearchOut[append_offset + 15] = '0' + lUTCDecodeTime.tm_min%10;
+            pContex->u8dataCenterSearchOut[append_offset + 16] = ':';
+            pContex->u8dataCenterSearchOut[append_offset + 17] = '0' + lUTCDecodeTime.tm_sec%100/10;
+            pContex->u8dataCenterSearchOut[append_offset + 18] = '0' + lUTCDecodeTime.tm_sec%10;
+            pContex->u8dataCenterSearchOut[append_offset + 19] = 0;
+            //4.重量
+            append_offset = 8 + CF_STORE_BCCODE_TYPEBYTE + 20;
+            pContex->u8dataCenterSearchOut[append_offset + 0] = '0' + store_weight/1000;
+            pContex->u8dataCenterSearchOut[append_offset + 1] = '0' + store_weight/100;
+            pContex->u8dataCenterSearchOut[append_offset + 2] = '0' + store_weight/10;
+            pContex->u8dataCenterSearchOut[append_offset + 3] = '0' + store_weight%10;
+            pContex->u8dataCenterSearchOut[append_offset + 4] = '(';
+            pContex->u8dataCenterSearchOut[append_offset + 5] = 'm';
+            pContex->u8dataCenterSearchOut[append_offset + 6] = 'l';
+            pContex->u8dataCenterSearchOut[append_offset + 7] = ')';
+            //5.血浆类型
+            append_offset = 8 + CF_STORE_BCCODE_TYPEBYTE + 20 + 8;
+            pContex->u8dataCenterSearchOut[append_offset + 0] = 'P' + store_weight/1000;
+            pContex->u8dataCenterSearchOut[append_offset + 1] = '0' + searchResult_Leixing;
+            pContex->u8dataCenterSearchOut[append_offset + 2] = 'x';
+            pContex->u8dataCenterSearchOut[append_offset + 3] = 'x';
+            pContex->u8dataCenterSearchOut[append_offset + 4] = 'x';
+            pContex->u8dataCenterSearchOut[append_offset + 5] = 'x';
+            pContex->u8dataCenterSearchOut[append_offset + 6] = 'x';
+            pContex->u8dataCenterSearchOut[append_offset + 7] = 'x';
+            //6.规格
+            append_offset = 8 + CF_STORE_BCCODE_TYPEBYTE + 20 + 8 + 8;
+            pContex->u8dataCenterSearchOut[append_offset + 0] = ' ';
+            pContex->u8dataCenterSearchOut[append_offset + 1] = ' ';
+            if(store_guige >= 100)
+            {
+                pContex->u8dataCenterSearchOut[append_offset + 1] = '0' + store_guige/100;
+            }
+            pContex->u8dataCenterSearchOut[append_offset + 2] = '0' + store_guige/10;
+            pContex->u8dataCenterSearchOut[append_offset + 3] = '0' + store_guige%10;
+            
+
+            //==
+            append_offset = 8 + CF_STORE_BCCODE_TYPEBYTE + 20 + 8 + 8 + 4;
+            searchResult_Nums++;
+            ret = TRUE;
+        }
+        //==
+        pContex->dataCenterSearchIndex++;
+        pContex->dataCenterSearchIndex = pContex->dataCenterSearchIndex%CLASSIFICATION_STORE_MAX_NUM;
+        //
+        if(thisForEnd_dataCenterSearchIndex == pContex->dataCenterSearchIndex)
+        {
+            break;
+        }
+    }
+    //
+    return ret;
+}
+
+
 
 #endif
 

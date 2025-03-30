@@ -208,14 +208,11 @@ void BalancingData_WeightData_Handle_PrepareAndJudgeAndSendToScreen(T5LType *pSd
 		break;
 
 		case 1://发送【重量】数据给屏幕
-			if(TRUE ==t5lWriteData(pSdwe,DMG_FUNC_ASK_CHANEL_WEIGHT_ADDRESS,pSdwe->screenCycle.pDataSendToDiWen,(2*(HX711_CHANEL_NUM)),0));//2*chanel_len:because each data type was 4 byte
-			{
 				//设置pDataPre=pData
 				BalancingData_Data32_WasSend(pSdwe->screenCycle.pData,pSdwe->screenCycle.pDataPre,(2*HX711_CHANEL_NUM));
 				//继续跳回判断数据是否相等
 				pSdwe->screenWeightHandleHoldOn = 0 ;
 				pSdwe->screenWeightHandleStatus = 0;//【重量】：发送->判断
-			}
 		break;
 
 		default:
@@ -492,11 +489,7 @@ void BalancingData_ColorData_Handle_PrepareAndJudgeAndSendToScreen(T5LType *pSdw
 		break;
 
 		case 1://发送【背景色】给屏幕
-			if(TRUE ==t5lWriteData(pSdwe,DMG_FUNC_ASK_CHANEL_COLOR_ADDRESS,pSdwe->screenCycle.pColor,(2*HX711_CHANEL_NUM),0));
-			{
-				BalancingData_Data16_WasSend(pSdwe->screenCycle.pColor,pSdwe->screenCycle.pColorPre,(2*HX711_CHANEL_NUM));
-				pSdwe->screenColorHandleStatus = 0;//【背景色】：发送->判断
-			}		
+				pSdwe->screenColorHandleStatus = 0;//【背景色】：发送->判断	
 		break;
 
 		case 0xFE://等待
@@ -715,13 +708,4 @@ void BalancingData_HelpData_Handle_PrepareAndJudgeAndSendToScreen(T5LType *pSdwe
 	}
 }
 
-#if 0
-//20240623：发送【重量】 【背景色】【帮助信息】给屏幕（内屏外屏兼容）
-UINT16 System_WeightColorAndHelpData_SendToScreen_Handle(T5LType *pSdwe)
-{
-	BalancingData_WeightData_Handle_PrepareAndJudgeAndSendToScreen(pSdwe);
-	BalancingData_ColorData_Handle_PrepareAndJudgeAndSendToScreen(pSdwe);
-	BalancingData_HelpData_Handle_PrepareAndJudgeAndSendToScreen(pSdwe);
-}
-#endif
 

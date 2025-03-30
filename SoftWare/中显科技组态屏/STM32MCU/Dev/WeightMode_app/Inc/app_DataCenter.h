@@ -1,22 +1,13 @@
 #ifndef _APP_DATACENTER_H
 #define _APP_DATACENTER_H
 #include "app_EEFLASH.h"
+#include "app_t5l_ctrl.h"
 
 
 
 #define EXTFLASH_ORDER_BUZY (0x78)
 
 
-#define INNERSCREEN_DATACENTER_GROUP_START_ADD  (INNERSCREEN_DATACENTER_START_ADD)
-#define INNERSCREEN_DATACENTER_GROUP_NUM        (7)
-#define INNERSCREEN_DATACENTER_GROUP_OFFSET     (0X80)
-
-#define INNER_SCREEN_DATACENTER_LENOF_INDEX     (4u) // 4 ,Address[0x5000 ~ 0x5003] ,such as [0000]
-#define INNER_SCREEN_DATACENTER_LENOF_BARCODE   (13u)//13 ,Address[0x5004 ~ 0x5010] ,such as [639382000393]
-#define INNER_SCREEN_DATACENTER_LENOF_RECTIME   (32u)//19 ,Address[0x5011 ~ 0x5023] ,such as [2024/12/12 08:08:08]
-#define INNER_SCREEN_DATACENTER_LENOF_WEIGHT    (12u)// 8 ,Address[0x5024 ~ 0x502B] ,such as [2222(ml)]
-#define INNER_SCREEN_DATACENTER_LENOF_TYPE      (4u) // 1 ,Address[0x502C ~ 0x502C] ,such as [2222]
-#define INNER_SCREEN_DATACENTER_LENOF_RANGE     (11u)//13 ,Address[0x502D ~ 0x5039] ,such as [1111 ~ 2222]
 
 //数据中心显示界面
 #define CLASSIFICATION_SEARCH_DISPLAY_NUM               (7)//at onepage the max display num
@@ -60,10 +51,10 @@ typedef enum
 
 typedef struct sClassificationStruct
 {
-    uint32 mid;
     uint32 min;
+    uint32 mid;
     uint32 max;
-    uint32 typeOutput;
+    uint32 clssSelected;
 }tClassificationStruct;
 
 typedef struct sInnerScreenDataCenterStruct
@@ -131,13 +122,13 @@ DATA_INFO	stroenum	    barcode	date	        weight	        CRC	addStart_dec	addS
 #define CF_STORE_MASK_CPLT      (0x003F)
 
 //STORE NUM
-#define CLASSIFICATION_STORE_MAX_NUM    (220)//最大存储220条
+#define CLASSIFICATION_STORE_MAX_NUM    (220)//AT24C128=最大存储220条,AT24C512=最大存储1000条
 //定义数据
 #define CF_STORE_GONGHAO_TYPEBYTE       ( 4)//1.员工工号：4字节 0000 - 9999
-#define CF_STORE_BCCODE_TYPEBYTE        (15)//2.献血条码：15位
+#define CF_STORE_BCCODE_TYPEBYTE        (15+1)//2.献血条码：15位 在加=号
 #define CF_STORE_CFG_TIME_TYPEBYTE      ( 4)//3.称重时间：utc time at 1970~2099 存储到显示需要转换
 #define CF_STORE_WEIGHT_TYPEBYTE        ( 2)//4.血浆重量：2字节重量 0~65535ml    存储到显示需要转换
-#define CF_STORE_LEIXING_TYPEBYTE       ( 1)//5.血浆类型：1字节 存储到显示需要转换:0->P1鲜浆 , 1-> ..
+#define CF_STORE_LEIXING_TYPEBYTE       ( 1)//5.血浆类型：1字节 存储到显示需要转换:1->P1鲜浆 , 2->P2冰浆 , 3->P3病灭鲜浆 , 4->P4冰灭冰浆
 #define CF_STORE_GUIGE_TYPEBYTE         ( 1)//6.血浆规格：1字节 存储到显示需要转换:0->50 , 1->75 ..
 #define CF_STORE_TOTAL_LEN              (CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + \
     CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE + CF_STORE_LEIXING_TYPEBYTE + CF_STORE_GUIGE_TYPEBYTE )//27byte
@@ -152,17 +143,6 @@ DATA_INFO	stroenum	    barcode	date	        weight	        CRC	addStart_dec	addS
 #define CF_ATC24_USERDATA_BACKUP_STORE_LEN          CF_ATC24_USERDATA_STORE_LEN
 #define CF_ATC24_USERDATA_BACKUP_STORE_END_ADD      (CF_ATC24_USERDATA_BACKUP_STORE_START_ADD + CF_ATC24_USERDATA_BACKUP_STORE_LEN)
 #endif
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -238,7 +218,7 @@ typedef struct sInnerScreenDataCenterHandleStruct
 {
     uint32 ticks;
     uint8 initSuccess;
-    uint8 trigerStroreFromScreen;
+    uint8 trigerStroreFromScreen;//触发单次存储
     uint8 	weigthClassifyCplt;
     //cfg info store in extern e2
     uint8 cfgInfo_weightType[CLASSIFICATION_STORE_CFG_LEN + 2];
@@ -280,7 +260,7 @@ typedef struct sInnerScreenDataCenterHandleStruct
     //
     //20250319
     eDataCenterHandleType handle;
-    uint8 trigerToStore;
+    uint8  screenTrigerToSingleStore;
     uint16 weightVlu;
     uint8 classificationIndex;
     uint8 yuangonghao[CF_STORE_GONGHAO_TYPEBYTE];
@@ -297,6 +277,9 @@ typedef struct sInnerScreenDataCenterHandleStruct
     //
     uint16 userStorePosition;
     uint16 crc16;
+    //
+    uint16 dataCenterSearchIndex;
+    uint16 u8dataCenterSearchOut[2*INNERSCREEN_DATACENTER_GROUP_OFFSET];
 }tInnerScreenDataCenterHandleStruct;
 
 extern tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle;
@@ -308,5 +291,8 @@ extern uint8 InnerScreenDataCenterHandle_Searching_Use_WeightType(tInnerScreenDa
 
 extern void InnerScreenDataCenterHandle_WeightClassification_Init(tInnerScreenDataCenterHandleStruct *pContex);
 extern void appTrigerDatacenter2Store(void);
+extern uint8 InnerScreenDataCenter_GetClassfication(void);
+extern UINT8  DataCenterDisplay_Prepare_OneGroupData(void);
+
 
 #endif

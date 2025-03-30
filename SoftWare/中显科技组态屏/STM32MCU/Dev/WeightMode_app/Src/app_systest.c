@@ -425,7 +425,6 @@ void sendBalancingModelData()
 						{
 							g_t5l_dis_data_buff[chanel] = g_t5l_dis_data[chanel];
 						}
-						t5lWriteVarible(DMG_FUNC_ASK_CHANEL_WEIGHT_ADDRESS,pSendData,HX711_CHANEL_NUM,0);
 					}
 					else if(ModbusAdd_Master == gSystemPara.isCascade)
 					{
@@ -433,7 +432,6 @@ void sendBalancingModelData()
 						{
 							g_t5l_dis_data_buff[chanel] = g_t5l_dis_data[chanel];
 						}
-						t5lWriteVarible(DMG_FUNC_ASK_CHANEL_WEIGHT_ADDRESS,pSendData,HX711_CHANEL_NUM,0);
 					}
 					//
 					inerStatus=1;

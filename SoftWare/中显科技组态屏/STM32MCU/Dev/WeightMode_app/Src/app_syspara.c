@@ -5,6 +5,7 @@
 #include "app_t5l_ctrl.h"
 #include "drv_flash.h"
 #include "app_password.h"
+#include "app_DataCenter.h"
 
 //store flash data : 8 * (sample value , weight value , k , b , remove value ) , last one is crc
 unionFloatInt32 flashStoreDataBuf[FLASH_STORE_MAX_LEN]={0};
@@ -480,16 +481,13 @@ void storeSysDataToFlash_3030(void)
 		pWordInt32Float[start_i].i_value = *pInt32++;
 	}	
 
-
-
-
 	//筛选器：年月日 时分秒
 	for( i = 0 ; i < 6 ; i++)
 	{
 		pWordInt32Float[start_i++].i_value = gSystemPara.Sizer_TimeSet[i];
 	}
 
-	//筛选器：类型 最小值 最大值 是否选择
+	//筛选器：最小值 中称制 最大值 是否选择
 	for( i = 0 ; i < SIZER_CLASSIFY_GROUP_NUM ; i++ )
 	{
 		for( j = 0 ; j < SIZER_CLASSIFY_MEMBER_NUM ; j++ )
@@ -497,15 +495,6 @@ void storeSysDataToFlash_3030(void)
 			pWordInt32Float[start_i++].i_value = gSystemPara.Sizer_ClassifySet[i][j];
 		}
 	}
-
-
-
-
-
-
-
-
-
 
 	//======================================================================================
 	//======================================================================================

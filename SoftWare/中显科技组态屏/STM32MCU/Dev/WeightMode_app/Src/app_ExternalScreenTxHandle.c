@@ -110,30 +110,10 @@ UINT8 externalScreenTxHandle_Init(T5LType *pSdwe)
 			}
 		break;
 		case 1://send weight data to DW
-			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
-				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
-			{
-				len=0;
-				for(len=0;len<(2*T5L_MAX_CHANEL_LEN);len++)//每个通道是4字节变量
-				{
-					sendData[len] = 0;
-				}
-				t5lWriteVarible(pSdwe,DMG_FUNC_ASK_CHANEL_WEIGHT_ADDRESS,sendData,len,0);/**< 通道重量 */
 				pSdwe->sendSysParaDataToDiwenIndex++;
-			}
 		break;
 		case 2://send back color to DW
-			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
-				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
-			{
-				len=0;
-				for(len=0;len<T5L_MAX_CHANEL_LEN;len++)
-				{
-					sendData[len] = 0;
-				}
-				t5lWriteVarible(pSdwe,DMG_FUNC_ASK_CHANEL_COLOR_ADDRESS,sendData,len,0);/**< 通道背景色 */  //3100
 				pSdwe->sendSysParaDataToDiwenIndex++;
-			}
 		break;
 		case 3://send help data to DW
 			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||

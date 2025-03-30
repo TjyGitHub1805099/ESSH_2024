@@ -14,14 +14,20 @@
 #include "app_t5l_cfg.h"
 #include "app_InnerScreen_Cfg.h"
 #include "app_ExternalScreen_Cfg.h"
+#include "app_usbsmq.h"
 
 extern UINT8 appScreenCfgIndexGet(T5LType *pSdwe,UINT8 weight_help_index_color_orther);
 
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+ISPopupWindowType IS_PopupWindow[IS_PopupWindow_MAX_HANDLE] = ISPopupWindowDefault;
+//
 T5LType g_T5LCtx[ScreenIndex_Max] = {T5LDataDefault,T5LDataDefault2};
 ScreenHandleType g_ScreenHandle[ScreenIndex_Max] = {ScreenHandleDefault_Smaller,ScreenHandleDefault_Larger};
+
+
+
 
 //1.chanel num :0~x HX711_CHANEL_NUM
 //2.trigerStarus , back color , point avg Sample , point set weight
@@ -604,41 +610,48 @@ void screenPublic_Init(void)
 void screenPublic_ScreenVersionGet(T5LType *pSdwe)
 {
 	#if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
-		/*
-			发送：A5 5A 03 81 00 01 
-			返回：A5 5A 04 81 00 01 43
-		 */
+		/*发送：A5 5A 03 81 00 01 	返回：A5 5A 04 81 00 01 43 */
 		innerScreenReadReg(pSdwe,INNER_SCREEN_VERSION_GET_ADD,INNER_SCREEN_VERSION_GET_LEN,0);//get version
 	#else
-		/*
-			发送：5A A5 04 83 000E 02 
-			返回：5A A5 08 83 000E 02 00 41 61 21
-		*/
+		/*发送：5A A5 04 83 000E 02  	返回：5A A5 08 83 000E 02 00 41 61 21*/
 		t5lReadVarible(pSdwe,INNER_SCREEN_VERSION_GET_ADD,INNER_SCREEN_VERSION_GET_LEN,0);//get cur page
 	#endif
 }
+
+
+
+
+//公共函数：获取屏幕的软件版本号
+UINT8 screenPublic_Cycle_GetCurPage(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	static uint16 ticks = 0 ;
+	if(ticks++ >= 1000)
+	{
+		ticks = 0;
+		matched = TRUE;
+		#if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
+			/*发送：A5 5A 03 81 03 02 		返回：A5 5A 04 81 03 02 xx xx	*/
+			innerScreenReadReg(pSdwe,INNER_SCREEN_CURPAGE_GET_ADD,INNER_SCREEN_CURPAGE_GET_LEN,0);//get cur page
+		#else
+			/*发送：5A A5 04 83 000E 02 	返回：5A A5 08 83 000E 02 00 41 61 21*/
+			t5lReadVarible(pSdwe,INNER_SCREEN_VERSION_GET_ADD,INNER_SCREEN_VERSION_GET_LEN,0);//get cur page
+		#endif
+	}
+	return matched;
+}
+
 
 //公共函数：获取屏幕的软件版本号
 void screenPublic_ScreenRTCGet_YMDHMS(T5LType *pSdwe)
 {
 	#if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
-		/*
-			读取版本信息，串口下发指令 A5 5A 03 81 00 01 
-			返回A5 5A 04 81 00 01 43
-		 */
+		/*发送：A5 5A 03 81 00 01 	返回：A5 5A 04 81 00 01 43 */
 		innerScreenReadReg(pSdwe,INNER_SCREEN_RTC_GET_ADD,7,0);//get RTC
 	#else
-		/*
-			发送：5A A5 04 83 000E 02 
-			返回：5A A5 08 83 000E 02 00 41 61 21
-		*/
-		t5lReadVarible(pSdwe,INNER_SCREEN_RTC_GET_ADD,INNER_SCREEN_RTC_GET_LEN,0);//get cur page
+		/*发送：5A A5 04 83 000E 02 返回：5A A5 08 83 000E 02 00 41 61 21*/
+		t5lReadVarible(pSdwe,INNER_SCREEN_RTC_GET_ADD,INNER_SCREEN_RTC_GET_LEN,0);//get RTC
 	#endif
-}
-//公共函数：获取屏幕的当前页面序号
-void screenPublic_CurPageGet(T5LType *pSdwe)
-{
-	t5lReadVarible(pSdwe,DMG_SYS_CUR_PAGE_GET_ADD,1,0);//get cur page
 }
 
 //公共函数：屏幕亮度控制 
@@ -833,7 +846,10 @@ UINT8 screenPrivate_ChanelChangedTrigerHandle(T5LType *pSdwe)
 	UINT8 result = 0 ;
 	
 	if(pSdwe->CalibrateChanel > HX711_CHANEL_NUM)
-		return 0 ;
+	{
+		result = 1;
+		return result;
+	}
 
 	//chanel get
 	if(0 == pSdwe->CalibrateChanel)
@@ -929,7 +945,10 @@ UINT8 screenPrivate_ResetCalibrationTrigerHandle(T5LType *pSdwe)
 	UINT8 result = 0 ;
 
 	if(pSdwe->CalibrateChanel > HX711_CHANEL_NUM)
-		return 0 ;
+	{
+		result = 1;
+		return result;
+	}
 
 	//chanel get
 	if(0 == pSdwe->CalibrateChanel)
@@ -997,7 +1016,10 @@ UINT8 screenPrivate_PointTrigerHandle(T5LType *pSdwe)
 	UINT8 result = 0 ;
 
 	if(pSdwe->CalibrateChanel > HX711_CHANEL_NUM)
-		return 0 ;
+	{
+		result = 1;
+		return result;
+	}
 
 	//chanel get
 	if(0 == pSdwe->CalibrateChanel)
@@ -1081,32 +1103,16 @@ void t5lDisPlayDataClear(void)
 //私有函数：去皮 处理
 UINT8 screenPrivate_RemoveWeightTrigerHandle(T5LType *pSdwe)
 {
-	INT16 *pSendData = &g_i16ColorBuff[0];
-	INT16 *pDataSendToDiWen = &g_i32_i16DataBuff[0];
-
 	UINT8 result = 0 ;
 
 	switch((*pSdwe->screenCycle.rmTrigerInnerSts))
 	{
 		case 0://==send weight vlu to Screen
-			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
-				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
-			{
-				pDataSendToDiWen = &g_i32_i16DataBuff[0];
-				t5lWriteVarible(pSdwe,DMG_FUNC_ASK_CHANEL_WEIGHT_ADDRESS,pDataSendToDiWen,(2*T5L_MAX_CHANEL_LEN),0);
 				//
 				(*pSdwe->screenCycle.rmTrigerInnerSts)=1;
-			}
 		break;
 		case 1://==send color vlu to Screen
-			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
-				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
-			{
-				pSendData = &g_i16ColorBuff[0];
-				t5lWriteVarible(pSdwe,DMG_FUNC_ASK_CHANEL_COLOR_ADDRESS,pSendData,T5L_MAX_CHANEL_LEN,0);
-				//
 				(*pSdwe->screenCycle.rmTrigerInnerSts)=2;
-			}
 		break;
 		default:
 			(*pSdwe->screenCycle.rmTrigerInnerSts) = 0 ;
@@ -1275,7 +1281,6 @@ INT16 *pColor , INT16 *pColorPre , INT16 *pColorOtherCh , UINT8 chanel_len)
 			//=================prepare weight data
 			if(TRUE == screenPrivate_preWeightDataAndJudgeIfNeedSend(pData,pDataSendToDiWen,pDataPre,chanel_len))
 			{
-				if(TRUE ==t5lWriteData(pSdwe,DMG_FUNC_ASK_CHANEL_WEIGHT_ADDRESS,pDataSendToDiWen,(2*chanel_len),0))//2*chanel_len:because each data type was 4 byte
 				{
 					(*pSdwe->screenCycle.weightHoldOn) = 0 ;
 					handleWeightDataWasSend(pData,pDataPre,chanel_len);
@@ -1295,18 +1300,7 @@ INT16 *pColor , INT16 *pColorPre , INT16 *pColorOtherCh , UINT8 chanel_len)
 		//judge if color need send to screenxx
 		case 0x10:
 			//=================prepare color data
-			if(TRUE == screenPrivate_preColorDataAndJudgeIfNeedSend(pData,pColor,pColorPre,pColorOtherCh,chanel_len))
-			{
-				if(TRUE ==t5lWriteData(pSdwe,DMG_FUNC_ASK_CHANEL_COLOR_ADDRESS,pColor,chanel_len,0))
-				{
-					handleWeightColorWasSend(pColor,pColorPre,chanel_len);
-					(*pSdwe->screenCycle.handleStatus) = 0x20;//if color was send to screen go to default
-				}
-			}
-			else
-			{
-				(*pSdwe->screenCycle.handleStatus) = 0x20;//if color was send to screen go to default
-			}
+			(*pSdwe->screenCycle.handleStatus) = 0x20;//if color was send to screen go to default
 		break;
 
 		default :
@@ -1687,11 +1681,15 @@ UINT8 sdweAskVaribleData(ScreenHandleType  *screenHandlePtr,UINT16 varAdd, UINT1
 	{
 		for( i = 0 ; i < screenHandlePtr->recvScreenHadlleNum ; i++)
 		{
-			if(TRUE == screenHandlePtr->recvScreenHadlleCtx[i].func(pSdwe))
+			if(0 != screenHandlePtr->recvScreenHadlleCtx[i].func)
 			{
-				needStore = pSdwe->needStore;
-				break;//遍历所有屏幕发过来的变量地址，满足则退出遍历
+				if(TRUE == screenHandlePtr->recvScreenHadlleCtx[i].func(pSdwe))
+				{
+					needStore = pSdwe->needStore;
+					break;//遍历所有屏幕发过来的变量地址，满足则退出遍历
+				}				
 			}
+
 		}
 		//clr address
 		pSdwe->SetAdd = 0xffff;
@@ -1721,10 +1719,13 @@ UINT8 sdweAskRegData(ScreenHandleType  *screenHandlePtr,UINT8 regAdd, UINT8 regD
 	{
 		for( i = 0 ; i < screenHandlePtr->recvScreenHadlleNum ; i++)
 		{
-			if(TRUE == screenHandlePtr->recvScreenHadlleCtx[i].func(pSdwe))
+			if(0 != screenHandlePtr->recvScreenHadlleCtx[i].func)
 			{
-				needStore = pSdwe->needStore;
-				break;//遍历所有屏幕发过来的变量地址，满足则退出遍历
+				if(TRUE == screenHandlePtr->recvScreenHadlleCtx[i].func(pSdwe))
+				{
+					needStore = pSdwe->needStore;
+					break;//遍历所有屏幕发过来的变量地址，满足则退出遍历
+				}				
 			}
 		}
 		//clr address
@@ -2943,9 +2944,12 @@ void screenT5L_TxFunction(ScreenHandleType  *screenHandlePtr)
 	T5LType *t5lCtx = screenHandlePtr->Ctx;
 	for( i = 0 ; i < screenHandlePtr->sendScreenHadlleNum ; i++)
 	{
-		if(TRUE == screenHandlePtr->sendScreenHadlleCtx[i].func(t5lCtx))
+		if(0 != screenHandlePtr->sendScreenHadlleCtx[i].func)
 		{
-			break;
+			if(TRUE == screenHandlePtr->sendScreenHadlleCtx[i].func(t5lCtx))
+			{
+				break;
+			}			
 		}
 	}	
 }

@@ -12,8 +12,8 @@
 #define INNERSCREEN_TYPE            (INNERSCREEN_TYPE_ZHONGXIAN)
 
 #define SYS_HX711_ONLINE_CHECK_TIME	(2000)//when power on 2000ms start check HX711  , total 3 times
-#define MCU_VERSION			        (821)//2024.08.21
-#define DIWEN_VERSION		        (821)//2024.08.21
+#define MCU_VERSION			        (821)//2025.03.31
+#define DIWEN_VERSION		        (821)//2025.03.31
 
 
 extern UINT32 get_SysTick_ByTimer(void);

@@ -152,7 +152,7 @@ typedef enum HX711SystemParaType
 #define FLASH_STORE_MAX_LEN						(((FLASH_STORE_ADDRESS_END-FLASH_STORE_ADDRESS_START)/4)+1)
 //==========================================================================================================================
 #define SIZER_CLASSIFY_GROUP_NUM	(10)//最多10个分类
-#define SIZER_CLASSIFY_MEMBER_NUM	(4)//mid min max select
+#define SIZER_CLASSIFY_MEMBER_NUM	(4)//min mid max output
 
 //
 typedef struct SystemParaType

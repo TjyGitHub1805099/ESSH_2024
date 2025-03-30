@@ -6,7 +6,7 @@
 
 
 typedef uint8   ExtFlashDevAddType;
-typedef uint16  ExtFlashRegAddType;
+typedef uint32  ExtFlashRegAddType;
 typedef uint8   ExtFlashRegVluType;
 
 typedef enum

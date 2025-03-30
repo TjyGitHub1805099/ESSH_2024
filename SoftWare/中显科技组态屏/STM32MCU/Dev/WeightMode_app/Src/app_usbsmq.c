@@ -138,14 +138,15 @@ void USB_SMQ_CodeCheck(tUSBSMQHandle *pCtx)
 }
 
 
+//当执行存储后 把decodeDataVaild赋给decodeDataVaildPre
 UINT8 USB_SMQ_DataDiffCheck(void)
 {
-    UINT8 i = 0 ,ret = 0;
+    UINT8 i = 0 ,ret = FALSE;
     for(i = 0 ;i < USBSMQ_KEYBORD_MAX_NUM ; i++)
     {
         if(sUSBSMQHandleContex.decodeDataVaild[i] != sUSBSMQHandleContex.decodeDataVaildPre[i])
         {
-            ret = 1;
+            ret = TRUE;
             break;
         }
     }

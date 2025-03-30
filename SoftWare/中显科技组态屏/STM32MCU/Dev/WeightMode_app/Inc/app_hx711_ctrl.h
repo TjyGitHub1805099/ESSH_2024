@@ -8,8 +8,8 @@
 //sample NUM
 typedef enum HX711ChanelType
 {
-	HX711Chanel_1 = 0,  /**< HX711  1控制 */
-	HX711_CHANEL_NUM,	 /**< HX711  总数量 hardware chanel number */
+	HX711Chanel_1 = 0,  	/**< HX711  1控制 */
+	HX711_CHANEL_NUM,	 	/**< HX711  总数量 hardware chanel number */
 	HX711_CHANEL_LOCKED=0X80,
 	HX711_CHANEL_UNLOCKED=0X81
 }enumHX711ChanelType;
