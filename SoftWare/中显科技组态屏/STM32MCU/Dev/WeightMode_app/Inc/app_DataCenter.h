@@ -51,8 +51,8 @@ typedef enum
 
 typedef struct sClassificationStruct
 {
+    uint32 guige;
     uint32 min;
-    uint32 mid;
     uint32 max;
     uint32 clssSelected;
 }tClassificationStruct;
@@ -123,15 +123,20 @@ DATA_INFO	stroenum	    barcode	date	        weight	        CRC	addStart_dec	addS
 
 //STORE NUM
 #define CLASSIFICATION_STORE_MAX_NUM    (220)//AT24C128=最大存储220条,AT24C512=最大存储1000条
-//定义数据
+//定义数据：2025.3.28 [员工工号 献血条码            称重时间                血浆类型    血浆规格]
+//                    0001    =123456789012345    2025-04-08 21:34:30    P1鲜浆      25
+//                    0001    =123456789012346    2025-04-08 21:44:30    P2冰浆      55
 #define CF_STORE_GONGHAO_TYPEBYTE       ( 4)//1.员工工号：4字节 0000 - 9999
 #define CF_STORE_BCCODE_TYPEBYTE        (15+1)//2.献血条码：15位 在加=号
 #define CF_STORE_CFG_TIME_TYPEBYTE      ( 4)//3.称重时间：utc time at 1970~2099 存储到显示需要转换
 #define CF_STORE_WEIGHT_TYPEBYTE        ( 2)//4.血浆重量：2字节重量 0~65535ml    存储到显示需要转换
 #define CF_STORE_LEIXING_TYPEBYTE       ( 1)//5.血浆类型：1字节 存储到显示需要转换:1->P1鲜浆 , 2->P2冰浆 , 3->P3病灭鲜浆 , 4->P4冰灭冰浆
-#define CF_STORE_GUIGE_TYPEBYTE         ( 1)//6.血浆规格：1字节 存储到显示需要转换:0->50 , 1->75 ..
+#define CF_STORE_GUIGE_TYPEBYTE         ( 2)//6.血浆规格：2字节 存储到显示需要转换:0->50 , 1->75 ..
+#define CF_STORE_CHECKSUM               ( 0)//7.CRC 低字节
+//单组数据总长度
 #define CF_STORE_TOTAL_LEN              (CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + \
-    CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE + CF_STORE_LEIXING_TYPEBYTE + CF_STORE_GUIGE_TYPEBYTE )//27byte
+                                         CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE + \
+                                         CF_STORE_LEIXING_TYPEBYTE + CF_STORE_GUIGE_TYPEBYTE + CF_STORE_CHECKSUM) //28byte
 //原始数据
 #define CF_ATC24_USERDATA_STORE_POSITION_LEN        (2)
 #define CF_ATC24_USERDATA_STORE_START_ADD           (((EEFLASH_SYS_PARA_END_ADD/EXT_FLASH_PROCESS_LEN) + 1)*EXT_FLASH_PROCESS_LEN)
@@ -142,6 +147,7 @@ DATA_INFO	stroenum	    barcode	date	        weight	        CRC	addStart_dec	addS
 #define CF_ATC24_USERDATA_BACKUP_STORE_START_ADD    (((CF_ATC24_USERDATA_STORE_END_ADD/EXT_FLASH_PROCESS_LEN) + 1)*EXT_FLASH_PROCESS_LEN)
 #define CF_ATC24_USERDATA_BACKUP_STORE_LEN          CF_ATC24_USERDATA_STORE_LEN
 #define CF_ATC24_USERDATA_BACKUP_STORE_END_ADD      (CF_ATC24_USERDATA_BACKUP_STORE_START_ADD + CF_ATC24_USERDATA_BACKUP_STORE_LEN)
+
 #endif
 
 
@@ -213,13 +219,46 @@ typedef enum
     D_C_HANDLE_MAX_NUM
 }eDataCenterHandleType;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+typedef enum
+{
+    D_C_SEARCH_DATA_EVENT_WAIT = 0,
+    D_C_SEARCH_DATA_INIT = 1,
+    D_C_SEARCH_DATA_SEARCHUNTIL = 2,
+    D_C_SEARCH_DATA_SEND = 3,
+    D_C_SEARCH_DATA_INDEX_HANDLE = 4,
+    D_C_SEARCH_DATA_FORCE_QUIT = 5,
+    D_C_SEARCH_DATA_NUM
+}eDataCenterSearchType;
+typedef enum
+{
+    D_C_SEARCH_DIR_UP = 0,
+    D_C_SEARCH_DIR_DOWN = 1,
+    D_C_SEARCH_DIR_NUM
+}eDataCenterSearchDirType;
+
+
+
+
 //local data center handle
 typedef struct sInnerScreenDataCenterHandleStruct
 {
     uint32 ticks;
     uint8 initSuccess;
     uint8 trigerStroreFromScreen;//触发单次存储
-    uint8 	weigthClassifyCplt;
+    uint8 weigthClassifyCplt;
     //cfg info store in extern e2
     uint8 cfgInfo_weightType[CLASSIFICATION_STORE_CFG_LEN + 2];
     uint8 cfgInfo_utcTime[CLASSIFICATION_STORE_CFG_TIME_LEN+2];
@@ -242,6 +281,7 @@ typedef struct sInnerScreenDataCenterHandleStruct
     sint64 searchUseUTCTimeStart;
     sint64 searchUseUTCTimeEnd;
     uint16 searchOutIndex_CheckedBy_UTCTime;
+    UINT16 leixingxuanze;
     //search out buffer
     uint16 searchOutIndexArry[CLASSIFICATION_SEARCH_DISPLAY_NUM]; 
     
@@ -278,8 +318,31 @@ typedef struct sInnerScreenDataCenterHandleStruct
     uint16 userStorePosition;
     uint16 crc16;
     //
-    uint16 dataCenterSearchIndex;
-    uint16 u8dataCenterSearchOut[2*INNERSCREEN_DATACENTER_GROUP_OFFSET];
+    UINT16 dataCenterSearchIndex;
+    uint8 u8dataCenterSearchOut[2*INNERSCREEN_DATACENTER_GROUP_OFFSET];
+
+
+
+
+
+
+
+    //20250509 数据中心上下页 数据显示 控制逻辑
+
+    eDataCenterSearchType serchState;
+    eDataCenterSearchDirType serchDir;
+    eDataCenterSearchDirType serchDirPre;
+    UINT16 dataAllSendToScreen;
+    INT16 curSerchIndex;
+    INT16 maxSerchIndex;
+
+    INT16 serchIndex_start;//每一页第一条的位置
+    INT16 serchIndex_end;//每一页最后一条的位置
+
+    INT16 sendIndex;//发送屏幕地址 = 序号 * 长度
+    UINT16 sendCnt;//已经发送了几组数据
+    UINT16 firstEntry;//首次从其他页面 到 数据页面
+    UINT16 u16DataCenterDisData[IS_LEN_DATACENTER_SINGLE];    
 }tInnerScreenDataCenterHandleStruct;
 
 extern tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle;
@@ -291,8 +354,9 @@ extern uint8 InnerScreenDataCenterHandle_Searching_Use_WeightType(tInnerScreenDa
 
 extern void InnerScreenDataCenterHandle_WeightClassification_Init(tInnerScreenDataCenterHandleStruct *pContex);
 extern void appTrigerDatacenter2Store(void);
-extern uint8 InnerScreenDataCenter_GetClassfication(void);
-extern UINT8  DataCenterDisplay_Prepare_OneGroupData(void);
+extern uint16 InnerScreenDataCenter_GetClassfication(void);
+extern UINT8  DataCenterDisplay_Prepare_OneGroupData(UINT8 up_dowm);
+extern UINT8  DataCenterDisplay_Prepare_OneGroupData_20250509(tInnerScreenDataCenterHandleStruct *pContex , INT16 *searchedIdx);
 
 
 #endif

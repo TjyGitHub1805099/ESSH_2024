@@ -628,11 +628,14 @@ UINT8 screenPublic_Cycle_GetCurPage(T5LType *pSdwe)
 	static uint16 ticks = 0 ;
 	if(ticks++ >= 1000)
 	{
-		ticks = 0;
 		matched = TRUE;
 		#if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
 			/*发送：A5 5A 03 81 03 02 		返回：A5 5A 04 81 03 02 xx xx	*/
-			innerScreenReadReg(pSdwe,INNER_SCREEN_CURPAGE_GET_ADD,INNER_SCREEN_CURPAGE_GET_LEN,0);//get cur page
+			if(TRUE == innerScreenReadReg(pSdwe,INNER_SCREEN_CURPAGE_GET_ADD,INNER_SCREEN_CURPAGE_GET_LEN,0))//get cur page
+			{
+				matched = FALSE;
+				ticks = 0;
+			}
 		#else
 			/*发送：5A A5 04 83 000E 02 	返回：5A A5 08 83 000E 02 00 41 61 21*/
 			t5lReadVarible(pSdwe,INNER_SCREEN_VERSION_GET_ADD,INNER_SCREEN_VERSION_GET_LEN,0);//get cur page
@@ -2948,6 +2951,7 @@ void screenT5L_TxFunction(ScreenHandleType  *screenHandlePtr)
 		{
 			if(TRUE == screenHandlePtr->sendScreenHadlleCtx[i].func(t5lCtx))
 			{
+				screenHandlePtr->matchedIdx = i;
 				break;
 			}			
 		}

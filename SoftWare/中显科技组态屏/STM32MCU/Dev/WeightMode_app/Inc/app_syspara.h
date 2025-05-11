@@ -49,42 +49,52 @@ typedef enum HX711SystemParaType
 	SystemPara_Sizer_ClassifySet_ALei ,
 	SystemPara_Sizer_ClassifySet_ALei_Min,
 	SystemPara_Sizer_ClassifySet_ALei_Max,
-	SystemPara_Sizer_ClassifySet_ALei_Sel,
+	SystemPara_Sizer_ClassifySet_ALei_Sel = 34,
 
 	SystemPara_Sizer_ClassifySet_BLei,
 	SystemPara_Sizer_ClassifySet_BLei_Min,
 	SystemPara_Sizer_ClassifySet_BLei_Max,
-	SystemPara_Sizer_ClassifySet_BLei_Sel,
+	SystemPara_Sizer_ClassifySet_BLei_Sel = 38,
 
 	SystemPara_Sizer_ClassifySet_CLei ,
 	SystemPara_Sizer_ClassifySet_CLei_Min,
 	SystemPara_Sizer_ClassifySet_CLei_Max,
-	SystemPara_Sizer_ClassifySet_CLei_Sel,
+	SystemPara_Sizer_ClassifySet_CLei_Sel = 42,
 
 	SystemPara_Sizer_ClassifySet_DLei ,
 	SystemPara_Sizer_ClassifySet_DLei_Min,
 	SystemPara_Sizer_ClassifySet_DLei_Max,
-	SystemPara_Sizer_ClassifySet_DLei_Sel,
+	SystemPara_Sizer_ClassifySet_DLei_Sel = 46,
 	
 	SystemPara_Sizer_ClassifySet_ELei ,
 	SystemPara_Sizer_ClassifySet_ELei_Min,
 	SystemPara_Sizer_ClassifySet_ELei_Max,
-	SystemPara_Sizer_ClassifySet_ELei_Sel,
+	SystemPara_Sizer_ClassifySet_ELei_Sel = 50,
 
 	SystemPara_Sizer_ClassifySet_FLei ,
 	SystemPara_Sizer_ClassifySet_FLei_Min,
 	SystemPara_Sizer_ClassifySet_FLei_Max,
-	SystemPara_Sizer_ClassifySet_FLei_Sel,
+	SystemPara_Sizer_ClassifySet_FLei_Sel = 54,
 
 	SystemPara_Sizer_ClassifySet_GLei ,
 	SystemPara_Sizer_ClassifySet_GLei_Min,
 	SystemPara_Sizer_ClassifySet_GLei_Max,
-	SystemPara_Sizer_ClassifySet_GLei_Sel,
+	SystemPara_Sizer_ClassifySet_GLei_Sel = 58,
 
 	SystemPara_Sizer_ClassifySet_HLei ,
 	SystemPara_Sizer_ClassifySet_HLei_Min,
 	SystemPara_Sizer_ClassifySet_HLei_Max,
-	SystemPara_Sizer_ClassifySet_HLei_Sel=62,
+	SystemPara_Sizer_ClassifySet_HLei_Sel = 62,
+
+	SystemPara_Sizer_ClassifySet_ILei ,
+	SystemPara_Sizer_ClassifySet_ILei_Min,
+	SystemPara_Sizer_ClassifySet_ILei_Max,
+	SystemPara_Sizer_ClassifySet_ILei_Sel = 66,
+
+	SystemPara_Sizer_ClassifySet_JLei ,
+	SystemPara_Sizer_ClassifySet_JLei_Min,
+	SystemPara_Sizer_ClassifySet_JLei_Max,
+	SystemPara_Sizer_ClassifySet_JLei_Sel = 70,
 
 	HX711SystemPara_NUM  			/**< HX711  系统设置-最大长度 */
 }enumHX711SystemParaType;
@@ -152,7 +162,7 @@ typedef enum HX711SystemParaType
 #define FLASH_STORE_MAX_LEN						(((FLASH_STORE_ADDRESS_END-FLASH_STORE_ADDRESS_START)/4)+1)
 //==========================================================================================================================
 #define SIZER_CLASSIFY_GROUP_NUM	(10)//最多10个分类
-#define SIZER_CLASSIFY_MEMBER_NUM	(4)//min mid max output
+#define SIZER_CLASSIFY_MEMBER_NUM	(4)//guige min max selected
 
 //
 typedef struct SystemParaType
@@ -191,7 +201,7 @@ typedef struct SystemParaType
 
 
 	UINT32 Sizer_TimeSet[6];//NYR SFM
-	UINT32 Sizer_ClassifySet[SIZER_CLASSIFY_GROUP_NUM][SIZER_CLASSIFY_MEMBER_NUM];
+	UINT32 Sizer_ClassifySet[SIZER_CLASSIFY_GROUP_NUM][SIZER_CLASSIFY_MEMBER_NUM];//guige min max selected
 	UINT16 TimerSearch[2][6];
 
 } gSystemParaType;

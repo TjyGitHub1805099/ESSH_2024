@@ -41,6 +41,7 @@ typedef enum
 typedef enum ZHONGXIANPageType
 {
 	IS_PAGE_00_0X00_HOMEPAGEE = 0,
+	IS_PAGE_09_0X09_DATACENTERPAGEE = 9,
 	IS_PAGE_18_0X12_XUEJIANGLEIXING = 18,
 	IS_PAGE_19_0X13_GONGHAO = 19,
 	IS_PAGE_IVALID = 0xff,
@@ -190,6 +191,12 @@ extern ISPopupWindowType IS_PopupWindow[IS_PopupWindow_MAX_HANDLE];
 #define IS_ADD_CLASSFYSET_START					(0x1810)//共10组*4=40个地址
 #define IS_ADD_CLASSFYSET_END					(0x1837)
 
+#define IS_ADD_CLASSFYSET_P1					(0x1840)//共4个地址
+#define IS_ADD_CLASSFYSET_P4					(0x1843)//共4个地址
+
+
+
+
 //页面7 称重校准页面：相关
 //==(update:20210328):address of set chanel number : 0->all chanel set  ; (1~8)->single chanel set
 #define DMG_FUNC_SET_CHANEL_NUM								(0X2100)//2024-10-06
@@ -223,7 +230,7 @@ extern ISPopupWindowType IS_PopupWindow[IS_PopupWindow_MAX_HANDLE];
 //页面19 工号录入
 #define IS_ADD_GONGHAO									(0x3020)//主页面显示
 #define IS_ADD_GONGHAO_CHOICE							(0x3040)//工号显示页面
-#define IS_LEN_GONGHAO									(8)
+#define IS_LEN_GONGHAO									(4)
 
 //页面9：数据中心 显示7组数据
 #define IS_ADD_DATACENTER_GROUP_START        			(0x3500)
@@ -639,7 +646,6 @@ typedef struct structInnerScreenEventType
 
 extern InnerScreenEventType IS_Event;
 
-
 /** 定义从机串口设备类型 */
 typedef struct structSdweType
 {
@@ -725,7 +731,6 @@ typedef struct structSdweType
 	UINT8   jumpToDataCenterHandle;
 	ISPopupWindowType *PopupWindow;
 	InnerScreenEventType *RxEventTable;
-
 }T5LType;
 
 #define ScreenCycleTypeDefault   { \
@@ -827,7 +832,7 @@ typedef struct structSdweType
 	.bcCodeLen = 0 ,\
 	.triggerSaveVlu = 0 ,\
 	.triggerSaveVluPre = 0,\
-	.dataCenterDisplayPage = 0,\
+	.dataCenterDisplayPage = IS_PAGE_09_0X09_DATACENTERPAGEE,\
 	.dataCenterDisplayPagePre = 0xff ,\
 	.jumpToDataCenterHandle = 0 ,\
 	.PopupWindow = &IS_PopupWindow[0],\
@@ -906,7 +911,7 @@ typedef struct structSdweType
 	.bcCodeLen = 0 ,\
 	.triggerSaveVlu = 0 ,\
 	.triggerSaveVluPre = 0,\
-	.dataCenterDisplayPage = 0,\
+	.dataCenterDisplayPage = IS_PAGE_09_0X09_DATACENTERPAGEE,\
 	.dataCenterDisplayPagePre = 0xff ,\
 	.jumpToDataCenterHandle = 0 ,\
 	.PopupWindow = &IS_PopupWindow[0],\
@@ -934,10 +939,11 @@ typedef struct structScreenHandleType
 	screenRxTxHandleType *recvScreenHadlleCtx;
 	UINT8 sendScreenHadlleNum;
 	screenRxTxHandleType *sendScreenHadlleCtx;
+	UINT8 matchedIdx;
 }ScreenHandleType;
 
-#define SCREEN_RX_HANDLE_TOTAL_NUM	(25)	/**< 屏幕RX数据处理事件数量 */
-#define SCREEN_TX_HANDLE_TOTAL_NUM	(11)	/**< 屏幕TX数据处理事件数量 */
+#define SCREEN_RX_HANDLE_TOTAL_NUM	(26)	/**< 屏幕RX数据处理事件数量 */
+#define SCREEN_TX_HANDLE_TOTAL_NUM	(12)	/**< 屏幕TX数据处理事件数量 */
 extern screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM];
 extern screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM];
 
@@ -956,6 +962,7 @@ extern screenRxTxHandleType externalScreenTxHandle[SCREEN_LARGER_TX_HANDLE_TOTAL
 	&innerScreenRxHandle[0],\
 	SCREEN_TX_HANDLE_TOTAL_NUM,\
 	&innerScreenTxHandle[0],\
+	0xFF,\
 }
 #define ScreenHandleDefault_Larger   { \
 	ScreenIndex_Larger,\
@@ -964,6 +971,7 @@ extern screenRxTxHandleType externalScreenTxHandle[SCREEN_LARGER_TX_HANDLE_TOTAL
 	&externalScreenRxHandle[0],\
 	SCREEN_LARGER_TX_HANDLE_TOTAL_NUM,\
 	&externalScreenTxHandle[0],\
+	0xFF,\
 }
 
 //================================================================================================

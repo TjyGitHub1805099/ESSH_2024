@@ -163,6 +163,11 @@
       <TargetDriverDllRegistry>
         <SetRegEntry>
           <Number>0</Number>
+          <Key>DLGUARM</Key>
+          <Name></Name>
+        </SetRegEntry>
+        <SetRegEntry>
+          <Number>0</Number>
           <Key>ARMRTXEVENTFLAGS</Key>
           <Name>-L70 -Z18 -C0 -M0 -T1</Name>
         </SetRegEntry>
@@ -196,9 +201,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>1827</LineNumber>
+          <LineNumber>1648</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134244668</Address>
+          <Address>134246756</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -207,80 +212,158 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\涓樉绉戞妧缁勬€佸睆\STM32MCU\Dev\WeightMode_app\Src\app_DataCenter.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\SoftWare\../WeightMode_app/Src/app_DataCenter.c\1827</Expression>
+          <Expression>\\SoftWare\../WeightMode_app/Src/app_DataCenter.c\1648</Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>487</LineNumber>
+          <LineNumber>2445</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134283728</Address>
+          <Address>0</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\涓樉绉戞妧缁勬€佸睆\STM32MCU\Dev\WeightMode_app\Src\app_InnerScreenTxHandle.c</Filename>
+          <BreakIfRCount>0</BreakIfRCount>
+          <Filename>..\WeightMode_app\Src\app_DataCenter.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\SoftWare\../WeightMode_app/Src/app_InnerScreenTxHandle.c\487</Expression>
+          <Expression></Expression>
+        </Bp>
+        <Bp>
+          <Number>2</Number>
+          <Type>0</Type>
+          <LineNumber>2527</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>0</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>0</BreakIfRCount>
+          <Filename>..\WeightMode_app\Src\app_DataCenter.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression></Expression>
+        </Bp>
+        <Bp>
+          <Number>3</Number>
+          <Type>0</Type>
+          <LineNumber>2565</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>0</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>0</BreakIfRCount>
+          <Filename>..\WeightMode_app\Src\app_DataCenter.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression></Expression>
+        </Bp>
+        <Bp>
+          <Number>4</Number>
+          <Type>0</Type>
+          <LineNumber>623</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>0</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>0</BreakIfRCount>
+          <Filename>..\WeightMode_app\Src\app_InnerScreenTxHandle.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression></Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>pSdwe</ItemText>
+          <ItemText>pContex-&gt;u8dataCenterSearchOut</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>gonghao_ticks</ItemText>
+          <ItemText>u16_IS_DatacenterData</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>gonghaoBuf</ItemText>
+          <ItemText>test_flag</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>sUSBSMQHandleContex</ItemText>
+          <ItemText>u16_IS_DatacenterData</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>pContex</ItemText>
+          <ItemText>new_entry</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>ClassificationCfg,0x0A</ItemText>
+          <ItemText>thisWhileEnd_dataCenterSearchIndex</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>cfg,0x0A</ItemText>
+          <ItemText>pContex-&gt;s_StoreData[0]</ItemText>
         </Ww>
         <Ww>
           <count>7</count>
           <WinNumber>1</WinNumber>
-          <ItemText>pContex-&gt;handle</ItemText>
+          <ItemText>pContex-&gt;s_StoreData_Backup[0]</ItemText>
         </Ww>
         <Ww>
           <count>8</count>
           <WinNumber>1</WinNumber>
-          <ItemText>pContex-&gt;utctime</ItemText>
+          <ItemText>InnerScreenDataCenteHandle.userStorePosition</ItemText>
         </Ww>
         <Ww>
           <count>9</count>
           <WinNumber>1</WinNumber>
-          <ItemText>pContex-&gt;singleStoreData</ItemText>
+          <ItemText>InnerScreenDataCenteHandle.s_StoreData[CF_ATC24_USERDATA_STORE_LEN - 4]</ItemText>
         </Ww>
         <Ww>
           <count>10</count>
           <WinNumber>1</WinNumber>
-          <ItemText>u16bccode</ItemText>
+          <ItemText>InnerScreenDataCenteHandle.s_StoreData[CF_ATC24_USERDATA_STORE_LEN - 3]</ItemText>
+        </Ww>
+        <Ww>
+          <count>11</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>InnerScreenDataCenteHandle.s_StoreData[CF_ATC24_USERDATA_STORE_LEN - 2]</ItemText>
+        </Ww>
+        <Ww>
+          <count>12</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>InnerScreenDataCenteHandle.s_StoreData[CF_ATC24_USERDATA_STORE_LEN - 1]</ItemText>
+        </Ww>
+        <Ww>
+          <count>13</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>InnerScreenDataCenteHandle.serchDir</ItemText>
+        </Ww>
+        <Ww>
+          <count>14</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>InnerScreenDataCenteHandle.serchIndex_end</ItemText>
+        </Ww>
+        <Ww>
+          <count>15</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>InnerScreenDataCenteHandle.serchIndex_start</ItemText>
+        </Ww>
+        <Ww>
+          <count>16</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>InnerScreenDataCenteHandle.curSerchIndex,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -341,7 +424,7 @@
 
   <Group>
     <GroupName>Application/User/Core</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -820,7 +903,7 @@
 
   <Group>
     <GroupName>Middlewares/FreeRTOS</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

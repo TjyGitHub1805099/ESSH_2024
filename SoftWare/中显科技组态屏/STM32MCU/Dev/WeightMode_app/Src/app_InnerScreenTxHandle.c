@@ -255,24 +255,6 @@ void innerScreenDiwenLSBChangeToMSB(T5LType *pSdwe)
 
 }
 
-void innerScreenTxHandle_ScreenBcCode(T5LType *pSdwe)
-{
-	if(1 == pSdwe->bcCodeTriger)
-	{
-		//memset(&pSdwe->bcCodeVlu[0],0,(INNER_SCREEN_DATACENTER_LENOF_BARCODE+0));
-		memcpy(&pSdwe->bcCodeVlu[0],&sUSBSMQHandleContex.decodeDataVaild[0],INNER_SCREEN_DATACENTER_LENOF_BARCODE);
-		#if(INNERSCREEN_TYPE==INNERSCREEN_TYPE_DIWEN)
-			innerScreenDiwenLSBChangeToMSB(pSdwe);
-		#endif
-		if(TRUE ==t5lWriteData(pSdwe,IS_ADD_BCCODE,(INT16 *)&pSdwe->bcCodeVlu[0],((INNER_SCREEN_DATACENTER_LENOF_BARCODE+1)/2),0));//2*chanel_len:because each data type was 4 byte
-		{
-			pSdwe->bcCodeTriger = 0;
-			memcpy(&sUSBSMQHandleContex.decodeDataVaildPre,&sUSBSMQHandleContex.decodeDataVaild,USBSMQ_KEYBORD_MAX_NUM);
-		}
-	}
-}
-
-
 UINT8 innerScreenDataCenter_Display(T5LType *pSdwe)
 {
 	UINT8 ret = 0 ;
@@ -358,13 +340,21 @@ UINT8 ISTxHandle_Event_JumpToDataCenterPage(T5LType *pSdwe)
 		{
 			InnerScreenDataCenterHandle_WeightClassification_Init(&InnerScreenDataCenteHandle);
 			InnerScreenDataCenteHandle.needToStore = 0x68;//执行扫描显示
+		}
+		if(0 != screenPublic_PageJump(pSdwe,pSdwe->dataCenterDisplayPage))
+		{
 			pSdwe->jumpToDataCenterHandle = FALSE;
 		}
+
 	}
 	return matched;
 }
 
 //==20250330 序号8 工号录入处理
+UINT8 u8gonghao_pre[2*IS_LEN_GONGHAO]={0xff};
+UINT16 u16gonghaoBuf[IS_LEN_GONGHAO];
+enumISPopupWindowType u8gonghao_OK = IS_PopupWindow_Max ;
+
 UINT8 ISTxHandle_Page_GongHaoLuRu(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
@@ -372,30 +362,44 @@ UINT8 ISTxHandle_Page_GongHaoLuRu(T5LType *pSdwe)
 	UINT8 ret = 0 ;
 	//
 	UINT8 u8gonghao[2*IS_LEN_GONGHAO] , i = 0 , validLen;
-	static UINT8 u8gonghao_pre[2*IS_LEN_GONGHAO]={0xff};
 	//
-	UINT16 u16gonghaoBuf[IS_LEN_GONGHAO];
+	if(u8gonghao_OK == IS_PopupWindow_OK)
+	{
+		matched = TRUE;
+		if(TRUE == t5lWriteData(pSdwe,IS_ADD_GONGHAO,(INT16 *)u16gonghaoBuf,IS_LEN_GONGHAO,0))
+		{
+			memcpy(&InnerScreenDataCenteHandle.yuangonghao[0],u8gonghao_pre,CF_STORE_GONGHAO_TYPEBYTE);
+			u8gonghao_OK = IS_PopupWindow_Max;
+			matched = FALSE;
+		}
+	}
+
 	//如果当前页面是：工号录入页
 	if(IS_PAGE_19_0X13_GONGHAO == pSdwe->curPage)
 	{
+		matched = TRUE;
+
 		ret = USB_SMQ_GetDecodeData(u8gonghao,2*IS_LEN_GONGHAO,&validLen);
-		if((1 == ret) && (0 != memcmp(u8gonghao_pre,u8gonghao,2*IS_LEN_GONGHAO)))
+		if((1 == ret) && (4 == validLen))
 		{
-			needSend = 1;
-			for( i = 0 ; i < IS_LEN_GONGHAO ; i++)
+			if(0 != memcmp(u8gonghao_pre,u8gonghao,validLen))
 			{
-				u16gonghaoBuf[i] = u8gonghao[2*i + 0];
-				u16gonghaoBuf[i] <<= 8;
-				u16gonghaoBuf[i] &= 0xff00;
-				u16gonghaoBuf[i] += u8gonghao[2*i + 1];
+				needSend = 1;
+				for( i = 0 ; i < IS_LEN_GONGHAO ; i++)
+				{
+					u16gonghaoBuf[i] = u8gonghao[2*i + 0];
+					u16gonghaoBuf[i] <<= 8;
+					u16gonghaoBuf[i] &= 0xff00;
+					u16gonghaoBuf[i] += u8gonghao[2*i + 1];
+				}				
 			}
+
 		}
 		if(1 == needSend)
 		{
-			if(TRUE == t5lWriteData(pSdwe,IS_ADD_GONGHAO,(INT16 *)u16gonghaoBuf,IS_LEN_GONGHAO,0))
+			if(TRUE == t5lWriteData(pSdwe,IS_ADD_GONGHAO_CHOICE,(INT16 *)u16gonghaoBuf,IS_LEN_GONGHAO,0))
 			{
-				matched = TRUE;
-				memcpy(u8gonghao_pre,u8gonghao,2*IS_LEN_GONGHAO);
+				memcpy(u8gonghao_pre,u8gonghao,validLen);
 			}
 		}
 	}
@@ -436,6 +440,7 @@ UINT8 ISTxHandle_Page_XueJiangLeiXingXuanZhe(T5LType *pSdwe)
 //==20250330 序号10 周期数据发送处理
 UINT16 u16_IS_CycleData[IS_LEN_HOMEPAGE_CYCLE_DATA]={0};
 UINT16 u16_IS_CycleData_Pre[IS_LEN_HOMEPAGE_CYCLE_DATA]={0xff};
+extern UINT8 zhixingzhuangtai3002;
 UINT8 ISTxHandle_Page_Home_CycleDataHandle(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE  , i = 0 , offset = 0;
@@ -450,8 +455,6 @@ UINT8 ISTxHandle_Page_Home_CycleDataHandle(T5LType *pSdwe)
 
 	if(IS_PAGE_00_0X00_HOMEPAGEE == pSdwe->curPage)
 	{
-		matched = TRUE;
-
 		//重量
 		weight = hx711_getWeight(HX711Chanel_1);
 		//重量转ml
@@ -465,15 +468,23 @@ UINT8 ISTxHandle_Page_Home_CycleDataHandle(T5LType *pSdwe)
 		//2.重量的分类
 		u16_IS_CycleData[1] = InnerScreenDataCenter_GetClassfication();
 		//3.执行状态
-
+		u16_IS_CycleData[2] = zhixingzhuangtai3002;
 		//4.条码值
 		offset = 3;
 		for( i = 0 ; i < IS_LEN_BCCODE ; i ++)
 		{
-			u16_IS_CycleData[offset+i] = pUSBCtx->decodeDataVaild[2*i + 0];
-			u16_IS_CycleData[offset+i] <<= 8;
-			u16_IS_CycleData[offset+i] &= 0xFF00;
-			u16_IS_CycleData[offset+i] += pUSBCtx->decodeDataVaild[2*i + 1];
+			if(CF_STORE_BCCODE_TYPEBYTE == pUSBCtx->decodeVaildLen)
+			{
+				u16_IS_CycleData[offset+i] = pUSBCtx->decodeDataVaild[2*i + 0];
+				u16_IS_CycleData[offset+i] <<= 8;
+				u16_IS_CycleData[offset+i] &= 0xFF00;
+				u16_IS_CycleData[offset+i] += pUSBCtx->decodeDataVaild[2*i + 1];				
+			}
+			else
+			{
+				u16_IS_CycleData[offset+i] = 0;
+			}
+
 		}
 		//
 		if(FALSE == needSend)
@@ -504,12 +515,256 @@ UINT8 ISTxHandle_Page_Home_CycleDataHandle(T5LType *pSdwe)
 				test_flag = 0;
 			}
 		}
-
-	}	
+	}
+	else
+	{
+		needSend = FALSE;
+	}
+	matched = needSend;
 	return matched;
 }
+
+//测试函数
+UINT8 TEST_DIS(T5LType *pSdwe)
+{
+	tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
+	static UINT16 test_add = IS_ADD_DATACENTER_GROUP_START,test_len = IS_LEN_DATACENTER_SINGLE,test_flag = 0;
+	if(11 == test_flag)
+	{
+		if(TRUE == t5lWriteData(pSdwe,(test_add),(INT16 *)pContex->u16DataCenterDisData,test_len,0))
+		{
+			test_flag = 0 ;
+		}	
+	}
+
+}
+
+//P:0x50
+//鲜浆：0xCFCA 0xBDAC
+//冰浆：0xB1F9 0xBDAC
+//病灭：0xB2A1 0xC3F0 
+#define DATA_CENTER_DISPLAY_RECOREDE TRUE
+#define DATA_CENTER_DISPLAY_RECOREDE_INDEX TRUE
+
+//进入数据中心后采用此函数
+UINT8 ISTxHandle_Page_Datacenter_CycleDataHandle_20250509(T5LType *pSdwe)
+{
+	static UINT8 matched = FALSE;
+	tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
+	UINT16 i = 0 ;
+	INT16 serchedIdx = 0 ;
+	UINT8 retSearched = FALSE ;
+	//
+	if(IS_PAGE_09_0X09_DATACENTERPAGEE == pSdwe->curPage)
+	{
+		switch(pContex->serchState)
+		{
+			case D_C_SEARCH_DATA_EVENT_WAIT:
+				if(D_C_SEARCH_DIR_NUM != pContex->serchDir)//非上下页 最多发送 IS_NUM_DATACENTER_GROUP 组数据
+				{
+					pContex->serchState = D_C_SEARCH_DATA_INIT;
+					matched = TRUE;
+				}
+			break;
+
+			case D_C_SEARCH_DATA_INIT:
+				pContex->sendCnt = 0 ;
+				pContex->dataAllSendToScreen = FALSE;
+				pContex->maxSerchIndex= CLASSIFICATION_STORE_MAX_NUM;//最大查找标号就是能存储的最大数量
+				//记录查找的下标 被打开
+				#if (TRUE == DATA_CENTER_DISPLAY_RECOREDE_INDEX)
+					//发送给屏幕的index管理
+					if(D_C_SEARCH_DIR_DOWN == pContex->serchDir)//点击 <下一页>
+					{
+						pContex->sendIndex = 0 ;
+					}
+					else//点击 <上一页>
+					{
+						pContex->sendIndex = IS_NUM_DATACENTER_GROUP - 1;
+					}
+				#else
+					pContex->sendIndex = 0 ;
+				#endif
+
+				#if (TRUE == DATA_CENTER_DISPLAY_RECOREDE_INDEX)
+					//从哪里开始查找的下表管理
+					//第一次 <上一页> ~ <下一页> 之间 反向查找
+					if(pContex->serchDirPre != pContex->serchDir)
+					{
+						//点击 <上一页> ， 之前是<下一页>
+						if(D_C_SEARCH_DIR_UP == pContex->serchDir)
+						{
+							pContex->curSerchIndex = pContex->serchIndex_start - 1;
+						}
+						//点击 <下一页> ， 之前是<上一页>
+						if(D_C_SEARCH_DIR_DOWN == pContex->serchDir)
+						{
+							pContex->curSerchIndex = pContex->serchIndex_start + 1;
+						}						
+					}
+					else//==同向查找
+					{	
+						//继续点击 <下一页>
+						if(D_C_SEARCH_DIR_DOWN == pContex->serchDir)
+						{
+							pContex->curSerchIndex = pContex->serchIndex_end + 1;
+						}
+						//继续点击 <上一页>
+						if(D_C_SEARCH_DIR_UP == pContex->serchDir)
+						{
+							pContex->curSerchIndex = pContex->serchIndex_end - 1;
+						}
+					}
+				#endif
+				//
+				pContex->serchState = D_C_SEARCH_DATA_SEARCHUNTIL;
+			break;
+
+			case D_C_SEARCH_DATA_SEARCHUNTIL:
+				memset(pContex->u8dataCenterSearchOut,0,(2*INNERSCREEN_DATACENTER_GROUP_OFFSET));//至0
+				retSearched = DataCenterDisplay_Prepare_OneGroupData_20250509(pContex,&serchedIdx);//如果查找成功 这里会更新待发送屏幕的数据
+				for( i = 0 ; i < IS_LEN_DATACENTER_SINGLE ; i++)//将UIN8转换成屏幕需要的UINT16
+				{
+					pContex->u16DataCenterDisData[i] = pContex->u8dataCenterSearchOut[2*i+0];
+					pContex->u16DataCenterDisData[i] <<= 8;
+					pContex->u16DataCenterDisData[i] += pContex->u8dataCenterSearchOut[2*i+1];
+				}
+				//====记录成功查找的起止标号
+				#if (TRUE == DATA_CENTER_DISPLAY_RECOREDE_INDEX)
+					if(TRUE == retSearched)
+					{
+						if(0 == pContex->sendCnt)
+						{
+							pContex->serchIndex_start = serchedIdx;
+						}
+						pContex->serchIndex_end = serchedIdx;
+					}
+				#endif
+				//====特殊退出 未查找到匹配数据 且 当前发送的数量是0
+				if((FALSE == retSearched) && (0 == pContex->sendCnt) && (FALSE == pContex->firstEntry))
+				{
+					//非第一次进入 数据页面 第一个数据查找 没有查找成功 则直接退出 不刷新数据
+					pContex->serchState = D_C_SEARCH_DATA_FORCE_QUIT;
+				}
+				else
+				{
+					pContex->serchState = D_C_SEARCH_DATA_SEND;
+				}
+			break;
+
+			case D_C_SEARCH_DATA_SEND:
+				pContex->firstEntry = FALSE;//如果已经刷新了数据（包含空数据）则非第一次进
+				//点击下一页 是从0~6的顺序发给屏幕
+				//点击上一页 是从6~0的顺序发给屏幕
+				if(TRUE == t5lWriteData(pSdwe,(IS_ADD_DATACENTER_GROUP_START + IS_LEN_DATACENTER_SINGLE*pContex->sendIndex),(INT16 *)pContex->u16DataCenterDisData,IS_LEN_DATACENTER_SINGLE,0))
+				{
+					pContex->sendCnt++;
+					pContex->serchState = D_C_SEARCH_DATA_INDEX_HANDLE;
+				}
+			break;
+
+			case D_C_SEARCH_DATA_INDEX_HANDLE:
+				#if (TRUE == DATA_CENTER_DISPLAY_RECOREDE_INDEX)
+					if(D_C_SEARCH_DIR_DOWN == pContex->serchDir)//点击 <下一页>
+					{
+						pContex->sendIndex++;
+					}
+					else//点击 <上一页>
+					{
+						pContex->sendIndex--;
+					}
+					if((IS_NUM_DATACENTER_GROUP == pContex->sendCnt) ||
+					   ((pContex->sendIndex < 0) || (pContex->sendIndex >= IS_NUM_DATACENTER_GROUP)))
+					{
+						pContex->dataAllSendToScreen = TRUE;//当前页面数据发送完成 包含空数据
+					}
+				#else
+					pContex->sendCnt++;
+					if(pContex->sendCnt >= IS_NUM_DATACENTER_GROUP)
+					{
+						pContex->dataAllSendToScreen = TRUE;
+					}
+				#endif
+
+				// 当前页面数据完全发送完毕 则退出 否则继续查找
+				if(TRUE == pContex->dataAllSendToScreen)
+				{
+					pContex->serchState = D_C_SEARCH_DATA_FORCE_QUIT;
+				}
+				else
+				{
+					pContex->serchState = D_C_SEARCH_DATA_SEARCHUNTIL;
+				}
+			break;
+
+			case D_C_SEARCH_DATA_FORCE_QUIT:
+				pContex->serchState = D_C_SEARCH_DATA_EVENT_WAIT;
+				if(0 != pContex->sendCnt)
+				{
+					pContex->serchDirPre = pContex->serchDir;			
+				}
+				//
+				pContex->serchDir = D_C_SEARCH_DIR_NUM;//不进入当前内部循环
+				matched = FALSE;
+			break;
+
+			default:
+				pContex->serchState = D_C_SEARCH_DATA_EVENT_WAIT;
+				matched = FALSE;
+			break;
+		}
+	}
+	else
+	{
+		pContex->firstEntry = TRUE;//刚开始进入 涉及是否没有的情况下 发送空格给屏幕
+		//==这里需要特殊处理serchIndex_end = -1
+		pContex->serchDir = D_C_SEARCH_DIR_DOWN;
+		pContex->serchDirPre = D_C_SEARCH_DIR_DOWN;
+		pContex->serchIndex_end = -1;
+		pContex->serchIndex_start = -1;
+		//
+		pContex->serchState = D_C_SEARCH_DATA_EVENT_WAIT ;
+		matched = FALSE;
+	}
+	//
+	return matched;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //================================================================================================
-//===============================[函数列表：内屏初始化+事件处理+周期数据]============================
+//===============================[函数列表：内屏初始化+事件处理+周期数据]=========================
 //================================================================================================
 screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM]=
 {
@@ -524,7 +779,8 @@ screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM]=
 	{0 , 7, &ISTxHandle_Event_JumpToDataCenterPage},		//跳转至数据中心界面
 	{0 , 8, &ISTxHandle_Page_GongHaoLuRu},					//工号录入界面
 	{0 , 9, &ISTxHandle_Page_XueJiangLeiXingXuanZhe},		//血浆类型确认后发送给主页
-	{0 ,10, &ISTxHandle_Page_Home_CycleDataHandle},			//正常周期数据
+	{0 ,10, &ISTxHandle_Page_Datacenter_CycleDataHandle_20250509},	//数据中心数据发送
+	{0 ,11, &ISTxHandle_Page_Home_CycleDataHandle},			//正常周期数据
 };
 
 #endif// end of _APP_INNER_SCREEN_TX_HANDLE_C_

@@ -68,7 +68,20 @@ UINT8 innerScreenRxHandle_Xuejiangleixing(T5LType *pSdwe)
 	}
 	return matched;
 }
-
+extern enumISPopupWindowType u8gonghao_OK;
+UINT8 innerScreenRxHandle_Gonghao(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	if((IS_ADD_INPUTGONGHAO_PAGE_EVENT) == pSdwe->SetAdd)
+	{
+		if(IS_VLU_INPUTGONGHAO_PAGE_EVENT_OK == pSdwe->SetData)
+		{
+			u8gonghao_OK = IS_PopupWindow_OK;
+			matched = TRUE;
+		}		
+	}
+	return matched;
+}
 #if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
 UINT8 innerScreenRxHandle_RTC_YMDHMS(T5LType *pSdwe)
 {
@@ -430,6 +443,10 @@ UINT8 innerScreenRxHandle_JumpToDataCenterTriger(T5LType *pSdwe)
 			pSdweSmaller->jumpToDataCenterHandle = TRUE;
 			matched = TRUE;
 		}
+		if(IS_VLU_DATACHOICE_PAGE_EVENT_OUTPUTCHOICE == (UINT16)pSdwe->SetData)
+		{
+			matched = TRUE;
+		}
 	}
 	//
 	return matched;
@@ -536,6 +553,7 @@ UINT8 innerScreenRxHandle_Sizer_ClassifySet(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
 	UINT8 i = 0 , j = 0;
+    tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
 
 	if((pSdwe->SetAdd >= IS_ADD_CLASSFYSET_START) && (pSdwe->SetAdd <= IS_ADD_CLASSFYSET_END))
 	{
@@ -543,10 +561,22 @@ UINT8 innerScreenRxHandle_Sizer_ClassifySet(T5LType *pSdwe)
 		i = (pSdwe->SetAdd - IS_ADD_CLASSFYSET_START)/SIZER_CLASSIFY_MEMBER_NUM;
 		j = (pSdwe->SetAdd - IS_ADD_CLASSFYSET_START)%SIZER_CLASSIFY_MEMBER_NUM;
 		gSystemPara.Sizer_ClassifySet[i][j] = pSdwe->SetData;
+		DataCenterHandle_ClassificationVluSet(i,&gSystemPara.Sizer_ClassifySet[i][0]);
 		//
 		InnerScreenDataCenterHandle_WeightClassification_Init(&InnerScreenDataCenteHandle);
 		//
 		pSdwe->needStore |= DMG_TRIGER_SAVE_SECOTOR_2 ;
+	}
+	else if((pSdwe->SetAdd >= IS_ADD_CLASSFYSET_P1) && (pSdwe->SetAdd <= IS_ADD_CLASSFYSET_P4))
+	{
+		if(1 == pSdwe->SetData)
+		{
+			pContex->leixingxuanze &= (~(1 << (pSdwe->SetAdd - IS_ADD_CLASSFYSET_P1)));
+		}
+		else
+		{
+			pContex->leixingxuanze |= ((1 << (pSdwe->SetAdd - IS_ADD_CLASSFYSET_P1)));
+		}
 	}
 	return matched;
 }
@@ -630,6 +660,9 @@ UINT8 innerScreenRxHandle_DataCenterPageHandle(T5LType *pSdwe)
 		//下一页
 		if(IS_VLU_DATACENTER_PAGE_EVENT_PAGEDOWN == pSdwe->SetData)
 		{
+			InnerScreenDataCenteHandle.serchDir = D_C_SEARCH_DIR_DOWN;
+
+
 			InnerScreenDataCenteHandle.curPageNum = 0 ;
 			InnerScreenDataCenteHandle.targetPageNum = 1 ;
 			//
@@ -660,6 +693,9 @@ UINT8 innerScreenRxHandle_DataCenterPageHandle(T5LType *pSdwe)
 		//上一页
 		else if(IS_VLU_DATACENTER_PAGE_EVENT_PAGEUP == pSdwe->SetData)
 		{
+			InnerScreenDataCenteHandle.serchDir = D_C_SEARCH_DIR_UP;
+
+
 			InnerScreenDataCenteHandle.curPageNum = 1 ;
 			InnerScreenDataCenteHandle.targetPageNum = 0 ;
 			//
@@ -809,6 +845,7 @@ screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM]=
 	{0, 21,&innerScreenRxHandle_HomePageHandle},
 	{0, 22,&innerScreenRxHandle_CurPage},
 	{0, 23,&innerScreenRxHandle_Xuejiangleixing},
+	{0, 24,&innerScreenRxHandle_Gonghao},
 
 	
 };
