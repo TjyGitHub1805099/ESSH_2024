@@ -121,6 +121,17 @@ DATA_INFO	stroenum	    barcode	date	        weight	        CRC	addStart_dec	addS
 #define CF_STORE_MASK_GUIGE     (0x0020)
 #define CF_STORE_MASK_CPLT      (0x003F)
 
+
+typedef enum
+{
+    CF_STORE_LEIXING_P1 = 1,
+    CF_STORE_LEIXING_P2 = 2,
+    CF_STORE_LEIXING_P3 = 3,
+    CF_STORE_LEIXING_P4 = 4,
+    CF_STORE_LEIXING_PMax,
+}eCFStoreLeixingType;
+
+
 //STORE NUM
 #define CLASSIFICATION_STORE_MAX_NUM    (220)//AT24C128=最大存储220条,AT24C512=最大存储1000条
 //定义数据：2025.3.28 [员工工号 献血条码            称重时间                血浆类型    血浆规格]
@@ -151,7 +162,10 @@ DATA_INFO	stroenum	    barcode	date	        weight	        CRC	addStart_dec	addS
 #endif
 
 
-
+#define LEIXING_XIANJIANG 0xCFCABDAC
+#define LEIXING_BINGJIANG 0xB1F9BDAC
+#define LEIXING_BINMIE    0xB2A1C3F0 
+#define LEIXING_KONGGE    0x20202020 
 
 #define CLASSIFICATION_STORE_CFG_TYPEBIT            (4)//4bit : 0000 as A, ~ 0111 as H , for 
 #define CLASSIFICATION_STORE_CFG_TIME_TYPEBYTE      (4)//4byte : utc time at 1970~2099
@@ -300,7 +314,7 @@ typedef struct sInnerScreenDataCenterHandleStruct
     //
     //20250319
     eDataCenterHandleType handle;
-    uint8  screenTrigerToSingleStore;
+    uint8  screenTrigerToSingleStore;//触发外部EEPROM进行单组存储
     uint16 weightVlu;
     uint8 classificationIndex;
     uint8 yuangonghao[CF_STORE_GONGHAO_TYPEBYTE];

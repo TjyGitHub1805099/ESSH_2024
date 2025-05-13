@@ -1638,7 +1638,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
                 crc16 = EECRC16(&pContex->s_StoreData[0],(CF_ATC24_USERDATA_STORE_LEN-2));
                 if(crc16 == pContex->crc16)//第一份数据合法
                 {
-                    pContex->initSuccess |= 1;
+                   pContex->initSuccess |= 1;
                     //获取存储位置
                     pContex->userStorePosition = 0;
                     pContex->userStorePosition += pContex->s_StoreData[CF_ATC24_USERDATA_STORE_LEN - 4];//最后3`4字节存储位置
@@ -2364,10 +2364,7 @@ UINT8  DataCenterDisplay_Prepare_OneGroupData(UINT8 up_dowm)
 
 
 
-#define LEIXING_XIANJIANG 0xCFCABDAC
-#define LEIXING_BINGJIANG 0xB1F9BDAC
-#define LEIXING_BINMIE    0xB2A1C3F0 
-#define LEIXING_KONGGE    0x20202020 
+
 
 
 

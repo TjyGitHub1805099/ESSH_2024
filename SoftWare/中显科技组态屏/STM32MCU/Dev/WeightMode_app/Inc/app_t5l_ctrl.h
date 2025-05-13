@@ -42,8 +42,16 @@ typedef enum ZHONGXIANPageType
 {
 	IS_PAGE_00_0X00_HOMEPAGEE = 0,
 	IS_PAGE_09_0X09_DATACENTERPAGEE = 9,
-	IS_PAGE_18_0X12_XUEJIANGLEIXING = 18,
-	IS_PAGE_19_0X13_GONGHAO = 19,
+	IS_PAGE_11_0X0B_UPAN_PLUG_IN = 11,//U盘插入界面
+	IS_PAGE_12_0X0C_UPAN_PLUG_OUT = 12,//U盘拔出界面
+	IS_PAGE_15_0X0F_OUTPUTCPLT = 15,//导出数据到U盘完成提示界面
+	IS_PAGE_18_0X12_XUEJIANGLEIXING = 18,//血浆类型选择界面
+	IS_PAGE_19_0X13_GONGHAO = 19,//工号录入界面
+
+
+	
+
+
 	IS_PAGE_IVALID = 0xff,
 }enumISPageType;
 typedef struct structISPopupWindowType
@@ -710,6 +718,8 @@ typedef struct structSdweType
 	UINT8 	sendSysParaDataToDiwenIndex;/**< sendSysParaDataToDiwenIndex：(事件)初始化屏幕时的序号*/
 	//
 	UINT16  screenHomePageNum;/**< 屏幕 主页 页面序号*/
+	UINT16  screenOutputCpltPageNum;/**< 屏幕 导出数据完成 页面序号*/
+
 	UINT16  screenBanlingPageNum;/**< 屏幕 配平 页面序号*/
 	UINT16 	screenCalibrationPage;/**< 屏幕 计算 页面序号*/
 	UINT16 	screenActivePage;/**< 屏幕 激活 页面序号*/
@@ -729,6 +739,14 @@ typedef struct structSdweType
 	UINT16 	dataCenterDisplayPagePre;
 
 	UINT8   jumpToDataCenterHandle;
+	UINT8   jumpToHomeHandle;
+	UINT8   jumpToOutputCpltPageHandle;
+
+	//跳转至指定界面
+	UINT8 	jumpToPageEvent;
+	enumISPageType 	jumpToPageEvent_PageNum;
+
+
 	ISPopupWindowType *PopupWindow;
 	InnerScreenEventType *RxEventTable;
 }T5LType;
@@ -817,7 +835,8 @@ typedef struct structSdweType
 	.sdweHX711FirstSampleCoplt = 0,/**/\
 	.needStore = 0,/**/\
 	.sendSysParaDataToDiwenIndex = 0xF0,/**< sendSysParaDataToDiwenIndex：(事件)初始化屏幕时的序号*/\
-	.screenHomePageNum = DMG_FUNC_HomePage,\
+	.screenHomePageNum = 0,\
+	.screenOutputCpltPageNum = 15,\
 	.screenBanlingPageNum = INNER_SCREEN_Balancing_6_HOME_PAGE,\
 	.screenCalibrationPage = DMG_FUNC_CalibrationPage,\
 	.screenActivePage = DMG_FUNC_ActivePage,\
@@ -835,6 +854,10 @@ typedef struct structSdweType
 	.dataCenterDisplayPage = IS_PAGE_09_0X09_DATACENTERPAGEE,\
 	.dataCenterDisplayPagePre = 0xff ,\
 	.jumpToDataCenterHandle = 0 ,\
+	.jumpToHomeHandle = 0 ,\
+	.jumpToOutputCpltPageHandle = 0 ,\
+	.jumpToPageEvent = 0 ,\
+	.jumpToPageEvent_PageNum = 0,\
 	.PopupWindow = &IS_PopupWindow[0],\
 	.RxEventTable = &IS_Event,\
 }
@@ -896,7 +919,8 @@ typedef struct structSdweType
 	.sdweHX711FirstSampleCoplt = 0,/**/\
 	.needStore = 0,/**/\
 	.sendSysParaDataToDiwenIndex = 0x80,/**< sendSysParaDataToDiwenIndex：(事件)初始化屏幕时的序号*/\
-	.screenHomePageNum = DMG_FUNC_HomePage,\
+	.screenHomePageNum = 0,\
+	.screenOutputCpltPageNum = 15,\
 	.screenBanlingPageNum = EXTERNAL_SCREEN_Balancing_8_HOME_PAGE,\
 	.screenCalibrationPage = DMG_FUNC_CalibrationPage,\
 	.screenActivePage = DMG_FUNC_ActivePage,\
@@ -914,6 +938,10 @@ typedef struct structSdweType
 	.dataCenterDisplayPage = IS_PAGE_09_0X09_DATACENTERPAGEE,\
 	.dataCenterDisplayPagePre = 0xff ,\
 	.jumpToDataCenterHandle = 0 ,\
+	.jumpToHomeHandle = 0 ,\
+	.jumpToOutputCpltPageHandle = 0 ,\
+	.jumpToPageEvent = 0 ,\
+	.jumpToPageEvent_PageNum = 0 ,\
 	.PopupWindow = &IS_PopupWindow[0],\
 	.RxEventTable = &IS_Event,\
 }
@@ -943,7 +971,7 @@ typedef struct structScreenHandleType
 }ScreenHandleType;
 
 #define SCREEN_RX_HANDLE_TOTAL_NUM	(26)	/**< 屏幕RX数据处理事件数量 */
-#define SCREEN_TX_HANDLE_TOTAL_NUM	(12)	/**< 屏幕TX数据处理事件数量 */
+#define SCREEN_TX_HANDLE_TOTAL_NUM	(13)	/**< 屏幕TX数据处理事件数量 */
 extern screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM];
 extern screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM];
 

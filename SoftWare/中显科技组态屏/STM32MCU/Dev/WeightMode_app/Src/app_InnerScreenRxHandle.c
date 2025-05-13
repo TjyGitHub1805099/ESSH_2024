@@ -445,6 +445,7 @@ UINT8 innerScreenRxHandle_JumpToDataCenterTriger(T5LType *pSdwe)
 		}
 		if(IS_VLU_DATACHOICE_PAGE_EVENT_OUTPUTCHOICE == (UINT16)pSdwe->SetData)
 		{
+			g_TrigerUSBStoreAll = APP_TRIGER_USB_STORE_ALL_VAL;
 			matched = TRUE;
 		}
 	}
@@ -644,9 +645,7 @@ UINT8 innerScreenRxHandle_OutputAll2Upan(T5LType *pSdwe)
 				InnerScreenDataCenteHandle.searchUseWeightType[i] = i;
 			}
 
-			//upanPrepareStoreData();
 			g_TrigerUSBStoreAll = APP_TRIGER_USB_STORE_ALL_VAL;
-
 		}
 	}
 	return matched;
@@ -657,6 +656,13 @@ UINT8 innerScreenRxHandle_DataCenterPageHandle(T5LType *pSdwe)
 	UINT8 matched = FALSE;
 	if(pSdwe->SetAdd == IS_ADD_DATACENTER_PAGE_EVENT)
 	{
+
+		if(IS_VLU_DATACENTER_PAGE_EVENT_OUTPUTCHOICE == pSdwe->SetData)
+		{
+			g_TrigerUSBStoreAll = APP_TRIGER_USB_STORE_ALL_VAL;
+		}
+
+
 		//下一页
 		if(IS_VLU_DATACENTER_PAGE_EVENT_PAGEDOWN == pSdwe->SetData)
 		{

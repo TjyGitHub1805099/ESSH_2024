@@ -350,6 +350,30 @@ UINT8 ISTxHandle_Event_JumpToDataCenterPage(T5LType *pSdwe)
 	return matched;
 }
 
+
+
+
+//==20250513 序号7 跳转至 导出完成 中心前处理
+UINT8 ISTxHandle_Event_JumpToPage(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	if(TRUE == pSdwe->jumpToPageEvent)
+	{
+		matched = TRUE;
+
+		if(0 != screenPublic_PageJump(pSdwe,pSdwe->jumpToPageEvent_PageNum))
+		{
+			pSdwe->jumpToPageEvent = FALSE;
+			pSdwe->jumpToPageEvent_PageNum = IS_PAGE_00_0X00_HOMEPAGEE;
+			matched = FALSE;
+		}
+
+	}
+	return matched;
+}
+
+
+
 //==20250330 序号8 工号录入处理
 UINT8 u8gonghao_pre[2*IS_LEN_GONGHAO]={0xff};
 UINT16 u16gonghaoBuf[IS_LEN_GONGHAO];
@@ -777,10 +801,11 @@ screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM]=
 	{0 , 5, &screenPublic_RemoveWeightTrigerHandle},		//==C4 event arrive:At Calibration Page , point trigerd
 	{0 , 6, &screenPublic_Cycle_GetCurPage},				//当前页面获取
 	{0 , 7, &ISTxHandle_Event_JumpToDataCenterPage},		//跳转至数据中心界面
-	{0 , 8, &ISTxHandle_Page_GongHaoLuRu},					//工号录入界面
-	{0 , 9, &ISTxHandle_Page_XueJiangLeiXingXuanZhe},		//血浆类型确认后发送给主页
-	{0 ,10, &ISTxHandle_Page_Datacenter_CycleDataHandle_20250509},	//数据中心数据发送
-	{0 ,11, &ISTxHandle_Page_Home_CycleDataHandle},			//正常周期数据
+	{0 , 8, &ISTxHandle_Event_JumpToPage},		//跳转至指定界面
+	{0 , 9, &ISTxHandle_Page_GongHaoLuRu},					//工号录入界面
+	{0 ,10, &ISTxHandle_Page_XueJiangLeiXingXuanZhe},		//血浆类型确认后发送给主页
+	{0 ,11, &ISTxHandle_Page_Datacenter_CycleDataHandle_20250509},	//数据中心数据发送
+	{0 ,12, &ISTxHandle_Page_Home_CycleDataHandle},			//正常周期数据
 };
 
 #endif// end of _APP_INNER_SCREEN_TX_HANDLE_C_
