@@ -315,6 +315,7 @@ typedef struct sInnerScreenDataCenterHandleStruct
     //20250319
     eDataCenterHandleType handle;
     uint8  screenTrigerToSingleStore;//触发外部EEPROM进行单组存储
+    uint8  screenTrigerToSingleStoreByPullDown;
     uint16 weightVlu;
     uint8 classificationIndex;
     uint8 yuangonghao[CF_STORE_GONGHAO_TYPEBYTE];

@@ -201,41 +201,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>786</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134266634</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\涓樉绉戞妧缁勬€佸睆\STM32MCU\Dev\USB_HOST\App\usb_ESSH.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\SoftWare\../USB_HOST/App/usb_ESSH.c\786</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>798</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134266670</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\涓樉绉戞妧缁勬€佸睆\STM32MCU\Dev\USB_HOST\App\usb_ESSH.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\SoftWare\../USB_HOST/App/usb_ESSH.c\798</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
           <LineNumber>1641</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134246872</Address>
+          <Address>134246916</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -245,22 +213,6 @@
           <Filename>D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\涓樉绉戞妧缁勬€佸睆\STM32MCU\Dev\WeightMode_app\Src\app_DataCenter.c</Filename>
           <ExecCommand></ExecCommand>
           <Expression>\\SoftWare\../WeightMode_app/Src/app_DataCenter.c\1641</Expression>
-        </Bp>
-        <Bp>
-          <Number>3</Number>
-          <Type>0</Type>
-          <LineNumber>1674</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134247076</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>D:\WorkSpace\GitWorkSpace\03_ESSH_2024\ESSH_2024\SoftWare\涓樉绉戞妧缁勬€佸睆\STM32MCU\Dev\WeightMode_app\Src\app_DataCenter.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\SoftWare\../WeightMode_app/Src/app_DataCenter.c\1674</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -338,6 +290,11 @@
           <count>14</count>
           <WinNumber>1</WinNumber>
           <ItemText>fileName</ItemText>
+        </Ww>
+        <Ww>
+          <count>15</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>pContex</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>

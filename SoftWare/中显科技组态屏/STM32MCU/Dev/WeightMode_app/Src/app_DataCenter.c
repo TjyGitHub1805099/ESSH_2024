@@ -95,6 +95,7 @@ tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle =
     //
     .handle = D_C_HANDLE_INIT,\
     .screenTrigerToSingleStore = 0,\
+    .screenTrigerToSingleStoreByPullDown = 1,\
     .weightVlu = 0,\
     .classificationIndex = D_C_CLASSIFICATION_NUM,\
     .yuangonghao = {0},\
@@ -1940,8 +1941,13 @@ void InnerScreenDataCenterHandle_MainFunction(void)
         //==等待屏幕触发存储
         #if 1
         case D_C_HANDLE_WAIT_TRIGER_STORE:
+        #if 0
             if(((l_CF_StoreMask & CF_STORE_MASK_CPLT) == CF_STORE_MASK_CPLT)//满足则进行存储
               && (TRUE == pContex->screenTrigerToSingleStore))//等待屏幕主界面触发存储
+        #else
+            if(((l_CF_StoreMask & CF_STORE_MASK_CPLT) == CF_STORE_MASK_CPLT)//满足则进行存储
+               && (jiluwanchengkeyishaomiao == 0))
+        #endif
             {
                 l_CF_StoreMask &= (~CF_STORE_MASK_CPLT);
                 pContex->handle = D_C_HANDLE_STORE2EE;
