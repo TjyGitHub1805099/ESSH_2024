@@ -35,7 +35,8 @@ typedef enum
     U_S_HANDLE_TYPE_IDLE_ORDER_CHECK = 12,
     U_S_HANDLE_TYPE_IDLE_STOREDATA_OUTPUT = 13,
     U_S_HANDLE_TYPE_FILE_WRITE_DELAY = 14,//write file delay
-    U_S_HANDLE_TYPE_FILECLOSE_DELAY = 15,//close file delay
+    U_S_HANDLE_TYPE_UPAN_OUTPUT_CPLT = 16,//判断
+    U_S_HANDLE_TYPE_FILE_CLOSE_DELAY = 17,//close file delay
 
     U_S_HANDLE_TYPE_MAX
 }eUsbStoreHanldeType;
@@ -48,7 +49,7 @@ typedef enum
 typedef uint8 (*UsbHandleCallback)(eUsbStoreHanldeType, uint8); 
 
 #define U_S_RETRY_TIME              (3)//3
-#define U_S_RETRY_OFFSET_TICKS      (1000)//1000ms
+#define U_S_RETRY_OFFSET_TICKS      (500)//500ms
 
 #define U_S_SINGLE_WRITE_MAX_LEN    (32)//!!! 每次写入U盘文件的字节数 !!!
 
@@ -82,7 +83,7 @@ typedef struct sUsbStoreStruct
     eUsbStoreHanldeType retryRecodeHandleType;
 }tUsbStoreHandleStruct;
 
-extern void USBIf_Mainfunction(uint8 driver_status);
+extern void USBIf_Mainfunction(ApplicationTypeDef driver_status);
 
 #if 0
 extern uint8 upanPrepareStoreData(void);

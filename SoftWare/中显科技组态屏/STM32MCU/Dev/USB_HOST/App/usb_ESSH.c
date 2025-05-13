@@ -9,171 +9,58 @@
 #include "app_DataCenter.h"
 #include "app_syspara.h"
 
-extern ApplicationTypeDef Appli_state;
-extern USBH_HandleTypeDef hUsbHostFS;
 extern char USBHPath[4]; // USBH logical drive path
-
-//filename
-char fileName_User[5] = CLASSIFICATION_OUTPUT_FILE_USERNAME;
-char fileName_Time[CLASSIFICATION_OUTPUT_FILE_MIDLE_LEN] = "2024-09-10-23-45-12";
-char fileName[CLASSIFICATION_OUTPUT_FILE_LEN]="ESSH-xxxx-2024-09-10-23-45-12.txt";
-char fileData[20]="test1.txt - 20";
-
-FATFS FatfsUDisk; // File system object for USB disk logical drive
-FIL myFile; // File object
- //参考 https://blog.csdn.net/qq_43559363/article/details/127920402
-void MSC_Application(void)
-{
-    FRESULT fres; // FatFs function common result code
-    uint32_t byteswrite;
-    //uint8_t str[] = "hello world!";
- 
-    /* Register the file system object to the FatFs module */
-    if( f_mount(&FatfsUDisk, (TCHAR const*)USBHPath, 0) != FR_OK)
-    {
-        Error_Handler(); //FatFs Initialization Error
-    }
-    else
-    {
-		#if 1
-        /* Create and Open a new text file object with write access */
-        if(f_open(&myFile, fileName, FA_CREATE_ALWAYS | FA_WRITE) != FR_OK)
-        {
-            Error_Handler(); //'STM32.TXT' file Open for write Error
-        }
-        else
-        {
-            fres = f_write(&myFile, fileData, sizeof(fileData), (void *)&byteswrite);
-            if(byteswrite == 0 || (fres != FR_OK))
-            {
-                Error_Handler();
-            }
-            else
-            {
-                f_close(&myFile); //Close the open text file
-            }
-        }
-		#else
-			/* Create and Open a new text file object with write access */
-			if(f_open(&myFile, "ProgramEdit.csv", FA_CREATE_ALWAYS | FA_WRITE) != FR_OK)
-			{
-				Error_Handler(); //'ProgramEdit.csv' file Open for write Error
-			}
-			else
-			{
-				f_close(&myFile);
-				fres = f_open(&myFile,"ProgramEdit.csv",FA_CREATE_ALWAYS|FA_WRITE);
-				fres = f_printf(&myFile,"123");
-				f_close(&myFile); //Close the open text file
-			}
-		
-		
-		#endif
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+uint8 lc_fileName[8] = "DDHHMMSS";//日时分秒
 
 /*
-==========================================================================================
-|  0000  |  0123456789ABC  |  2024/12/12 12:12:12  |  0056(ml)  |  0055  |  0010 ~ 0100  |
-==========================================================================================
-|  0001  |  0123456789ABC  |  2024/12/12 12:12:12  |  0056(ml)  |  0055  |  0010 ~ 0100  |
-==========================================================================================
-|  0002  |  0123456789ABC  |  2024/12/12 12:12:12  |  0056(ml)  |  0055  |  0010 ~ 0100  |
-==========================================================================================
-|  0003  |  0123456789ABC  |  2024/12/12 12:12:12  |  0056(ml)  |  0055  |  0010 ~ 0100  |
-==========================================================================================
-|  0000  |  0123456789ABC  |  2024/12/12 12:12:12  |  0056(ml)  |  0055  |  0010 ~ 0100  |
-==========================================================================================
-|  0001  |  0123456789ABC  |  2024/12/12 12:12:12  |  0056(ml)  |  0055  |  0010 ~ 0100  |
-==========================================================================================
-|  0002  |  0123456789ABC  |  2024/12/12 12:12:12  |  0056(ml)  |  0055  |  0010 ~ 0100  |
-==========================================================================================
-|  0003  |  0123456789ABC  |  2024/12/12 12:12:12  |  0056(ml)  |  0055  |  0010 ~ 0100  |
-==========================================================================================
+导出文件格式
 
 */
 
-#if 0
-#define UPAN_STRORE_LINE_LINE_DIFF  "==========================================================================================\r"
-#define UPAN_STRORE_LINE_START      "|  "
-#define UPAN_STRORE_LINE_PART_DIFF  "  |  "
-#define UPAN_STRORE_LINE_END        "  |\r"
-#define UPAN_STRORE_LINE_MAX_LEN    (91)
-#define UPAN_STRORE_GROUP_NUM       (2)
-#else
 //编码方式问题 这里不能采用 
-//#define UPAN_STRORE_LINE_HEAD "员工号 |     献血条码     |       献血时间      |   重量   |    类型    | 规格 |\r";
+//#define UPAN_STRORE_SINGLE_GROUP_HEAD "员工号 |     献血条码     |       献血时间      |   重量   |    类型    | 规格 |\r";
 
-uint8 UPAN_STRORE_LINE_HEAD[81] = 
+uint8 UPAN_STRORE_SINGLE_GROUP_HEAD[81] = 
 {
-//员      工        号              | 
-0xD4,0xB1,0xB9,0xA4,0xBA,0xC5,0x20,0x7C,0x20,0x20,
-//             献        血        条         码
-0x20,0x20,0x20,0xCF,0xD7,0xD1,0xAA,0xCC,0xF5,0xC2,
-//                              |
-0xEB,0x20,0x20,0x20,0x20,0x20,0x7C,0x20,0x20,0x20,
-//                  献        血         时
-0x20,0x20,0x20,0x20,0xCF,0xD7,0xD1,0xAA,0xCA,0xB1,
-//间                                       |
-0xBC,0xE4,0x20,0x20,0x20,0x20,0x20,0x20,0x7C,0x20,
-//        重        量                         |
-0x20,0x20,0xD6,0xD8,0xC1,0xBF,0x20,0x20,0x20,0x7C,
-//                  类        型
-0x20,0x20,0x20,0x20,0xC0,0xE0,0xD0,0xCD,0x20,0x20,
-//          |       规        格               |
-0x20,0x20,0x7C,0x20,0xB9,0xE6,0xB8,0xF1,0x20,0x7C,
-0x0D,
+    //员      工        号              | 
+    0xD4,0xB1,0xB9,0xA4,0xBA,0xC5,0x20,0x7C,0x20,0x20,
+    //             献        血        条         码
+    0x20,0x20,0x20,0xCF,0xD7,0xD1,0xAA,0xCC,0xF5,0xC2,
+    //                              |
+    0xEB,0x20,0x20,0x20,0x20,0x20,0x7C,0x20,0x20,0x20,
+    //                  献        血         时
+    0x20,0x20,0x20,0x20,0xCF,0xD7,0xD1,0xAA,0xCA,0xB1,
+    //间                                       |
+    0xBC,0xE4,0x20,0x20,0x20,0x20,0x20,0x20,0x7C,0x20,
+    //        重        量                         |
+    0x20,0x20,0xD6,0xD8,0xC1,0xBF,0x20,0x20,0x20,0x7C,
+    //                  类        型
+    0x20,0x20,0x20,0x20,0xC0,0xE0,0xD0,0xCD,0x20,0x20,
+    //          |       规        格               |
+    0x20,0x20,0x7C,0x20,0xB9,0xE6,0xB8,0xF1,0x20,0x7C,
+    0x0D,
 };
 
-
-uint8 UPAN_STRORE_LINE_ENDD[9] = 
+uint8 UPAN_STRORE_SINGLE_GROUP_END[9] = 
 {
-//导       出        完        成
-0xB5,0xBC,0xB3,0xF6,0xCD,0xEA,0xB3,0xC9,0x0D 
+//  导        出        完         成
+    0xB5,0xBC,0xB3,0xF6,0xCD,0xEA,0xB3,0xC9,0x0D 
 };
 
 //"导出完成\r";
-#define WEITE_UPAN_DELAY        (100)//100ms
 
 #define UPAN_STRORE_LINE_LINE_DIFF  "==========================================================================================\r"
 #define UPAN_STRORE_LINE_START      "| "
 #define UPAN_STRORE_LINE_PART_DIFF  " | "
 #define UPAN_STRORE_LINE_END        " |"
 #define UPAN_STRORE_LINE_MAX_LEN    (91)
-#define UPAN_STRORE_GROUP_NUM       (2)
-#endif
+#define UPAN_STRORE_GROUP_NUM       (10)
+
+
+#define WEITE_UPAN_2ORDER_DIFF        (100)//2条写命令延时 100ms
+
 uint16 g_TrigerUSBStoreAll = APP_TRIGER_USB_STORE_EMPTY;
-
-uint8 self_test_data[100]="1234567890qwertyuiopasdfghjklzxcvbnm";
-
 uint8 upanStoreDataGroup[2*UPAN_STRORE_GROUP_NUM][UPAN_STRORE_LINE_MAX_LEN];
-uint16 upanStoreOffset_i = 0;
 
 tUsbStoreHandleStruct UsbStoreHandle = {
     //usb driver status
@@ -185,7 +72,7 @@ tUsbStoreHandleStruct UsbStoreHandle = {
     .usbIfCallback = 0,
     .fileName ="test0918.txt",
     .filePosition = 0,
-    .pFileData = self_test_data,
+    .pFileData = &upanStoreDataGroup[0][0],
     .handleLen = 20,
     .handleLenRemain = 20,
     .byteWriten = 0,
@@ -261,180 +148,7 @@ uint8 USBIf_OrderTrigger_Write(tUsbStoreHandleStruct *pContex, uint8 *pFileName,
     return ret;
 }
 
-//usb if order write trigger
-uint8 USBIf_OrderContinue_Write(tUsbStoreHandleStruct *pContex, uint8 *pFileName, uint32 position, uint32 len , uint8 *pWriteInData , UsbHandleCallback callout)
-{
-    uint8 ret = 0 ;
-    if(U_S_HANDLE_TRIGER == pContex->usbIfTrigger)
-    {
-        if(pContex->usbIfTrigger_Order == U_S_HANDLE_TYPE_WRITE_ORDER)
-        {
-            pContex->filePosition = position;
-            pContex->pFileData = pWriteInData;
-        }
-    }
-    return ret;
-}
 
-
-#if 0
-uint8 upanPrepareStoreData(void)
-{
-    uint8 ret = 0 , i = 0 , *pData = 0 , findoutLine = 0 , *pCpyData , tempType;
-    uint16 data_i = 0 , barcode_offset , payloadOffset;
-    tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
-    struct tm lUTCDecodeTime;
-    sint64 lS64UTCTime = 0;
-    UINT32 classifyIdentify , classifyMin , classifyMax;
-
-    //U盘 : 出于空闲状态
-    if(U_S_HANDLE_EMPTY == UsbStoreHandle.usbIfTrigger)
-    {
-        pContex->searchStartIndex_Use_WeightType = upanStoreOffset_i;
-        for( i = 0 ; i < UPAN_STRORE_GROUP_NUM ; i++)
-        {
-            ret = InnerScreenDataCenterHandle_Searching_Use_WeightType(pContex);
-            if(1 == ret)
-            {
-                memcpy(&upanStoreDataGroup[0+2*i][0],UPAN_STRORE_LINE_LINE_DIFF,UPAN_STRORE_LINE_MAX_LEN);
-                //
-                pData = &upanStoreDataGroup[1+2*i][0];
-                //每行：开始==
-                memcpy(pData,UPAN_STRORE_LINE_START,3);
-                data_i = 3;
-                //每行：自身序号
-                pData[data_i+0] = '0' + upanStoreOffset_i/1000;
-                pData[data_i+1] = '0' + upanStoreOffset_i%1000/100;
-                pData[data_i+2] = '0' + upanStoreOffset_i%100/10;
-                pData[data_i+3] = '0' + upanStoreOffset_i%10/1;
-                data_i += 4;
-                //每行：间隔==
-                memcpy((pData+data_i),UPAN_STRORE_LINE_PART_DIFF,5);
-                data_i += 5;
-                //每行：录入条码值
-                barcode_offset = upanStoreOffset_i*CLASSIFICATION_STORE_DATA_SINGLE_LEN;
-                pCpyData = &InnerScreenDataCenteHandle.dataCenterPayload[barcode_offset];
-                memcpy((pData+data_i),pCpyData,INNER_SCREEN_DATACENTER_LENOF_BARCODE);
-                data_i += INNER_SCREEN_DATACENTER_LENOF_BARCODE;
-                //每行：间隔==
-                memcpy((pData+data_i),UPAN_STRORE_LINE_PART_DIFF,5);
-                data_i += 5;
-                //每行：录入时间
-                payloadOffset = upanStoreOffset_i;
-                payloadOffset *= CLASSIFICATION_STORE_CFG_TIME_TYPEBYTE;
-                lS64UTCTime = 0;
-                lS64UTCTime +=  InnerScreenDataCenteHandle.cfgInfo_utcTime[payloadOffset+0];
-                lS64UTCTime <<= 8;
-                lS64UTCTime +=  InnerScreenDataCenteHandle.cfgInfo_utcTime[payloadOffset+1];
-                lS64UTCTime <<= 8;
-                lS64UTCTime +=  InnerScreenDataCenteHandle.cfgInfo_utcTime[payloadOffset+2];
-                lS64UTCTime <<= 8;
-                lS64UTCTime +=  InnerScreenDataCenteHandle.cfgInfo_utcTime[payloadOffset+3];
-                lUTCDecodeTime = *(mygmtime(&lS64UTCTime));
-
-                pData[data_i + 0] = '0' + lUTCDecodeTime.tm_year/1000;
-                pData[data_i + 1] = '0' + lUTCDecodeTime.tm_year%1000/100;
-                pData[data_i + 2] = '0' + lUTCDecodeTime.tm_year%100/10;
-                pData[data_i + 3] = '0' + lUTCDecodeTime.tm_year%10;
-
-                pData[data_i + 4] = '/';
-                pData[data_i + 5] = '0' + lUTCDecodeTime.tm_mon%100/10;
-                pData[data_i + 6] = '0' + lUTCDecodeTime.tm_mon%10;
-                        
-                pData[data_i + 7] = '/';
-                pData[data_i + 8] = '0' + lUTCDecodeTime.tm_mday%100/10;
-                pData[data_i + 9] = '0' + lUTCDecodeTime.tm_mday%10;
-                        
-                pData[data_i + 10] = ' ';
-                pData[data_i + 11] = '0' + lUTCDecodeTime.tm_hour%100/10;
-                pData[data_i + 12] = '0' + lUTCDecodeTime.tm_hour%10;
-                        
-                pData[data_i + 13] = ':';
-                pData[data_i + 14] = '0' + lUTCDecodeTime.tm_min%100/10;
-                pData[data_i + 15] = '0' + lUTCDecodeTime.tm_min%10;
-                        
-                pData[data_i + 16] = ':';
-                pData[data_i + 17] = '0' + lUTCDecodeTime.tm_sec%100/10;
-                pData[data_i + 18] = '0' + lUTCDecodeTime.tm_sec%10;
-
-                data_i += 19;
-                //每行：间隔==
-                memcpy((pData+data_i),UPAN_STRORE_LINE_PART_DIFF,5);
-                data_i += 5;
-                //每行：录入重量
-                barcode_offset = upanStoreOffset_i*CLASSIFICATION_STORE_DATA_SINGLE_LEN;
-                barcode_offset += INNER_SCREEN_DATACENTER_LENOF_BARCODE;
-                pCpyData = &InnerScreenDataCenteHandle.dataCenterPayload[barcode_offset];
-                memcpy((pData+data_i),pCpyData,4);
-                data_i += 4;
-                pData[data_i+0] = '(';
-                pData[data_i+1] = 'm';
-                pData[data_i+2] = 'l';
-                pData[data_i+3] = ')';
-                data_i += 4;
-                //每行：间隔==
-                memcpy((pData+data_i),UPAN_STRORE_LINE_PART_DIFF,5);
-                data_i += 5;            
-                //5.表格中的：分类结果
-                tempType = pContex->searchOutType%D_C_CLASSIFICATION_NUM;
-                classifyIdentify =  gSystemPara.Sizer_ClassifySet[tempType][0];
-                pData[data_i+0] = '0' + classifyIdentify/1000;
-                pData[data_i+1] = '0' + classifyIdentify%1000/100;
-                pData[data_i+2] = '0' + classifyIdentify%100/10;
-                pData[data_i+3] = '0' + classifyIdentify%10;
-                data_i += 4;
-                //每行：间隔==
-                memcpy((pData+data_i),UPAN_STRORE_LINE_PART_DIFF,5);
-                data_i += 5;  
-                //6.表格中的：分类标准
-                tempType = pContex->searchOutType%D_C_CLASSIFICATION_NUM;
-                classifyMin =  gSystemPara.Sizer_ClassifySet[tempType][1];
-                classifyMax =  gSystemPara.Sizer_ClassifySet[tempType][2];
-                pData[data_i+0] = '0' + classifyMin/1000;
-                pData[data_i+1] = '0' + classifyMin%1000/100;
-                pData[data_i+2] = '0' + classifyMin%100/10;
-                pData[data_i+3] = '0' + classifyMin%10;
-                pData[data_i+4] = ' ';
-                data_i += 5;
-                pData[data_i+0] = '~';
-                data_i += 1;
-                pData[data_i+0] = ' ';
-                data_i += 1;
-                pData[data_i+0] = '0' + classifyMax/1000;
-                pData[data_i+1] = '0' + classifyMax%1000/100;
-                pData[data_i+2] = '0' + classifyMax%100/10;
-                pData[data_i+3] = '0' + classifyMax%10;
-                data_i += 4;
-                //每行：结束
-                memcpy((pData+data_i),UPAN_STRORE_LINE_END,4);
-                data_i += 4;            
-
-
-                upanStoreOffset_i++;
-                findoutLine++;
-            }
-            else
-            {
-                break;
-            }       
-        }
-
-        //如果至少找到1条则触发导出到U盘
-        if(findoutLine > 0)
-        {
-            USBIf_OrderTrigger_Write(&UsbStoreHandle,
-                                    "ESSH",
-                                    0,
-                                    findoutLine*UPAN_STRORE_LINE_MAX_LEN*2,
-                                    &upanStoreDataGroup[0][0],
-                                    0);
-        }
-    }
-    //
-    return findoutLine;
-
-}
-#else
 //一直查找 直到找出max_mun个 或则 start_idx序号超出
 uint8 upanPrepareStoreData_StoreAll_20250512_While1(uint16 *start_idx , uint16 max_mun)
 {
@@ -735,38 +449,75 @@ uint8 upanPrepareStoreData_StoreAll_20250512(uint16 *start_idx)
     return findoutLine;
 }
 
-#endif
-
 //https://www.runoob.com/cprogramming/c-function-fopen.html
+//https://blog.csdn.net/llllllillllillli/article/details/129149203
 //f_open f_wwite f_size f_lseek
 //mainfunction
+
 void USBIf_Mainfunction(ApplicationTypeDef driver_status)
 {
     tUsbStoreHandleStruct *pContex = &UsbStoreHandle;
-    static uint16 lstart_idx = 0 ;
+    static uint16 eepromStartIdx = 0 ;
     static uint32 weiteDelayTick = 0 , closeDelayTick = 0;
     UINT8 findoutLine = 0 ;
-    static uint8 writeEndEnable = 0 ;
-    uint8 ret = 0 ;
+    uint8 ret = 0;
     FRESULT f_ret;
-    static uint8 fileName[8] = "DDHHMMSS";//日时分秒
+    static uint8 fmout_status = FALSE , l_UserClassActive = FALSE;
 
     static uint8 upan_plug_pre = FALSE ,upan_plug_cur = FALSE , upan_output_faild = 0;
 
     pContex->usbDriverStatus = driver_status;
+    #if 0
+    switch(pContex->usbDriverStatus)
+    {
+        case APPLICATION_READY:
+            if(FALSE == fmout_status)
+            {
+                f_ret = f_mount(&pContex->FatfsUDisk, (TCHAR const*)USBHPath, 0);
+                if(FR_OK == f_ret)
+                {
+                    fmout_status = TRUE ;
+                    upan_plug_cur = TRUE;
+                    l_UserClassActive = 1;//直到user class active
+                    pContex->handleType = U_S_HANDLE_TYPE_IDLE;
+                    g_TrigerUSBStoreAll = APP_TRIGER_USB_STORE_EMPTY;
+                }               
+            }
+        break;
+        
+        case APPLICATION_DISCONNECT:
+            if(TRUE == fmout_status)
+            {
+                f_ret = f_mount(NULL_PTR, (TCHAR const*)USBHPath, 0);
+                if(FR_OK == f_ret)
+                {
+                    upan_plug_cur = FALSE;
+                    fmout_status = FALSE ;
+                    l_UserClassActive = 0 ;
+                }                
+            }
+      
+        break;
 
-    if(APPLICATION_READY == pContex->usbDriverStatus)
+        default:
+            l_UserClassActive = 0 ;
+        break;
+    }
+#else
+
+    if(APPLICATION_READY == pContex->usbDriverStatus)//HOST_USER_CLASS_ACTIVE
     {
         upan_plug_cur = TRUE;
-        ret = 1;//直到U盘ready
+        l_UserClassActive = 1;//直到user class active
     }
     else
     {
+        l_UserClassActive = 0;
         upan_plug_cur = FALSE;
         pContex->handleType = U_S_HANDLE_TYPE_IDLE;
         g_TrigerUSBStoreAll = APP_TRIGER_USB_STORE_EMPTY;
     }
-
+#endif
     //拔插U盘后的提示窗
     if(upan_plug_cur != upan_plug_pre)
     {
@@ -783,37 +534,38 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
         }
     }
 
-    //
-    if(1 == ret)
+    //如果USB-HOST接口已经就绪
+    if(1 == l_UserClassActive)
     {
         switch(pContex->handleType)
         {
-            case U_S_HANDLE_TYPE_IDLE:// = 0
+            //[空闲状态] :  判断是否有外部事件 触发导出到U盘
+            case U_S_HANDLE_TYPE_IDLE:
                 if(APP_TRIGER_USB_STORE_ALL_VAL == g_TrigerUSBStoreAll)
                 {
-                    fileName[0] = '0' + gUTCDecodeTime.tm_mon/10;
-                    fileName[1] = '0' + gUTCDecodeTime.tm_mon%10;
-                    fileName[2] = '0' + gUTCDecodeTime.tm_hour/10;
-                    fileName[3] = '0' + gUTCDecodeTime.tm_hour%10;
-                    fileName[4] = '0' + gUTCDecodeTime.tm_min/10;
-                    fileName[5] = '0' + gUTCDecodeTime.tm_min%10;
-                    fileName[6] = '0' + gUTCDecodeTime.tm_sec/10;
-                    fileName[7] = '0' + gUTCDecodeTime.tm_sec%10;
+                    lc_fileName[0] = '0' + gUTCDecodeTime.tm_mon/10;
+                    lc_fileName[1] = '0' + gUTCDecodeTime.tm_mon%10;
+                    lc_fileName[2] = '0' + gUTCDecodeTime.tm_hour/10;
+                    lc_fileName[3] = '0' + gUTCDecodeTime.tm_hour%10;
+                    lc_fileName[4] = '0' + gUTCDecodeTime.tm_min/10;
+                    lc_fileName[5] = '0' + gUTCDecodeTime.tm_min%10;
+                    lc_fileName[6] = '0' + gUTCDecodeTime.tm_sec/10;
+                    lc_fileName[7] = '0' + gUTCDecodeTime.tm_sec%10;
                     
-                    lstart_idx = 0 ;
+                    eepromStartIdx = 0 ;
                     pContex->handleType = U_S_HANDLE_TYPE_IDLE_WRITE_HEAD;//写排头
 
                     upan_output_faild = 0 ;
                 }            
             break;
-
+            
+            //[写抬头状态] :  判断是否有外部事件 触发导出到U盘
             case U_S_HANDLE_TYPE_IDLE_WRITE_HEAD:
-                //会设置 pContex->usbIfTrigger = U_S_HANDLE_TRIGER
                 USBIf_OrderTrigger_Write(&UsbStoreHandle,
-                                        fileName,
+                                        lc_fileName,
                                         0,
-                                        (sizeof(UPAN_STRORE_LINE_HEAD)),
-                                        UPAN_STRORE_LINE_HEAD,
+                                        (sizeof(UPAN_STRORE_SINGLE_GROUP_HEAD)),
+                                        UPAN_STRORE_SINGLE_GROUP_HEAD,
                                         0);
                 //
                 pContex->handleType = U_S_HANDLE_TYPE_IDLE_ORDER_CHECK; 
@@ -821,13 +573,13 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
             break;
   
             case U_S_HANDLE_TYPE_IDLE_STOREDATA_OUTPUT:
-                findoutLine = upanPrepareStoreData_StoreAll_20250512(&lstart_idx);//每次对多触发2组数据存U盘
+                findoutLine = upanPrepareStoreData_StoreAll_20250512(&eepromStartIdx);//每次对多触发2组数据存U盘
                 //==== 如果至少找到1条则触发导出到U盘
                 if(findoutLine > 0)
                 {
                     //会设置 pContex->usbIfTrigger = U_S_HANDLE_TRIGER
                     USBIf_OrderTrigger_Write(&UsbStoreHandle,
-                                            fileName,
+                                            lc_fileName,
                                             0,
                                             findoutLine*UPAN_STRORE_LINE_MAX_LEN*2,
                                             &upanStoreDataGroup[0][0],
@@ -847,10 +599,10 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
             case U_S_HANDLE_TYPE_IDLE_WRITE_END:
                 //会设置 pContex->usbIfTrigger = U_S_HANDLE_TRIGER
                 USBIf_OrderTrigger_Write(&UsbStoreHandle,
-                                        fileName,
+                                        lc_fileName,
                                         0,
-                                        sizeof(UPAN_STRORE_LINE_ENDD),
-                                        UPAN_STRORE_LINE_ENDD,
+                                        sizeof(UPAN_STRORE_SINGLE_GROUP_END),
+                                        UPAN_STRORE_SINGLE_GROUP_END,
                                         0);  
                 pContex->handleType = U_S_HANDLE_TYPE_IDLE_ORDER_CHECK;   
                 pContex->nextHandleType = U_S_HANDLE_TYPE_IDLE; 
@@ -869,8 +621,7 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
             //=========================================================================
             // 第一步 : U盘挂载 f_mount(fs, path, opt)
             case U_S_HANDLE_TYPE_MOUNT:
-            {
-                f_ret = f_mount(&pContex->FatfsUDisk, (TCHAR const*)USBHPath, 1);
+                f_ret = f_mount(&pContex->FatfsUDisk, (TCHAR const*)USBHPath, 0);//!!!!!!!! 必须用1 !!!!!!!!!!
                 if(FR_OK == f_ret)
                 {
                     pContex->retryCnt = U_S_RETRY_TIME;
@@ -880,14 +631,12 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
                 else
                 {
                     pContex->retryOffsetTicks = U_S_RETRY_OFFSET_TICKS;
-                    pContex->retryRecodeHandleType = pContex->handleType;
+                    pContex->retryRecodeHandleType = pContex->handleType;//记录当前步骤为：f_mount 挂载
                     pContex->handleType = U_S_HANDLE_TYPE_RETRY_DELAY;
                 }
-            }    
             break;
 
             // 第二步 : 打开文件 open file
-            //https://blog.csdn.net/llllllillllillli/article/details/129149203
             case U_S_HANDLE_TYPE_FILE_OPEN:
             {
                 #if 1
@@ -900,12 +649,11 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
                     }
                     else//如果文件不存在 则以创建文件 可写方式打开
                     {
-                        f_ret = f_open(&pContex->myFile, (const TCHAR*)&pContex->fileName[0], FA_CREATE_ALWAYS|FA_WRITE|FA_READ);
+                        f_ret = f_open(&pContex->myFile, (const TCHAR*)&pContex->fileName[0], FA_CREATE_ALWAYS|FA_WRITE);
                     } 
                 #else
-                    f_ret = f_open(&pContex->myFile, (const TCHAR*)&pContex->fileName[0], FA_OPEN_ALWAYS|FA_WRITE);
+                    f_ret = f_open(&pContex->myFile, (const TCHAR*)&pContex->fileName[0], FA_OPEN_ALWAYS|FA_WRITE|FA_READ);
                 #endif
-                
                 
                 if(FR_OK == f_ret)//f_open成功
                 {
@@ -930,64 +678,25 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
             } 
             break;
 
-            // 第三步 : 如果是读文件 -- 未处理
-            case U_S_HANDLE_TYPE_FILE_READ:
-            {
-                ret = 1;//f_read
-                if(FR_OK == ret)
-                {
-                    pContex->usbIfCallback(U_S_HANDLE_TYPE_FILE_READ,1);
-                    pContex->retryCnt = U_S_RETRY_TIME;
-                    pContex->retryOffsetTicks = U_S_RETRY_OFFSET_TICKS;
-                    pContex->handleType = U_S_HANDLE_TYPE_FILECLOSE;
-                }
-                else
-                {
-                    pContex->retryOffsetTicks = U_S_RETRY_OFFSET_TICKS;
-                    pContex->retryRecodeHandleType = pContex->handleType;
-                    pContex->handleType = U_S_HANDLE_TYPE_RETRY_DELAY;
-                }
-            }
-            break;
-
             // 第四步 : 如果是写文件 f_write
             //https://blog.csdn.net/lbaihao/article/details/75145256
             case U_S_HANDLE_TYPE_FILE_WRITE:
-            {
-                //
-                #if 0//move pointer
-                    f_lseek(&pContex->fileContex, f_size(&pContex->fileContex));
-                    f_ret = f_write(&pContex->fileContex, pContex->pFileData, pContex->fileLen, &pContex->byteWriten); 
-                    FRESULT f_write (
-                                    FIL* fp,			/* Pointer to the file object */
-                                    const void* buff,	/* Pointer to the data to be written */
-                                    UINT btw,			/* Number of bytes to write */
-                                    UINT* bw			/* Pointer to number of bytes written */
-                                )
-
-                #endif
                 //1.移动指针到文件末尾 : move pointer to file end
                 f_ret = f_lseek(&pContex->myFile, f_size(&pContex->myFile));
-
-                //2.写内容 : f_write
-                if(FR_OK == f_ret)
+                //2.单次最长写32字节
+                pContex->handleLen = pContex->handleLenRemain;
+                if(pContex->handleLen >= U_S_SINGLE_WRITE_MAX_LEN)
                 {
-                    pContex->handleLen = pContex->handleLenRemain;
-                    if(pContex->handleLen >= U_S_SINGLE_WRITE_MAX_LEN)
-                    {
-                        pContex->handleLen = U_S_SINGLE_WRITE_MAX_LEN;
-                    }
-                    //
-                    if(pContex->handleLen > 0)
-                    {
-                        f_ret = f_write(&pContex->myFile, &pContex->pFileData[pContex->handleOffset], pContex->handleLen, &pContex->byteWriten);
-                    }
+                    pContex->handleLen = U_S_SINGLE_WRITE_MAX_LEN;
                 }
-
-                //3.写结果判断 : check result
+                //3.写内容 : f_write
+                if(pContex->handleLen > 0)
+                {
+                    f_ret = f_write(&pContex->myFile, &pContex->pFileData[pContex->handleOffset], pContex->handleLen, &pContex->byteWriten);
+                }
+                //4.写结果判断 : check result
                 if(FR_OK == f_ret)//成功
                 {
-                    weiteDelayTick = WEITE_UPAN_DELAY;
 
                     pContex->retryCnt = U_S_RETRY_TIME;
                     pContex->retryOffsetTicks = U_S_RETRY_OFFSET_TICKS;
@@ -999,7 +708,12 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
                         pContex->handleOffset = 0;
                         pContex->retryCnt = U_S_RETRY_TIME;
                         pContex->retryOffsetTicks = U_S_RETRY_OFFSET_TICKS;
-                        pContex->handleType = U_S_HANDLE_TYPE_FILE_WRITE_DELAY;//如果写的长度完全写入 则关闭文件
+                        pContex->handleType = U_S_HANDLE_TYPE_FILECLOSE;//如果写的长度完全写入 则关闭文件
+                    }
+                    else
+                    {
+                        weiteDelayTick = WEITE_UPAN_2ORDER_DIFF;
+                        pContex->handleType = U_S_HANDLE_TYPE_FILE_WRITE_DELAY;//2个写命令之间的延时 
                     }
                 }
                 else
@@ -1008,7 +722,6 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
                     pContex->retryRecodeHandleType = pContex->handleType;
                     pContex->handleType = U_S_HANDLE_TYPE_RETRY_DELAY;
                 }
-            }
             break;
 
             case U_S_HANDLE_TYPE_FILE_WRITE_DELAY:
@@ -1018,17 +731,9 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
                 }
                 else
                 {
-                    f_ret = f_sync(&pContex->myFile);
-                    if(FR_OK == f_ret)
-                    {
-                        pContex->handleType = U_S_HANDLE_TYPE_FILECLOSE;
-                    }
-                    else
-                    {
-                        pContex->retryOffsetTicks = U_S_RETRY_OFFSET_TICKS;
-                        pContex->retryRecodeHandleType = pContex->handleType;
-                        pContex->handleType = U_S_HANDLE_TYPE_RETRY_DELAY;
-                    }
+                    pContex->retryCnt = U_S_RETRY_TIME;
+                    pContex->retryOffsetTicks = U_S_RETRY_OFFSET_TICKS;
+                    pContex->handleType = U_S_HANDLE_TYPE_FILE_WRITE;//延时后 继续写
                 }
             break;
 
@@ -1037,13 +742,12 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
             case U_S_HANDLE_TYPE_FILECLOSE:
             {
                 f_ret = f_close(&pContex->myFile); //Close the open text file
-
                 if(FR_OK == f_ret)
                 {
-                    closeDelayTick = WEITE_UPAN_DELAY;
+                    closeDelayTick = WEITE_UPAN_2ORDER_DIFF;
                     pContex->retryCnt = U_S_RETRY_TIME;
                     pContex->retryOffsetTicks = U_S_RETRY_OFFSET_TICKS;
-                    pContex->handleType = U_S_HANDLE_TYPE_FILECLOSE_DELAY;//关闭文件成功后 则取消挂载U盘
+                    pContex->handleType = U_S_HANDLE_TYPE_FILE_CLOSE_DELAY;//关闭文件成功后 延时
                 }
                 else
                 {
@@ -1053,58 +757,47 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
                 }
             }
             break;
-            case U_S_HANDLE_TYPE_FILECLOSE_DELAY:
+
+            case U_S_HANDLE_TYPE_FILE_CLOSE_DELAY:
                 if(closeDelayTick > 1)
                 {
                     closeDelayTick--;
                 }
                 else
                 {
-                    pContex->handleType = U_S_HANDLE_TYPE_UNMOUNT;
+                    pContex->handleType = U_S_HANDLE_TYPE_UPAN_OUTPUT_CPLT;
                 }
             break;
 
-            // 第六步 : 取消U盘挂载 USB unmount
-            case U_S_HANDLE_TYPE_UNMOUNT:
-            {
-                //Pointer to the file system object (NULL:unmount)
-                f_ret = f_mount(0, (TCHAR const*)USBHPath, 1);//空指针 则就是 取消挂载
-                if(FR_OK == f_ret)
+            case U_S_HANDLE_TYPE_UPAN_OUTPUT_CPLT:
+                pContex->retryCnt = U_S_RETRY_TIME;
+                pContex->retryOffsetTicks = U_S_RETRY_OFFSET_TICKS;
+                pContex->usbIfTrigger = U_S_HANDLE_EMPTY;
+                //
+                if(U_S_HANDLE_TYPE_IDLE != pContex->nextHandleType)
                 {
-                    pContex->retryCnt = U_S_RETRY_TIME;
-                    pContex->retryOffsetTicks = U_S_RETRY_OFFSET_TICKS;
-                    pContex->usbIfTrigger = U_S_HANDLE_EMPTY;
-                    //
-                    if(U_S_HANDLE_TYPE_IDLE != pContex->nextHandleType)
-                    {
-                        pContex->handleType = pContex->nextHandleType;
-                    }
-                    else
-                    {
-                        //头 数据 尾 : 都写入
-                        g_TrigerUSBStoreAll = APP_TRIGER_USB_STORE_EMPTY;
-                        InnerScreenDataCenterHandle_WeightClassification_Init(&InnerScreenDataCenteHandle);
-                        //
-                        pContex->handleType = U_S_HANDLE_TYPE_IDLE;
-                        if(TRUE == upan_output_faild)
-                        {
-                        }
-                        else
-                        {
-                            g_T5LCtx[ScreenIndex_Smaller].jumpToPageEvent = TRUE;
-                            g_T5LCtx[ScreenIndex_Smaller].jumpToPageEvent_PageNum = IS_PAGE_15_0X0F_OUTPUTCPLT;
-                        }
-                        
-                    }              
+                    pContex->handleType = pContex->nextHandleType;
                 }
                 else
                 {
-                    pContex->retryOffsetTicks = U_S_RETRY_OFFSET_TICKS;
-                    pContex->retryRecodeHandleType = pContex->handleType;
-                    pContex->handleType = U_S_HANDLE_TYPE_RETRY_DELAY;
-                }
-            }
+                    //
+                    pContex->handleType = U_S_HANDLE_TYPE_UNMOUNT;
+                    if(0 != upan_output_faild)
+                    {
+                    }
+                    else
+                    {
+                        g_T5LCtx[ScreenIndex_Smaller].jumpToPageEvent = TRUE;
+                        g_T5LCtx[ScreenIndex_Smaller].jumpToPageEvent_PageNum = IS_PAGE_15_0X0F_OUTPUTCPLT;
+                    }
+                    
+                }             
             break;
+
+
+
+
+
 
             //delay : 如果操作U盘失败 先延时 再继续处理
             case U_S_HANDLE_TYPE_RETRY_DELAY:
@@ -1118,12 +811,13 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
                     else
                     {
                         pContex->retryCnt --;
-                        pContex->handleType = U_S_HANDLE_TYPE_UNMOUNT;
-                        upan_output_faild = TRUE;
+                        pContex->handleType = U_S_HANDLE_TYPE_UNMOUNT;//如果尝试几次 还是失败 则 f_unmount
+                        upan_output_faild = pContex->retryRecodeHandleType;
                     }
                 }
                 else
                 {
+                    //尝试3次还有问题 则退出 U盘导出
                     g_TrigerUSBStoreAll = APP_TRIGER_USB_STORE_EMPTY;
                     pContex->usbIfTrigger = U_S_HANDLE_EMPTY;
                     pContex->handleType = U_S_HANDLE_TYPE_IDLE;//如果超过尝试次数 则结束本次存储
@@ -1131,12 +825,263 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
             }
             break;
 
+            // 第六步 : 取消U盘挂载 USB unmount
+            case U_S_HANDLE_TYPE_UNMOUNT:
+            {
+                //Pointer to the file system object (NULL:unmount)
+                f_ret = f_mount(0, (TCHAR const*)USBHPath, 0);//空指针 加 0 取消挂载
+                if(FR_OK == f_ret)
+                {
+                    pContex->handleType = U_S_HANDLE_TYPE_IDLE;
+                    //头 数据 尾 : 都写入
+                    g_TrigerUSBStoreAll = APP_TRIGER_USB_STORE_EMPTY;
+                    InnerScreenDataCenterHandle_WeightClassification_Init(&InnerScreenDataCenteHandle);
+                }
+                else
+                {
+                    pContex->retryOffsetTicks = U_S_RETRY_OFFSET_TICKS;
+                    pContex->retryRecodeHandleType = pContex->handleType;
+                    pContex->handleType = U_S_HANDLE_TYPE_RETRY_DELAY;
+                }
+            }
+            break;
+
+
             default:
                 g_TrigerUSBStoreAll = APP_TRIGER_USB_STORE_EMPTY;
                 pContex->usbIfTrigger = U_S_HANDLE_EMPTY;
                 pContex->handleType = U_S_HANDLE_TYPE_IDLE;
             break;
         }
+    }
+}
+
+
+#endif
+
+
+
+
+
+
+#if 0
+uint16 upanStoreOffset_i = 0;
+
+uint8 upanPrepareStoreData(void)
+{
+    uint8 ret = 0 , i = 0 , *pData = 0 , findoutLine = 0 , *pCpyData , tempType;
+    uint16 data_i = 0 , barcode_offset , payloadOffset;
+    tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
+    struct tm lUTCDecodeTime;
+    sint64 lS64UTCTime = 0;
+    UINT32 classifyIdentify , classifyMin , classifyMax;
+
+    //U盘 : 出于空闲状态
+    if(U_S_HANDLE_EMPTY == UsbStoreHandle.usbIfTrigger)
+    {
+        pContex->searchStartIndex_Use_WeightType = upanStoreOffset_i;
+        for( i = 0 ; i < UPAN_STRORE_GROUP_NUM ; i++)
+        {
+            ret = InnerScreenDataCenterHandle_Searching_Use_WeightType(pContex);
+            if(1 == ret)
+            {
+                memcpy(&upanStoreDataGroup[0+2*i][0],UPAN_STRORE_LINE_LINE_DIFF,UPAN_STRORE_LINE_MAX_LEN);
+                //
+                pData = &upanStoreDataGroup[1+2*i][0];
+                //每行：开始==
+                memcpy(pData,UPAN_STRORE_LINE_START,3);
+                data_i = 3;
+                //每行：自身序号
+                pData[data_i+0] = '0' + upanStoreOffset_i/1000;
+                pData[data_i+1] = '0' + upanStoreOffset_i%1000/100;
+                pData[data_i+2] = '0' + upanStoreOffset_i%100/10;
+                pData[data_i+3] = '0' + upanStoreOffset_i%10/1;
+                data_i += 4;
+                //每行：间隔==
+                memcpy((pData+data_i),UPAN_STRORE_LINE_PART_DIFF,5);
+                data_i += 5;
+                //每行：录入条码值
+                barcode_offset = upanStoreOffset_i*CLASSIFICATION_STORE_DATA_SINGLE_LEN;
+                pCpyData = &InnerScreenDataCenteHandle.dataCenterPayload[barcode_offset];
+                memcpy((pData+data_i),pCpyData,INNER_SCREEN_DATACENTER_LENOF_BARCODE);
+                data_i += INNER_SCREEN_DATACENTER_LENOF_BARCODE;
+                //每行：间隔==
+                memcpy((pData+data_i),UPAN_STRORE_LINE_PART_DIFF,5);
+                data_i += 5;
+                //每行：录入时间
+                payloadOffset = upanStoreOffset_i;
+                payloadOffset *= CLASSIFICATION_STORE_CFG_TIME_TYPEBYTE;
+                lS64UTCTime = 0;
+                lS64UTCTime +=  InnerScreenDataCenteHandle.cfgInfo_utcTime[payloadOffset+0];
+                lS64UTCTime <<= 8;
+                lS64UTCTime +=  InnerScreenDataCenteHandle.cfgInfo_utcTime[payloadOffset+1];
+                lS64UTCTime <<= 8;
+                lS64UTCTime +=  InnerScreenDataCenteHandle.cfgInfo_utcTime[payloadOffset+2];
+                lS64UTCTime <<= 8;
+                lS64UTCTime +=  InnerScreenDataCenteHandle.cfgInfo_utcTime[payloadOffset+3];
+                lUTCDecodeTime = *(mygmtime(&lS64UTCTime));
+
+                pData[data_i + 0] = '0' + lUTCDecodeTime.tm_year/1000;
+                pData[data_i + 1] = '0' + lUTCDecodeTime.tm_year%1000/100;
+                pData[data_i + 2] = '0' + lUTCDecodeTime.tm_year%100/10;
+                pData[data_i + 3] = '0' + lUTCDecodeTime.tm_year%10;
+
+                pData[data_i + 4] = '/';
+                pData[data_i + 5] = '0' + lUTCDecodeTime.tm_mon%100/10;
+                pData[data_i + 6] = '0' + lUTCDecodeTime.tm_mon%10;
+                        
+                pData[data_i + 7] = '/';
+                pData[data_i + 8] = '0' + lUTCDecodeTime.tm_mday%100/10;
+                pData[data_i + 9] = '0' + lUTCDecodeTime.tm_mday%10;
+                        
+                pData[data_i + 10] = ' ';
+                pData[data_i + 11] = '0' + lUTCDecodeTime.tm_hour%100/10;
+                pData[data_i + 12] = '0' + lUTCDecodeTime.tm_hour%10;
+                        
+                pData[data_i + 13] = ':';
+                pData[data_i + 14] = '0' + lUTCDecodeTime.tm_min%100/10;
+                pData[data_i + 15] = '0' + lUTCDecodeTime.tm_min%10;
+                        
+                pData[data_i + 16] = ':';
+                pData[data_i + 17] = '0' + lUTCDecodeTime.tm_sec%100/10;
+                pData[data_i + 18] = '0' + lUTCDecodeTime.tm_sec%10;
+
+                data_i += 19;
+                //每行：间隔==
+                memcpy((pData+data_i),UPAN_STRORE_LINE_PART_DIFF,5);
+                data_i += 5;
+                //每行：录入重量
+                barcode_offset = upanStoreOffset_i*CLASSIFICATION_STORE_DATA_SINGLE_LEN;
+                barcode_offset += INNER_SCREEN_DATACENTER_LENOF_BARCODE;
+                pCpyData = &InnerScreenDataCenteHandle.dataCenterPayload[barcode_offset];
+                memcpy((pData+data_i),pCpyData,4);
+                data_i += 4;
+                pData[data_i+0] = '(';
+                pData[data_i+1] = 'm';
+                pData[data_i+2] = 'l';
+                pData[data_i+3] = ')';
+                data_i += 4;
+                //每行：间隔==
+                memcpy((pData+data_i),UPAN_STRORE_LINE_PART_DIFF,5);
+                data_i += 5;            
+                //5.表格中的：分类结果
+                tempType = pContex->searchOutType%D_C_CLASSIFICATION_NUM;
+                classifyIdentify =  gSystemPara.Sizer_ClassifySet[tempType][0];
+                pData[data_i+0] = '0' + classifyIdentify/1000;
+                pData[data_i+1] = '0' + classifyIdentify%1000/100;
+                pData[data_i+2] = '0' + classifyIdentify%100/10;
+                pData[data_i+3] = '0' + classifyIdentify%10;
+                data_i += 4;
+                //每行：间隔==
+                memcpy((pData+data_i),UPAN_STRORE_LINE_PART_DIFF,5);
+                data_i += 5;  
+                //6.表格中的：分类标准
+                tempType = pContex->searchOutType%D_C_CLASSIFICATION_NUM;
+                classifyMin =  gSystemPara.Sizer_ClassifySet[tempType][1];
+                classifyMax =  gSystemPara.Sizer_ClassifySet[tempType][2];
+                pData[data_i+0] = '0' + classifyMin/1000;
+                pData[data_i+1] = '0' + classifyMin%1000/100;
+                pData[data_i+2] = '0' + classifyMin%100/10;
+                pData[data_i+3] = '0' + classifyMin%10;
+                pData[data_i+4] = ' ';
+                data_i += 5;
+                pData[data_i+0] = '~';
+                data_i += 1;
+                pData[data_i+0] = ' ';
+                data_i += 1;
+                pData[data_i+0] = '0' + classifyMax/1000;
+                pData[data_i+1] = '0' + classifyMax%1000/100;
+                pData[data_i+2] = '0' + classifyMax%100/10;
+                pData[data_i+3] = '0' + classifyMax%10;
+                data_i += 4;
+                //每行：结束
+                memcpy((pData+data_i),UPAN_STRORE_LINE_END,4);
+                data_i += 4;            
+
+
+                upanStoreOffset_i++;
+                findoutLine++;
+            }
+            else
+            {
+                break;
+            }       
+        }
+
+        //如果至少找到1条则触发导出到U盘
+        if(findoutLine > 0)
+        {
+            USBIf_OrderTrigger_Write(&UsbStoreHandle,
+                                    "ESSH",
+                                    0,
+                                    findoutLine*UPAN_STRORE_LINE_MAX_LEN*2,
+                                    &upanStoreDataGroup[0][0],
+                                    0);
+        }
+    }
+    //
+    return findoutLine;
+
+}
+#endif
+
+#if 0
+//filename
+char fileName_User[5] = CLASSIFICATION_OUTPUT_FILE_USERNAME;
+char fileName_Time[CLASSIFICATION_OUTPUT_FILE_MIDLE_LEN] = "2024-09-10-23-45-12";
+char fileName[CLASSIFICATION_OUTPUT_FILE_LEN]="ESSH-xxxx-2024-09-10-23-45-12.txt";
+char fileData[20]="test1.txt - 20";
+
+FATFS FatfsUDisk; // File system object for USB disk logical drive
+FIL myFile; // File object
+ //参考 https://blog.csdn.net/qq_43559363/article/details/127920402
+void MSC_Application(void)
+{
+    FRESULT fres; // FatFs function common result code
+    uint32_t byteswrite;
+    //uint8_t str[] = "hello world!";
+ 
+    /* Register the file system object to the FatFs module */
+    if( f_mount(&FatfsUDisk, (TCHAR const*)USBHPath, 0) != FR_OK)
+    {
+        Error_Handler(); //FatFs Initialization Error
+    }
+    else
+    {
+		#if 1
+        /* Create and Open a new text file object with write access */
+        if(f_open(&myFile, fileName, FA_CREATE_ALWAYS | FA_WRITE) != FR_OK)
+        {
+            Error_Handler(); //'STM32.TXT' file Open for write Error
+        }
+        else
+        {
+            fres = f_write(&myFile, fileData, sizeof(fileData), (void *)&byteswrite);
+            if(byteswrite == 0 || (fres != FR_OK))
+            {
+                Error_Handler();
+            }
+            else
+            {
+                f_close(&myFile); //Close the open text file
+            }
+        }
+		#else
+			/* Create and Open a new text file object with write access */
+			if(f_open(&myFile, "ProgramEdit.csv", FA_CREATE_ALWAYS | FA_WRITE) != FR_OK)
+			{
+				Error_Handler(); //'ProgramEdit.csv' file Open for write Error
+			}
+			else
+			{
+				f_close(&myFile);
+				fres = f_open(&myFile,"ProgramEdit.csv",FA_CREATE_ALWAYS|FA_WRITE);
+				fres = f_printf(&myFile,"123");
+				f_close(&myFile); //Close the open text file
+			}
+		
+		
+		#endif
     }
 }
 
