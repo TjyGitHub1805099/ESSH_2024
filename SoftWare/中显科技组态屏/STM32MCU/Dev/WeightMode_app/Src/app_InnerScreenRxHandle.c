@@ -445,7 +445,13 @@ UINT8 innerScreenRxHandle_JumpToDataCenterTriger(T5LType *pSdwe)
 		}
 		if(IS_VLU_DATACHOICE_PAGE_EVENT_OUTPUTCHOICE == (UINT16)pSdwe->SetData)
 		{
+			APP_TriggerOutPut2Udisk();
 			g_TrigerUSBStoreAll = APP_TRIGER_USB_STORE_ALL_VAL;
+			matched = TRUE;
+		}
+		if(IS_VLU_DATACHOICE_PAGE_EVENT_DELETECHOICE == (UINT16)pSdwe->SetData)
+		{
+			g_TrigerUSBDeletedAll = APP_TRIGER_USB_DELETED_ALL_VAL;
 			matched = TRUE;
 		}
 	}
@@ -645,6 +651,7 @@ UINT8 innerScreenRxHandle_OutputAll2Upan(T5LType *pSdwe)
 				InnerScreenDataCenteHandle.searchUseWeightType[i] = i;
 			}
 
+			APP_TriggerOutPut2Udisk();
 			g_TrigerUSBStoreAll = APP_TRIGER_USB_STORE_ALL_VAL;
 		}
 	}
@@ -659,6 +666,7 @@ UINT8 innerScreenRxHandle_DataCenterPageHandle(T5LType *pSdwe)
 
 		if(IS_VLU_DATACENTER_PAGE_EVENT_OUTPUTCHOICE == pSdwe->SetData)
 		{
+			APP_TriggerOutPut2Udisk();
 			g_TrigerUSBStoreAll = APP_TRIGER_USB_STORE_ALL_VAL;
 		}
 

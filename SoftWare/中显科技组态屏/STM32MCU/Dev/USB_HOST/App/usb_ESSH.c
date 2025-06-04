@@ -9,8 +9,16 @@
 #include "app_DataCenter.h"
 #include "app_syspara.h"
 
+FATFS FatfsUDisk; // File system object for USB disk logical drive
+
+#define FILE_NAME_MAX_LEN   (8)
 extern char USBHPath[4]; // USBH logical drive path
-uint8 lc_fileName[8] = "DDHHMMSS";//日时分秒
+uint8 localFileName[FILE_NAME_MAX_LEN] = "DDHHMMSS";//日时分秒
+
+
+#define DATA_NEED_WRITE_TO_FILE_HOLDON       (0XAA)//保持扫描数据 执行入队
+#define DATA_NEED_WRITE_TO_FILE_PUSHCPLT     (0X55)//入队成功
+#define DATA_NEED_WRITE_TO_FILE_NONE         (0X00)//无需执行
 
 /*
 导出文件格式
@@ -41,10 +49,10 @@ uint8 UPAN_STRORE_SINGLE_GROUP_HEAD[81] =
     0x0D,
 };
 
-uint8 UPAN_STRORE_SINGLE_GROUP_END[9] = 
+uint8 UPAN_STRORE_SINGLE_GROUP_END[9+4] = 
 {
-//  导        出        完         成
-    0xB5,0xBC,0xB3,0xF6,0xCD,0xEA,0xB3,0xC9,0x0D 
+//  导        出        完         成           写入数量                换行
+    0xB5,0xBC,0xB3,0xF6,0xCD,0xEA,0xB3,0xC9,   0x30,0x30,0x30,0x30,   0x0D 
 };
 
 //"导出完成\r";
@@ -55,16 +63,21 @@ uint8 UPAN_STRORE_SINGLE_GROUP_END[9] =
 #define UPAN_STRORE_LINE_END        " |"
 #define UPAN_STRORE_LINE_MAX_LEN    (91)
 #define UPAN_STRORE_GROUP_NUM       (10)
+#define UPSN_STORE_SYNC_DIFF        (10)//10次f_write执行一次f_sync强制存
 
 
 #define WEITE_UPAN_2ORDER_DIFF        (100)//2条写命令延时 100ms
 
 uint16 g_TrigerUSBStoreAll = APP_TRIGER_USB_STORE_EMPTY;
+uint16 g_TrigerUSBDeletedAll = APP_TRIGER_USB_STORE_EMPTY;
 uint8 upanStoreDataGroup[2*UPAN_STRORE_GROUP_NUM][UPAN_STRORE_LINE_MAX_LEN];
 
 tUsbStoreHandleStruct UsbStoreHandle = {
+    .eventTriggered = APP_TRIGER_USB_STORE_EMPTY,
     //usb driver status
-    .usbDriverStatus = APPLICATION_IDLE,
+    .plugInOut = U_USP_PULG_MAX,
+    .plugInOut_Pre = U_USP_PULG_MAX,
+    .usb2AppStatus = APPLICATION_IDLE,
 
     //usb if order triger
     .usbIfTrigger = U_S_HANDLE_EMPTY,
@@ -72,27 +85,49 @@ tUsbStoreHandleStruct UsbStoreHandle = {
     .usbIfCallback = 0,
     .fileName ="test0918.txt",
     .filePosition = 0,
+    //
+    .pFatfsUDisk = &FatfsUDisk,
+    .pFatfsPath = USBHPath,
+    .pFile = &USBHFile,
+
+
+    //
     .pFileData = &upanStoreDataGroup[0][0],
     .handleLen = 20,
+    .handleOffset = 0,
     .handleLenRemain = 20,
     .byteWriten = 0,
 
     //usb mainfunction
     .handleType = U_S_HANDLE_TYPE_IDLE,
+    .writeHandleType = USBIF_MAINFUNCTION_PREPARE_SUB_START,
+    .fromAppFindOutLine = 0,
+    .fromAppSearchLine = 0,
     .nextHandleType = U_S_HANDLE_TYPE_IDLE,
+    .fileSyncDiffCnt = 0,
     .retryCnt = 3,
     .retryOffsetTicks = 1000,
     .retryRecodeHandleType = U_S_HANDLE_TYPE_IDLE,
+    .usbIfAppMainFunctionState = USBIF_MAINFUNCTION_HANDLE_IDLE,
+    .usbFileFailedHandleMask = USB_HANDLE_MASK_EMPTY,
+    .usbFileSuccessHandleMask = USB_HANDLE_MASK_EMPTY,
 };
 
-//usb if filename prepare
-void USBIf_PrepareFileName(tUsbStoreHandleStruct *pContex,const uint8 *pFileName)
+
+void APP_TriggerOutPut2Udisk(void)
 {
-    uint8 fileLen = U_S_FILE_NAME_OF_USER_LEN ;
+    tUsbStoreHandleStruct *pContex = &UsbStoreHandle;
+    pContex->eventTriggered = APP_TRIGER_USB_STORE_ALL_VAL;
+}
+
+//usb if filename prepare
+void USBIf_PrepareFileName(tUsbStoreHandleStruct *pContex,const uint8 *pFileName,uint8 fileLen)
+{
+    //uint8 fileLen = U_S_FILE_NAME_OF_USER_LEN ;
     memset(&pContex->fileName[0],0,U_S_FILE_NAME_TOTAL_LEN);
 
     //judge file name len : 判断文件名长度(不包含后缀名)
-    fileLen = strlen((const char *)pFileName);
+    //fileLen = strlen((const char *)pFileName);
     if(fileLen >= U_S_FILE_NAME_OF_USER_LEN)
     {
         fileLen = U_S_FILE_NAME_OF_USER_LEN;
@@ -111,7 +146,7 @@ uint8 USBIf_OrderTrigger_Read(tUsbStoreHandleStruct *pContex, uint8 *pFileName, 
     uint8 ret = 0 ;
     if(U_S_HANDLE_EMPTY == pContex->usbIfTrigger)
     {
-        USBIf_PrepareFileName(pContex,pFileName);
+        USBIf_PrepareFileName(pContex,pFileName,FILE_NAME_MAX_LEN);
         //
         pContex->filePosition = position;
         pContex->handleLen = len;
@@ -132,7 +167,7 @@ uint8 USBIf_OrderTrigger_Write(tUsbStoreHandleStruct *pContex, uint8 *pFileName,
     uint8 ret = 0 ;
     if(U_S_HANDLE_EMPTY == pContex->usbIfTrigger)
     {
-        USBIf_PrepareFileName(pContex,pFileName);
+        USBIf_PrepareFileName(pContex,pFileName,FILE_NAME_MAX_LEN);
         //
         pContex->filePosition = position;
         pContex->handleLen = len;
@@ -319,7 +354,7 @@ uint8 upanPrepareStoreData_StoreAll_20250512_While1(uint16 *start_idx , uint16 m
                 {
                     pData[upanDataOffset + 2] = '0' + store_weight%100/10;
                 } 
-                if(store_weight >= 0)
+                ///if(store_weight >= 0)
                 {
                     pData[upanDataOffset + 3] = '0' + store_weight%10;
                 } 
@@ -439,21 +474,445 @@ uint8 upanPrepareStoreData_StoreAll_20250512_While1(uint16 *start_idx , uint16 m
 uint8 upanPrepareStoreData_StoreAll_20250512(uint16 *start_idx)
 {
     uint8 findoutLine = 0;
-
-    //U盘 : 出于空闲状态
-    if(U_S_HANDLE_EMPTY == UsbStoreHandle.usbIfTrigger)
-    {
-        //单次最多导出 UPAN_STRORE_GROUP_NUM 组数据
-        findoutLine = upanPrepareStoreData_StoreAll_20250512_While1(start_idx,UPAN_STRORE_GROUP_NUM); 
-    }
+    //单次最多导出 UPAN_STRORE_GROUP_NUM 组数据
+    findoutLine = upanPrepareStoreData_StoreAll_20250512_While1(start_idx,UPAN_STRORE_GROUP_NUM); 
     return findoutLine;
 }
+
+
+
+
+uint8 USBIf_WriteHanle_PrepareData(tUsbStoreHandleStruct *pContex)
+{
+    uint8 ret = 1 ;
+    pContex->dataNeedWriteToUSB = DATA_NEED_WRITE_TO_FILE_HOLDON ;
+
+    switch(pContex->writeHandleType)
+    {
+        case USBIF_MAINFUNCTION_PREPARE_SUB_IDLE:
+            pContex->fromAppFindOutLine = 0;
+            pContex->totalWriteLines = 0 ;
+            pContex->fromAppSearchLine = 0 ;//从第1个存储的数据开始查找
+            pContex->writeHandleType = USBIF_MAINFUNCTION_PREPARE_SUB_START;
+        break;
+
+        case USBIF_MAINFUNCTION_PREPARE_SUB_START://写特定的行 ： 开始行
+            ret = USBIf_OrderTrigger_Write(pContex,
+                                            localFileName,
+                                            0,
+                                            (sizeof(UPAN_STRORE_SINGLE_GROUP_HEAD)),UPAN_STRORE_SINGLE_GROUP_HEAD,
+                                            NULL_PTR);
+            if(1 == ret)
+            {
+                pContex->dataNeedWriteToUSB = DATA_NEED_WRITE_TO_FILE_PUSHCPLT;//数据入队成功,交由外部状态机写
+                //
+                pContex->writeHandleType = USBIF_MAINFUNCTION_PREPARE_SUB_CYCLE_SUB;
+            }
+            else
+            {
+                pContex->writeHandleType = USBIF_MAINFUNCTION_PREPARE_SUB_START;
+            }
+        break;
+
+        case USBIF_MAINFUNCTION_PREPARE_SUB_CYCLE_SUB://执行一次查找
+            pContex->fromAppFindOutLine = upanPrepareStoreData_StoreAll_20250512(&pContex->fromAppSearchLine);//每次对多触发2组数据存U盘
+            //==== 如果至少找到1条则触发导出到U盘
+            if(pContex->fromAppFindOutLine > 0)
+            {
+                pContex->writeHandleType = USBIF_MAINFUNCTION_PREPARE_SUB_CYCLE;
+            }
+            else
+            {
+                pContex->writeHandleType = USBIF_MAINFUNCTION_PREPARE_SUB_END;
+            }
+        break;
+
+        case USBIF_MAINFUNCTION_PREPARE_SUB_CYCLE:
+            //会设置 pContex->usbIfTrigger = U_S_HANDLE_TRIGER
+            ret = USBIf_OrderTrigger_Write(pContex,
+                                            localFileName,
+                                            0,
+                                            pContex->fromAppFindOutLine*UPAN_STRORE_LINE_MAX_LEN*2,
+                                            &upanStoreDataGroup[0][0],
+                                            NULL_PTR);
+            if(1 == ret)//入队成功
+            {
+                pContex->dataNeedWriteToUSB = DATA_NEED_WRITE_TO_FILE_PUSHCPLT;//数据入队成功,交由外部状态机写
+                //
+                pContex->writeHandleType = USBIF_MAINFUNCTION_PREPARE_SUB_CYCLE_SUB;
+            }
+            else//失败则继续入队
+            {
+                pContex->writeHandleType = USBIF_MAINFUNCTION_PREPARE_SUB_CYCLE;
+            }
+        break;
+
+        case USBIF_MAINFUNCTION_PREPARE_SUB_END:
+            //总共输出多上行
+            UPAN_STRORE_SINGLE_GROUP_END[8] = pContex->totalWriteLines/1000 + '0';
+            UPAN_STRORE_SINGLE_GROUP_END[9] = pContex->totalWriteLines%1000/100 + '0';
+            UPAN_STRORE_SINGLE_GROUP_END[10] = pContex->totalWriteLines%100/10 + '0';
+            UPAN_STRORE_SINGLE_GROUP_END[11] = pContex->totalWriteLines%10 + '0';
+            //
+            ret = USBIf_OrderTrigger_Write(pContex,
+                                        localFileName,
+                                        0,
+                                        sizeof(UPAN_STRORE_SINGLE_GROUP_END),
+                                        UPAN_STRORE_SINGLE_GROUP_END,
+                                        NULL_PTR); 
+            if(1 == ret)
+            {
+                pContex->dataNeedWriteToUSB = DATA_NEED_WRITE_TO_FILE_PUSHCPLT;//数据入队成功,交由外部状态机写
+                //
+                pContex->writeHandleType = USBIF_MAINFUNCTION_PREPARE_SUB_MAX;
+            }
+            else
+            {
+                pContex->writeHandleType = USBIF_MAINFUNCTION_PREPARE_SUB_END;
+            }
+        break;
+
+        default:
+            pContex->dataNeedWriteToUSB = DATA_NEED_WRITE_TO_FILE_NONE ;
+            pContex->writeHandleType = USBIF_MAINFUNCTION_PREPARE_SUB_IDLE;
+        break;
+    }
+    return pContex->dataNeedWriteToUSB;
+}
+
+
+
 
 //https://www.runoob.com/cprogramming/c-function-fopen.html
 //https://blog.csdn.net/llllllillllillli/article/details/129149203
 //f_open f_wwite f_size f_lseek
 //mainfunction
+//通过句柄判断文件是否打开过
+#define USBIF_FILE_IS_OPENED(pFile)    (NULL != (pFile)->obj.fs)
 
+/*USB-HOST准备好了
+1、如果文件出于打开状态，需要先关闭，以释放句柄
+*/
+void USBIf_Mainfunction_Ready(tUsbStoreHandleStruct *pContex)
+{
+    uint8 retWriteHoldOn = DATA_NEED_WRITE_TO_FILE_HOLDON;
+    uint8 ret = 0 ;
+    FRESULT f_ret;
+    //
+    switch(pContex->usbIfAppMainFunctionState)
+    {
+        //空闲时 判断是否触发读写U盘 比如应用层触发导出文件
+        case USBIF_MAINFUNCTION_HANDLE_IDLE:
+            pContex->usbIfTrigger = U_S_HANDLE_EMPTY;
+            pContex->usbFileFailedHandleMask = USB_HANDLE_MASK_EMPTY ;
+            pContex->usbFileSuccessHandleMask = USB_HANDLE_MASK_EMPTY ;
+            if(APP_TRIGER_USB_STORE_ALL_VAL == pContex->eventTriggered)
+            {
+                pContex->usbIfAppMainFunctionState = USBIF_MAINFUNCTION_HANDLE_MOUNT;
+            }
+        break;
+
+        //挂载文件系统
+        case USBIF_MAINFUNCTION_HANDLE_MOUNT:
+            if(TRUE == USBIF_FILE_IS_OPENED(pContex->pFile))
+            {
+                f_ret = f_close(pContex->pFile); //如果文件是打开的 则关闭 释放句柄
+                if(FR_OK != f_ret)
+                {
+                    pContex->usbFileFailedHandleMask |= USB_HANDLE_MASK_CLOSE;
+                }
+                else
+                {
+                    pContex->usbFileSuccessHandleMask |= USB_HANDLE_MASK_CLOSE;
+                }
+            }
+            f_ret = f_mount(pContex->pFatfsUDisk, pContex->pFatfsPath, 1);//!!!!!!!! 必须用1 !!!!!!!!!!
+            if(FR_OK == f_ret)
+            {
+                pContex->usbFileSuccessHandleMask |= USB_HANDLE_MASK_MOUNT;
+                pContex->usbIfAppMainFunctionState = USBIF_MAINFUNCTION_HANDLE_OPEN;
+            }
+            else
+            {
+                pContex->usbFileFailedHandleMask |= USB_HANDLE_MASK_MOUNT;
+            }               
+        break;
+
+        //打开文件
+        case USBIF_MAINFUNCTION_HANDLE_OPEN:
+            /*  f_open 打开类型
+                FA_READ	            只读打开，文件必须存在，否则返回 FR_NO_FILE。
+                FA_WRITE	        可写打开，文件必须存在，否则返回 FR_NO_FILE。
+                FA_CREATE_NEW	    创建新文件，如果文件已存在则返回 FR_EXIST。
+                FA_OPEN_ALWAYS	    文件存在则打开，不存在则创建（类似"a+"模式）。
+                FA_OPEN_APPEND	    文件存在则追加到末尾，不存在则创建（需配合 FA_WRITE）。
+                FA_CREATE_ALWAYS	总是创建新文件（覆盖已存在的文件）。
+            */
+            //准备文件名 = 月时分秒.txt
+            localFileName[0] = '0' + gUTCDecodeTime.tm_mon/10;
+            localFileName[1] = '0' + gUTCDecodeTime.tm_mon%10;
+            localFileName[2] = '0' + gUTCDecodeTime.tm_hour/10;
+            localFileName[3] = '0' + gUTCDecodeTime.tm_hour%10;
+            localFileName[4] = '0' + gUTCDecodeTime.tm_min/10;
+            localFileName[5] = '0' + gUTCDecodeTime.tm_min%10;
+            localFileName[6] = '0' + gUTCDecodeTime.tm_sec/10;
+            localFileName[7] = '0' + gUTCDecodeTime.tm_sec%10;
+            USBIf_PrepareFileName(pContex,localFileName,FILE_NAME_MAX_LEN);
+            //
+            #if 0
+            //1. f_stat 获取即将打开的文件的信息 (大小 模式 更新时间等)
+            f_ret = f_stat((const TCHAR*)&pContex->fileName[0], &pContex->fno);
+            //2.f_open 打开文件
+            if(FR_OK == f_ret)//如果文件存在 则以可写 可读方式打开
+            {
+                f_ret = f_open(pContex->pFile, (const TCHAR*)&pContex->fileName[0], FA_WRITE|FA_READ);
+            }
+            else if(FR_NO_FILE == f_ret)//如果文件不存在 则以创建文件 可写方式打开
+            {
+                f_ret = f_open(pContex->pFile, (const TCHAR*)&pContex->fileName[0], FA_OPEN_APPEND|FA_WRITE);
+            }
+            #else
+                f_ret = f_open(pContex->pFile, (const TCHAR*)&pContex->fileName[0], FA_OPEN_APPEND|FA_WRITE);
+            #endif
+            if(FR_OK == f_ret)
+            {
+                pContex->usbFileSuccessHandleMask |= USB_HANDLE_MASK_OPEN;
+                pContex->writeHandleType = USBIF_MAINFUNCTION_PREPARE_SUB_IDLE;
+                pContex->usbIfAppMainFunctionState = USBIF_MAINFUNCTION_HANDLE_PREPAREDATA;
+            }
+            else
+            {
+                pContex->usbFileFailedHandleMask |= USB_HANDLE_MASK_OPEN;
+            }
+        break;
+        
+        //准备数据
+        case USBIF_MAINFUNCTION_HANDLE_PREPAREDATA:
+            retWriteHoldOn = USBIf_WriteHanle_PrepareData(pContex);
+            if(DATA_NEED_WRITE_TO_FILE_HOLDON == retWriteHoldOn)
+            {
+                //继续准备数据
+                pContex->usbIfAppMainFunctionState = USBIF_MAINFUNCTION_HANDLE_PREPAREDATA;
+            }
+            else if(DATA_NEED_WRITE_TO_FILE_PUSHCPLT == retWriteHoldOn)
+            {
+                //入队成功 执行写前的指针平移
+                pContex->usbIfAppMainFunctionState = USBIF_MAINFUNCTION_HANDLE_LSEEK;
+            }
+            else if(DATA_NEED_WRITE_TO_FILE_NONE == retWriteHoldOn)
+            {
+                //无需数据写入 执行关闭文件
+                pContex->usbIfAppMainFunctionState = USBIF_MAINFUNCTION_HANDLE_CLOSE;
+            }
+        break;
+
+        //移动文件指针 到末尾
+        case USBIF_MAINFUNCTION_HANDLE_LSEEK:
+            //1.移动指针到文件末尾 : move pointer to file end
+            f_ret = f_lseek(pContex->pFile, f_size(pContex->pFile));
+            if(FR_OK == f_ret)
+            {
+                pContex->usbFileSuccessHandleMask |= USB_HANDLE_MASK_LSEEK;
+                pContex->usbIfAppMainFunctionState = USBIF_MAINFUNCTION_HANDLE_WRITE;
+            }
+            else
+            {
+                pContex->usbFileFailedHandleMask |= USB_HANDLE_MASK_LSEEK;
+            }
+        break;
+
+        //执行写数据 512字节以内
+        case USBIF_MAINFUNCTION_HANDLE_WRITE:
+            if(pContex->handleLen > 0)
+            {
+                f_ret = f_write(pContex->pFile, &pContex->pFileData[pContex->handleOffset], pContex->handleLen, &pContex->byteWriten);
+                if((FR_OK == f_ret) && ((pContex->handleLen == pContex->byteWriten)))
+                {
+                    pContex->totalWriteLines += pContex->fromAppFindOutLine;
+                    pContex->usbIfTrigger = U_S_HANDLE_EMPTY;
+                    //
+                    pContex->usbFileSuccessHandleMask |= USB_HANDLE_MASK_WRITE;
+                    pContex->usbIfAppMainFunctionState = USBIF_MAINFUNCTION_HANDLE_PREPAREDATA;
+                    pContex->fileSyncDiffCnt++;
+                    if(pContex->fileSyncDiffCnt%UPSN_STORE_SYNC_DIFF == 0)//10次写后 强制同步一次
+                    {
+                        pContex->usbIfAppMainFunctionState = USBIF_MAINFUNCTION_HANDLE_SYNC;
+                    }
+                }
+                else
+                {
+                    pContex->usbFileFailedHandleMask |= USB_HANDLE_MASK_WRITE;
+                }
+            }                
+        break;
+
+        //10次写后 强制同步一次
+        case USBIF_MAINFUNCTION_HANDLE_SYNC:
+            f_ret = f_sync(pContex->pFile);
+            if(FR_OK == f_ret)
+            {
+                pContex->usbFileSuccessHandleMask |= USB_HANDLE_MASK_SYNC;
+                pContex->usbIfAppMainFunctionState = USBIF_MAINFUNCTION_HANDLE_PREPAREDATA;
+            }
+            else
+            {
+                pContex->usbFileFailedHandleMask |= USB_HANDLE_MASK_SYNC;
+            }
+        break;
+
+        //只有准备数据后发现没有需要写的数据时 开始关闭文件
+        case USBIF_MAINFUNCTION_HANDLE_CLOSE:
+            if(TRUE == USBIF_FILE_IS_OPENED(pContex->pFile))
+            {
+                f_ret = f_close(pContex->pFile); //Close the open text file
+                if(FR_OK == f_ret)
+                {
+                    pContex->usbFileSuccessHandleMask |= USB_HANDLE_MASK_CLOSE;
+                    pContex->usbIfAppMainFunctionState = USBIF_MAINFUNCTION_HANDLE_UNMOUNT;
+                } 
+                else
+                {
+                    pContex->usbFileFailedHandleMask |= USB_HANDLE_MASK_CLOSE;
+                }             
+            }
+            else
+            {
+                pContex->usbIfAppMainFunctionState = USBIF_MAINFUNCTION_HANDLE_UNMOUNT;
+            }
+
+        break;
+        //卸载
+        case USBIF_MAINFUNCTION_HANDLE_UNMOUNT:
+            if(TRUE == USBIF_FILE_IS_OPENED(pContex->pFile))
+            {
+                f_ret = f_close(pContex->pFile); //Close the open text file
+                if(FR_OK != f_ret)
+                {
+                    pContex->usbFileFailedHandleMask |= USB_HANDLE_MASK_CLOSE;
+                }
+                else
+                {
+                    pContex->usbFileSuccessHandleMask |= USB_HANDLE_MASK_CLOSE;
+                }
+            }
+            f_ret = f_mount(NULL_PTR, pContex->pFatfsPath, 0);//空指针 加 0 取消挂载
+            if(FR_OK == f_ret)
+            {
+                pContex->eventTriggered = APP_TRIGER_USB_STORE_EMPTY;//去除事件
+                pContex->usbFileSuccessHandleMask |= USB_HANDLE_MASK_UNMOUNT;
+                pContex->usbIfAppMainFunctionState = USBIF_MAINFUNCTION_HANDLE_IDLE;
+                //
+                g_T5LCtx[ScreenIndex_Smaller].jumpToPageEvent = TRUE;
+                g_T5LCtx[ScreenIndex_Smaller].jumpToPageEvent_PageNum = IS_PAGE_15_0X0F_OUTPUTCPLT;
+            }
+            else
+            {
+                pContex->usbFileFailedHandleMask |= USB_HANDLE_MASK_UNMOUNT;
+            }              
+        break;
+
+        //
+        default:
+            pContex->usbIfAppMainFunctionState = USBIF_MAINFUNCTION_HANDLE_IDLE;
+        break;
+    }
+}
+
+/*
+1、U盘非正常拔出，则需要unmount
+2、unmount前，如果文件出于非关闭状态，需要先关闭文件
+*/
+void USBIf_Mainfunction_Disconnect(tUsbStoreHandleStruct *pContex)
+{
+    FRESULT f_ret;
+    //
+    switch(pContex->usbIfAppMainFunctionState)
+    {
+        case USBIF_MAINFUNCTION_HANDLE_IDLE:
+        break;
+
+        default:
+            if(TRUE == USBIF_FILE_IS_OPENED(pContex->pFile))
+            {
+                f_ret = f_close(pContex->pFile); //Close the open text file
+                if(FR_OK != f_ret)
+                {
+                    pContex->usbFileFailedHandleMask |= USB_HANDLE_MASK_CLOSE;
+                }
+                else
+                {
+                    pContex->usbFileSuccessHandleMask |= USB_HANDLE_MASK_CLOSE;
+                }           
+            }
+            f_ret = f_mount(NULL_PTR, pContex->pFatfsPath, 0);//空指针 加 0 取消挂载
+            if(FR_OK == f_ret)
+            {
+                pContex->eventTriggered = APP_TRIGER_USB_STORE_EMPTY;
+                pContex->usbFileSuccessHandleMask |= USB_HANDLE_MASK_UNMOUNT;
+                pContex->usbIfAppMainFunctionState = USBIF_MAINFUNCTION_HANDLE_IDLE;
+                }
+            else
+            {
+                pContex->usbFileFailedHandleMask |= USB_HANDLE_MASK_UNMOUNT;
+            }
+        break;
+    }
+}
+
+#if 1//20250603之后的代码
+void USBIf_Mainfunction(ApplicationTypeDef driver_status)
+{
+    tUsbStoreHandleStruct *pContex = &UsbStoreHandle;
+    //用USB-host抽象出的应用层状态更新usb
+    pContex->usb2AppStatus = driver_status;
+
+    //
+    switch(pContex->usb2AppStatus)//USB设备连接情况
+    {
+        case APPLICATION_IDLE:
+        break;
+
+        case APPLICATION_START:
+        break;
+
+        //HOST_USER_CLASS_ACTIVE U盘 已连接
+        case APPLICATION_READY:
+            USBIf_Mainfunction_Ready(pContex);
+            //
+            pContex->plugInOut = U_USP_PULG_IN;
+        break;
+
+        //HOST_USER_DISCONNECTION U盘 已拔出
+        case APPLICATION_DISCONNECT:
+            USBIf_Mainfunction_Disconnect(pContex);
+            //
+            pContex->plugInOut = U_USP_PULG_OUT;
+        break;  
+
+        default:
+        break;
+    }
+    //
+    if(pContex->plugInOut != pContex->plugInOut_Pre)
+    {
+        pContex->plugInOut_Pre = pContex->plugInOut;
+        g_T5LCtx[ScreenIndex_Smaller].jumpToPageEvent = TRUE;
+        if(pContex->plugInOut == U_USP_PULG_IN)
+        {
+            g_T5LCtx[ScreenIndex_Smaller].jumpToPageEvent_PageNum = IS_PAGE_11_0X0B_UPAN_PLUG_IN;
+        }
+        else
+        {
+            g_T5LCtx[ScreenIndex_Smaller].jumpToPageEvent_PageNum = IS_PAGE_12_0X0C_UPAN_PLUG_OUT;
+        }
+    }
+}
+
+
+
+#else
+
+//20250603之前
 void USBIf_Mainfunction(ApplicationTypeDef driver_status)
 {
     tUsbStoreHandleStruct *pContex = &UsbStoreHandle;
@@ -466,14 +925,14 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
 
     static uint8 upan_plug_pre = FALSE ,upan_plug_cur = FALSE , upan_output_faild = 0;
 
-    pContex->usbDriverStatus = driver_status;
-    #if 0
-    switch(pContex->usbDriverStatus)
+    pContex->usb2AppStatus = driver_status;
+#if 0
+    switch(pContex->usb2AppStatus)
     {
         case APPLICATION_READY:
             if(FALSE == fmout_status)
             {
-                f_ret = f_mount(&pContex->FatfsUDisk, (TCHAR const*)USBHPath, 0);
+                f_ret = f_mount(pContex->pFatfsUDisk, (TCHAR const*)USBHPath, 0);
                 if(FR_OK == f_ret)
                 {
                     fmout_status = TRUE ;
@@ -505,7 +964,7 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
     }
 #else
 
-    if(APPLICATION_READY == pContex->usbDriverStatus)//HOST_USER_CLASS_ACTIVE
+    if(APPLICATION_READY == pContex->usb2AppStatus)//HOST_USER_CLASS_ACTIVE
     {
         upan_plug_cur = TRUE;
         l_UserClassActive = 1;//直到user class active
@@ -518,6 +977,7 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
         g_TrigerUSBStoreAll = APP_TRIGER_USB_STORE_EMPTY;
     }
 #endif
+
     //拔插U盘后的提示窗
     if(upan_plug_cur != upan_plug_pre)
     {
@@ -543,14 +1003,14 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
             case U_S_HANDLE_TYPE_IDLE:
                 if(APP_TRIGER_USB_STORE_ALL_VAL == g_TrigerUSBStoreAll)
                 {
-                    lc_fileName[0] = '0' + gUTCDecodeTime.tm_mon/10;
-                    lc_fileName[1] = '0' + gUTCDecodeTime.tm_mon%10;
-                    lc_fileName[2] = '0' + gUTCDecodeTime.tm_hour/10;
-                    lc_fileName[3] = '0' + gUTCDecodeTime.tm_hour%10;
-                    lc_fileName[4] = '0' + gUTCDecodeTime.tm_min/10;
-                    lc_fileName[5] = '0' + gUTCDecodeTime.tm_min%10;
-                    lc_fileName[6] = '0' + gUTCDecodeTime.tm_sec/10;
-                    lc_fileName[7] = '0' + gUTCDecodeTime.tm_sec%10;
+                    localFileName[0] = '0' + gUTCDecodeTime.tm_mon/10;
+                    localFileName[1] = '0' + gUTCDecodeTime.tm_mon%10;
+                    localFileName[2] = '0' + gUTCDecodeTime.tm_hour/10;
+                    localFileName[3] = '0' + gUTCDecodeTime.tm_hour%10;
+                    localFileName[4] = '0' + gUTCDecodeTime.tm_min/10;
+                    localFileName[5] = '0' + gUTCDecodeTime.tm_min%10;
+                    localFileName[6] = '0' + gUTCDecodeTime.tm_sec/10;
+                    localFileName[7] = '0' + gUTCDecodeTime.tm_sec%10;
                     
                     eepromStartIdx = 0 ;
                     pContex->handleType = U_S_HANDLE_TYPE_IDLE_WRITE_HEAD;//写排头
@@ -562,7 +1022,7 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
             //[写抬头状态] :  判断是否有外部事件 触发导出到U盘
             case U_S_HANDLE_TYPE_IDLE_WRITE_HEAD:
                 USBIf_OrderTrigger_Write(&UsbStoreHandle,
-                                        lc_fileName,
+                                        localFileName,
                                         0,
                                         (sizeof(UPAN_STRORE_SINGLE_GROUP_HEAD)),
                                         UPAN_STRORE_SINGLE_GROUP_HEAD,
@@ -579,7 +1039,7 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
                 {
                     //会设置 pContex->usbIfTrigger = U_S_HANDLE_TRIGER
                     USBIf_OrderTrigger_Write(&UsbStoreHandle,
-                                            lc_fileName,
+                                            localFileName,
                                             0,
                                             findoutLine*UPAN_STRORE_LINE_MAX_LEN*2,
                                             &upanStoreDataGroup[0][0],
@@ -599,7 +1059,7 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
             case U_S_HANDLE_TYPE_IDLE_WRITE_END:
                 //会设置 pContex->usbIfTrigger = U_S_HANDLE_TRIGER
                 USBIf_OrderTrigger_Write(&UsbStoreHandle,
-                                        lc_fileName,
+                                        localFileName,
                                         0,
                                         sizeof(UPAN_STRORE_SINGLE_GROUP_END),
                                         UPAN_STRORE_SINGLE_GROUP_END,
@@ -621,7 +1081,7 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
             //=========================================================================
             // 第一步 : U盘挂载 f_mount(fs, path, opt)
             case U_S_HANDLE_TYPE_MOUNT:
-                f_ret = f_mount(&pContex->FatfsUDisk, (TCHAR const*)USBHPath, 0);//!!!!!!!! 必须用1 !!!!!!!!!!
+                f_ret = f_mount(pContex->pFatfsUDisk, (TCHAR const*)USBHPath, 0);//!!!!!!!! 必须用1 !!!!!!!!!!
                 if(FR_OK == f_ret)
                 {
                     pContex->retryCnt = U_S_RETRY_TIME;
@@ -645,14 +1105,14 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
                     //2.f_open 打开文件
                     if(FR_OK == f_ret)//如果文件存在 则以可写 可读方式打开
                     {
-                        f_ret = f_open(&pContex->myFile, (const TCHAR*)&pContex->fileName[0], FA_WRITE|FA_READ);
+                        f_ret = f_open(pContex->pFile, (const TCHAR*)&pContex->fileName[0], FA_WRITE|FA_READ);
                     }
                     else//如果文件不存在 则以创建文件 可写方式打开
                     {
-                        f_ret = f_open(&pContex->myFile, (const TCHAR*)&pContex->fileName[0], FA_CREATE_ALWAYS|FA_WRITE);
+                        f_ret = f_open(pContex->pFile, (const TCHAR*)&pContex->fileName[0], FA_CREATE_ALWAYS|FA_WRITE);
                     } 
                 #else
-                    f_ret = f_open(&pContex->myFile, (const TCHAR*)&pContex->fileName[0], FA_OPEN_ALWAYS|FA_WRITE|FA_READ);
+                    f_ret = f_open(pContex->pFile, (const TCHAR*)&pContex->fileName[0], FA_OPEN_ALWAYS|FA_WRITE|FA_READ);
                 #endif
                 
                 if(FR_OK == f_ret)//f_open成功
@@ -682,7 +1142,7 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
             //https://blog.csdn.net/lbaihao/article/details/75145256
             case U_S_HANDLE_TYPE_FILE_WRITE:
                 //1.移动指针到文件末尾 : move pointer to file end
-                f_ret = f_lseek(&pContex->myFile, f_size(&pContex->myFile));
+                f_ret = f_lseek(pContex->pFile, f_size(pContex->pFile));
                 //2.单次最长写32字节
                 pContex->handleLen = pContex->handleLenRemain;
                 if(pContex->handleLen >= U_S_SINGLE_WRITE_MAX_LEN)
@@ -692,7 +1152,7 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
                 //3.写内容 : f_write
                 if(pContex->handleLen > 0)
                 {
-                    f_ret = f_write(&pContex->myFile, &pContex->pFileData[pContex->handleOffset], pContex->handleLen, &pContex->byteWriten);
+                    f_ret = f_write(pContex->pFile, &pContex->pFileData[pContex->handleOffset], pContex->handleLen, &pContex->byteWriten);
                 }
                 //4.写结果判断 : check result
                 if(FR_OK == f_ret)//成功
@@ -741,7 +1201,7 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
             // 第五步 : 关闭文件 f_close file
             case U_S_HANDLE_TYPE_FILECLOSE:
             {
-                f_ret = f_close(&pContex->myFile); //Close the open text file
+                f_ret = f_close(pContex->pFile); //Close the open text file
                 if(FR_OK == f_ret)
                 {
                     closeDelayTick = WEITE_UPAN_2ORDER_DIFF;
@@ -855,14 +1315,7 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
         }
     }
 }
-
-
 #endif
-
-
-
-
-
 
 #if 0
 uint16 upanStoreOffset_i = 0;
@@ -1086,3 +1539,5 @@ void MSC_Application(void)
 }
 
 #endif
+
+#endif//_USB_ESSH_C_

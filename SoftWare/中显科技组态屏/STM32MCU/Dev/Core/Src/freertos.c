@@ -49,7 +49,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 volatile uint16_t usb_handle_test = 0 ;
-extern ApplicationTypeDef Appli_state;
+extern ApplicationTypeDef UDisk_Appli_state;
 extern void MSC_Application(void);
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
@@ -140,7 +140,7 @@ void StartDefaultTask(void const * argument)
   {
 	  osDelay(1);
     //
-    USBIf_Mainfunction(Appli_state);
+    USBIf_Mainfunction(UDisk_Appli_state);
   }
   /* USER CODE END StartDefaultTask */
 }

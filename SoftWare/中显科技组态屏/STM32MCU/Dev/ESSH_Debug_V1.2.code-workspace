@@ -48,7 +48,8 @@
 			"app_at24c.h": "c",
 			"time.h": "c",
 			"app_usbsmq.h": "c",
-			"usb_essh.h": "c"
+			"usb_essh.h": "c",
+			"usbh_diskio.h": "c"
 		}
 	}
 }

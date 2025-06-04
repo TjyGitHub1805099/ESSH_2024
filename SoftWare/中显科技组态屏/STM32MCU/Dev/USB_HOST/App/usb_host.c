@@ -42,8 +42,8 @@
 /* USB Host core handle declaration */
 USBH_HandleTypeDef hUsbHostHS;
 USBH_HandleTypeDef hUsbHostFS;
-ApplicationTypeDef Appli_state = APPLICATION_IDLE;
-ApplicationTypeDef Appli_state2 = APPLICATION_IDLE;
+ApplicationTypeDef UDisk_Appli_state = APPLICATION_IDLE;
+ApplicationTypeDef USB_Appli_state = APPLICATION_IDLE;
 
 /*
  * -- Insert your variables declaration here --
@@ -118,23 +118,23 @@ static void USBH_UserProcess1  (USBH_HandleTypeDef *phost, uint8_t id)
   /* USER CODE BEGIN CALL_BACK_2 */
   switch(id)
   {
-  case HOST_USER_SELECT_CONFIGURATION:
-  break;
+    case HOST_USER_SELECT_CONFIGURATION:
+    break;
 
-  case HOST_USER_DISCONNECTION:
-  Appli_state2 = APPLICATION_DISCONNECT;
-  break;
+    case HOST_USER_DISCONNECTION:
+      USB_Appli_state = APPLICATION_DISCONNECT;
+    break;
 
-  case HOST_USER_CLASS_ACTIVE:
-  Appli_state2 = APPLICATION_READY;
-  break;
+    case HOST_USER_CLASS_ACTIVE:
+      USB_Appli_state = APPLICATION_READY;
+    break;
 
-  case HOST_USER_CONNECTION:
-  Appli_state2 = APPLICATION_START;
-  break;
+    case HOST_USER_CONNECTION:
+      USB_Appli_state = APPLICATION_START;
+    break;
 
-  default:
-  break;
+    default:
+    break;
   }
   /* USER CODE END CALL_BACK_2 */
 }
@@ -142,25 +142,26 @@ static void USBH_UserProcess1  (USBH_HandleTypeDef *phost, uint8_t id)
 static void USBH_UserProcess2  (USBH_HandleTypeDef *phost, uint8_t id)
 {
   /* USER CODE BEGIN CALL_BACK_21 */
+  
   switch(id)
   {
-  case HOST_USER_SELECT_CONFIGURATION:
-  break;
+    case HOST_USER_SELECT_CONFIGURATION:
+    break;
 
-  case HOST_USER_DISCONNECTION:
-  Appli_state = APPLICATION_DISCONNECT;
-  break;
+    case HOST_USER_DISCONNECTION:
+      UDisk_Appli_state = APPLICATION_DISCONNECT;
+    break;
 
-  case HOST_USER_CLASS_ACTIVE:
-  Appli_state = APPLICATION_READY;
-  break;
+    case HOST_USER_CLASS_ACTIVE:
+      UDisk_Appli_state = APPLICATION_READY;
+    break;
 
-  case HOST_USER_CONNECTION:
-  Appli_state = APPLICATION_START;
-  break;
+    case HOST_USER_CONNECTION:
+      UDisk_Appli_state = APPLICATION_START;
+    break;
 
-  default:
-  break;
+    default:
+    break;
   }
   /* USER CODE END CALL_BACK_21 */
 }

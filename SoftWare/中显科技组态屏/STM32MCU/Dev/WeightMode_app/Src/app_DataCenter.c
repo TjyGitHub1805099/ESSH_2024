@@ -72,7 +72,7 @@ tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle =
     .searchStartIndex_Use_WeightType_LastSuccessIndex = 0xFFFF,
     .searchUseWeightType = {0},
     //search need step2: use weight type search
-    .searchUseUTCTimeStart = 0x66B40C68 ,//2024-08-08 08:08:08
+    .searchUseUTCTimeStart = 0x386CD300 ,//2000-01-01 00:00:00
     .searchUseUTCTimeEnd = 0xF3C5DDE8 ,//2099-08-08 08:08:08
     .searchOutIndex_CheckedBy_UTCTime = 0,
     .leixingxuanze = 0xF,//P1 P2 P3 P4
@@ -1639,7 +1639,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
                 crc16 = EECRC16(&pContex->s_StoreData[0],(CF_ATC24_USERDATA_STORE_LEN-2));
                 if(crc16 == pContex->crc16)//第一份数据合法
                 {
-                   pContex->initSuccess |= 1;
+                    pContex->initSuccess |= 1;
                     //获取存储位置
                     pContex->userStorePosition = 0;
                     pContex->userStorePosition += pContex->s_StoreData[CF_ATC24_USERDATA_STORE_LEN - 4];//最后3`4字节存储位置
