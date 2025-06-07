@@ -182,7 +182,9 @@ tDataCenterExtFlashCallbackStruct dataCenterCallbackRegisterList[E_F_HANDLE_JOBI
     {E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_DATAPAYLOAD_2025,DataCenterHandle_Callback},
     {E_F_HANDLE_JOBID_R_DATACENTER_BACKUP_DATAPAYLOAD_2025,DataCenterHandle_Callback},
     {E_F_HANDLE_JOBID_W_DATACENTER_CRC_DATAPAYLOAD_2025,DataCenterHandle_Callback},
-    {E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_CRC_DATAPAYLOAD_2025,DataCenterHandle_Callback}
+    {E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_CRC_DATAPAYLOAD_2025,DataCenterHandle_Callback},
+    {E_F_HANDLE_JOBID_W_DATACENTER_CLEAR_DATAPAYLOAD_2025,DataCenterHandle_Callback},
+    {E_F_HANDLE_JOBID_W_DATACENTER_CLEAR_BACKUP_DATAPAYLOAD_2025,DataCenterHandle_Callback}
 };
 
 void InnerScreenDataCenterHandle_WeightClassification_Init(tInnerScreenDataCenterHandleStruct *pContex)
@@ -663,6 +665,7 @@ void InnerScreenDataCenterHandle_PageAllIndexSearching(tInnerScreenDataCenterHan
     }
 }
 
+#if 0
 //PC1.when 1st goto data center , init it
 void InnerScreenDataCenterHandle_Searching_Page1Init(tInnerScreenDataCenterHandleStruct *pContex)
 {
@@ -675,6 +678,7 @@ void InnerScreenDataCenterHandle_Searching_Page1Init(tInnerScreenDataCenterHandl
     //send data to screen ....
 
 }
+
 
 //PC2.when at data center page and touch page down
 void InnerScreenDataCenterHandle_Searching_PageDown(tInnerScreenDataCenterHandleStruct *pContex)
@@ -858,72 +862,11 @@ UINT8 oneGroupSearchOutForDisplay(UINT16 inIndex, UINT8 in_MaxLen , UINT8 *pOutD
     return ret;
 }
 
+#endif
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#if 0
 //删除所有记录的数据
 uint8 InnerScreenDataCenterHandle_ClearAllData(tInnerScreenDataCenterHandleStruct *pContex , tInnerScreenDataCenterStruct *pEntryData)
 {
@@ -1138,6 +1081,7 @@ uint8 InnerScreenDataCenterHandle_QueueEntry(tInnerScreenDataCenterHandleStruct 
     return ret;
 }
 
+
 //clear all data when export all
 void InnerScreenDataCenterHandle_Clear_CfgInfo_WeightType(tInnerScreenDataCenterHandleStruct *pContex)
 {
@@ -1164,6 +1108,9 @@ void InnerScreenDataCenterHandle_Clear_CfgInfo_WeightType(tInnerScreenDataCenter
         } 
     }
 }
+
+
+
 //clear all data when export all
 void InnerScreenDataCenterHandle_Clear_CfgInfo_utcTime(tInnerScreenDataCenterHandleStruct *pContex)
 {
@@ -1191,6 +1138,12 @@ void InnerScreenDataCenterHandle_Clear_CfgInfo_utcTime(tInnerScreenDataCenterHan
     }
 }
 
+#endif
+
+
+
+
+//清除所有数据中心的 job 关于读写外部flash
 void InnerScreenDataCenterHandle_ClearAll_jobStatus(tInnerScreenDataCenterHandleStruct *pContex)
 {
     uint8 i = 0 ;
@@ -1201,7 +1154,7 @@ void InnerScreenDataCenterHandle_ClearAll_jobStatus(tInnerScreenDataCenterHandle
     }
     
 }
-
+//检查所有数据中心的 job 关于读写外部flash
 uint8 InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(tInnerScreenDataCenterHandleStruct *pContex)
 {
     uint8 i = 0 ;
@@ -1222,10 +1175,14 @@ uint8 InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(tInnerScreenDataCe
         }
     }
     //
-    return ret; 
-    
+    return ret;   
 }
 
+
+
+
+
+#if 0
 uint8 InnerScreenDataCenterHandle_Init_OrderTriger(tInnerScreenDataCenterHandleStruct *pContex)
 {
     uint8 ret = 0 ;
@@ -1306,7 +1263,7 @@ void innerScreenDiwen_LSB2MSB(uint8 *pData,uint16 len)
         i++;
     }
 }
-
+#endif
 
 
 #if 0
@@ -1581,11 +1538,17 @@ uint8 InnerScreenDataCenterHandle_Init_OrderTriger2025(tInnerScreenDataCenterHan
     return ret;
 }
 
+//
 uint16 InnerScreenDataCenter_GetClassfication(void)
 {
     tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
     return ((pContex->guige[0] << 8) + (pContex->guige[1] << 0));
 }
+
+
+
+
+
 UINT8 zhixingzhuangtai3002 = 0 , jiluwanchengkeyishaomiao = 0 ;
 extern UINT16 u16xuejiangleixingUsed[IS_LEN_XUEJIANG_LEIXING];//1->P1鲜浆 , 2->P2冰浆 , 3->P3病灭鲜浆 , 4->P4冰灭冰浆
 void InnerScreenDataCenterHandle_MainFunction(void)
@@ -1747,6 +1710,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
                 }
                 else
                 {
+                    pContex->userStorePosition += 1;///////////////////因为存的序号比实际的少1
                     pContex->userStorePosition = pContex->userStorePosition % CLASSIFICATION_STORE_MAX_NUM;
                     pContex->handle = D_C_HANDLE_READUSERDATA_CPLT;
                 }
@@ -1764,15 +1728,53 @@ void InnerScreenDataCenterHandle_MainFunction(void)
 
         //上电后对用户数据读取完成
         case D_C_HANDLE_READUSERDATA_CPLT:
-            pContex->handle = D_C_HANDLE_WEIGHT;
+            pContex->handle = D_C_HANDLE_CYCLE_SCAN;
         break;
+
+        //周期事件扫描
+        case D_C_HANDLE_CYCLE_SCAN:
+            if(APPLICATION_TRIGGER_DELETE_ALL_DATA_DOUBLECHECK == pContex->appTrigerDeleteAllData)
+            {
+                 pContex->handle = D_C_HANDLE_APP_DELETE_ALL_RECODEDATA;
+            }
+            else
+            {
+                pContex->handle = D_C_HANDLE_SCAN_FTROM_WEIGHT;
+            }
+        break; 
+       
+        //==============================================================================================================
+        //==============================================================================================================
+        //==============================================================================================================
+        #if 1//删除所有数据 事件处理
+        case D_C_HANDLE_APP_DELETE_ALL_RECODEDATA:
+            if(1 == DataCenter_DeleteData_FlashWriteTrigger(0xFFFF))
+            {
+                pContex->handle = D_C_HANDLE_APP_DELETE_ALL_RECODEDATA_WAIT;
+            }
+        break;
+        case D_C_HANDLE_APP_DELETE_ALL_RECODEDATA_WAIT:
+            if(1 == DataCenter_DeleteData_WaitDone(0xFFFF))
+            {
+                pContex->appTrigerDeleteAllData = 0;
+                IS_JumpToPage_Trigger(IS_PAGE_13_0X0D_DELETEALLDATA_CPLT); //跳转至提示界面 
+                InnerScreenDataCenteHandle.userStorePosition = 0;
+                //    
+                pContex->handle = D_C_HANDLE_CYCLE_SCAN; 
+            }
+        break;
+        #endif
+        //==============================================================================================================
+        //==============================================================================================================
+        //==============================================================================================================
+
 
         //==============================================================================================================
         //==============================================================================================================
         //==============================================================================================================
         //==开始正常控制之1：等待重量稳定
         #if 1
-        case D_C_HANDLE_WEIGHT:
+        case D_C_HANDLE_SCAN_FTROM_WEIGHT:
             weight = hx711_getWeight(HX711Chanel_1);
             if((0 != gSystemPara.mlYugBiLv) && (SYS_ML_G_WAS_ML == gSystemPara.uint))
             {
@@ -1814,7 +1816,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             else
             {
                 l_CF_StoreMask &= (~CF_STORE_MASK_WEIGHT);
-                pContex->handle = D_C_HANDLE_WEIGHT;
+                pContex->handle = D_C_HANDLE_CYCLE_SCAN;
             }
         break;
         #endif
@@ -1836,7 +1838,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             {               
                 //
                 l_CF_StoreMask &= (~CF_STORE_MASK_GUIGE);
-                pContex->handle = D_C_HANDLE_WEIGHT;
+                pContex->handle = D_C_HANDLE_CYCLE_SCAN;
             }
             //
             if(0 == jiluwanchengkeyishaomiao)
@@ -1906,7 +1908,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             else
             {
                 l_CF_StoreMask &= (~CF_STORE_MASK_BCCODE);
-                pContex->handle = D_C_HANDLE_WEIGHT;
+                pContex->handle = D_C_HANDLE_CYCLE_SCAN;
             }
         break;
         #endif
@@ -1931,7 +1933,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             else
             {
                 l_CF_StoreMask &= (~CF_STORE_MASK_TIME);
-                pContex->handle = D_C_HANDLE_WEIGHT;
+                pContex->handle = D_C_HANDLE_CYCLE_SCAN;
             }
         break;
         #endif
@@ -1955,7 +1957,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             else
             {
                 l_CF_StoreMask  &= (~CF_STORE_MASK_CPLT);
-                pContex->handle = D_C_HANDLE_WEIGHT;
+                pContex->handle = D_C_HANDLE_CYCLE_SCAN;
             } 
         break;
         #endif
@@ -2103,7 +2105,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             pContex->screenTrigerToSingleStore = FALSE;
             jiluwanchengkeyishaomiao = 1;
             //回到开始扫描重量
-            pContex->handle = D_C_HANDLE_WEIGHT;
+            pContex->handle = D_C_HANDLE_CYCLE_SCAN;
         break;
 
         default:
@@ -2117,6 +2119,7 @@ void appTrigerDatacenter2Store(void)
     pContex->screenTrigerToSingleStore = TRUE;
 }
 
+#if 0
 //数据中心 数据准备 
 UINT8  DataCenterDisplay_Prepare_OneGroupData(UINT8 up_dowm)
 {
@@ -2136,17 +2139,7 @@ UINT8  DataCenterDisplay_Prepare_OneGroupData(UINT8 up_dowm)
     uint8 append_offset = 0 , append_i = 0;
     //
     uint8 searchResult_Nums = 0 ; 
-    //查询整个区间都不够7组时退出
-    INT16 thisWhileEnd_dataCenterSearchIndex = pContex->dataCenterSearchIndex;
-    //==查找需要 自加/自减
-    if(1 == up_dowm)
-    {
-        thisWhileEnd_dataCenterSearchIndex = pContex->userStorePosition;
-    }
-    else
-    {
-        thisWhileEnd_dataCenterSearchIndex = -1;
-    }
+
 
 
 
@@ -2291,7 +2284,7 @@ UINT8  DataCenterDisplay_Prepare_OneGroupData(UINT8 up_dowm)
             {
                 pContex->u8dataCenterSearchOut[append_offset + 2] = '0' + store_weight%100/10;
             } 
-            if(store_weight >= 0)
+            //if(store_weight >= 0)
             {
                 pContex->u8dataCenterSearchOut[append_offset + 3] = '0' + store_weight%10;
             } 
@@ -2359,6 +2352,84 @@ UINT8  DataCenterDisplay_Prepare_OneGroupData(UINT8 up_dowm)
     return ret;
 }
 
+#endif
+
+//触发删除所有数据入口
+void ApplicationEventSet_Delete_ALL_RecodeData(UINT16 setVlu)
+{
+    tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
+    pContex->appTrigerDeleteAllData = setVlu;
+}
+UINT16 ApplicationEventGet_Delete_ALL_RecodeData(void)
+{
+    tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
+    return pContex->appTrigerDeleteAllData;
+}
+
+//删除数据：0xffff 代表所有数据
+UINT8 DataCenter_DeleteData_FlashWriteTrigger(UINT16 position)
+{
+    tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
+    uint16 offset = 0 ,  ret = 0;
+    uint16 crc16;
+    tExtFlashOrderStruct pushOrder;
+    //
+    if(0xFFFF == position)//删除所有数据
+    {
+        offset = CF_ATC24_USERDATA_STORE_LEN - CF_ATC24_USERDATA_STORE_POSITION_LEN - CLASSIFICATION_STORE_CFG_CRCLEN;
+        //清除第一份的全部数据 并计算CRC
+        memset(&pContex->s_StoreData[0],0,CF_ATC24_USERDATA_STORE_LEN);
+        crc16 = EECRC16(&pContex->s_StoreData[0],(CF_ATC24_USERDATA_STORE_LEN-2));
+        pContex->s_StoreData[offset + 2] = (crc16 >> 8) & 0xff;
+        pContex->s_StoreData[offset + 3] = (crc16 >> 0) & 0xff;
+        pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
+        pushOrder.RegAddress = CF_ATC24_USERDATA_STORE_START_ADD;
+        pushOrder.totalLen = CF_ATC24_USERDATA_STORE_LEN;
+        pushOrder.remainLen = CF_ATC24_USERDATA_STORE_LEN;
+        pushOrder.writePtr = &pContex->s_StoreData[0];
+        pushOrder.timeout = 10000;
+        ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_CLEAR_DATAPAYLOAD_2025,&pushOrder);    
+        if(1 == ret)
+        {
+            InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_CLEAR_DATAPAYLOAD_2025);
+        } 
+    }
+    else//删除单条数据
+    {
+
+    }
+    //
+    return ret;
+}
+
+//等待删除数据完成：0xffff 代表所有数据
+UINT8 DataCenter_DeleteData_WaitDone(UINT16 position)
+{
+    tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
+    UINT8 ret = 0 ;
+    //
+    if(0xFFFF == position)//删除所有数据
+    {
+        if(1 == InnerScreenDataCenterHandle_CheckAll_jobStatus_Complete(pContex))
+        {
+            ret = 1;
+        }
+    }
+    //
+    return ret;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2367,12 +2438,6 @@ UINT8  DataCenterDisplay_Prepare_OneGroupData(UINT8 up_dowm)
 //鲜浆：0xCFCA 0xBDAC
 //冰浆：0xB1F9 0xBDAC
 //病灭：0xB2A1 0xC3F0 
-
-
-
-
-
-
 
 
 
@@ -2549,7 +2614,7 @@ UINT8  DataCenterDisplay_Prepare_OneGroupData_20250509(tInnerScreenDataCenterHan
                 {
                     pContex->u8dataCenterSearchOut[append_offset + 2] = '0' + store_weight%100/10;
                 } 
-                if(store_weight >= 0)
+                //if(store_weight >= 0)
                 {
                     pContex->u8dataCenterSearchOut[append_offset + 3] = '0' + store_weight%10;
                 } 

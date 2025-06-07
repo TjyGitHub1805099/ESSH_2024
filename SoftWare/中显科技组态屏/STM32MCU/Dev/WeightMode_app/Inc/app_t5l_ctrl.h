@@ -44,13 +44,12 @@ typedef enum ZHONGXIANPageType
 	IS_PAGE_09_0X09_DATACENTERPAGEE = 9,
 	IS_PAGE_11_0X0B_UPAN_PLUG_IN = 11,//U盘插入界面
 	IS_PAGE_12_0X0C_UPAN_PLUG_OUT = 12,//U盘拔出界面
+	IS_PAGE_13_0X0D_DELETEALLDATA_CPLT = 13,//删除所有数据完成提示界面
 	IS_PAGE_15_0X0F_OUTPUTCPLT = 15,//导出数据到U盘完成提示界面
+	IS_PAGE_17_0X11_DELETEALLDATA_DOUBCHECK = 17,//删除所有数据 二次确认
 	IS_PAGE_18_0X12_XUEJIANGLEIXING = 18,//血浆类型选择界面
 	IS_PAGE_19_0X13_GONGHAO = 19,//工号录入界面
-
-
-	
-
+	IS_PAGE_20_0X14_PLEASE_PLUGIN_UDISK = 20,//请插入U盘
 
 	IS_PAGE_IVALID = 0xff,
 }enumISPageType;
@@ -230,10 +229,11 @@ extern ISPopupWindowType IS_PopupWindow[IS_PopupWindow_MAX_HANDLE];
 #define IS_ADD_CUR_WEIGHT								(0x3000)
 #define IS_ADD_FENLEI_RESULT							(0x3001)
 #define IS_ADD_EXE_STORE								(0x3002)
+
 #define IS_ADD_BCCODE									(0x3003)
 #define IS_LEN_BCCODE									(8)
 #define IS_ADD_HOMEPAGE_CYCLE_DATA						(IS_ADD_CUR_WEIGHT)
-#define IS_LEN_HOMEPAGE_CYCLE_DATA						(IS_LEN_BCCODE + 4)
+#define IS_LEN_HOMEPAGE_CYCLE_DATA						(IS_LEN_BCCODE + 3 + 2)//2个当前存储数量
 
 //页面19 工号录入
 #define IS_ADD_GONGHAO									(0x3020)//主页面显示
@@ -243,8 +243,8 @@ extern ISPopupWindowType IS_PopupWindow[IS_PopupWindow_MAX_HANDLE];
 //页面9：数据中心 显示7组数据
 #define IS_ADD_DATACENTER_GROUP_START        			(0x3500)
 #define IS_NUM_DATACENTER_GROUP        					(7)
-#define IS_LEN_DATACENTER_SINGLE        				(0x20)//员工工号 + ...
 
+#define IS_LEN_DATACENTER_SINGLE        				(0x20)//员工工号 + ...
 //
 #define IS_ADD_NAMEOF_UPAN_SAVE_FILENAME				(0X3600)//0x3600 == 未使用
 #define IS_LEN_NAMEOF_UPAN_SAVE_FILENAME				(20)//20个字符 == 未使用
@@ -286,7 +286,6 @@ extern ISPopupWindowType IS_PopupWindow[IS_PopupWindow_MAX_HANDLE];
 
 
 //page9:数据中心
-#define DMG_FUNC_PAGE9_DELET_ALL_DATA_ADDRESS		(0X8009)
 #define DMG_FUNC_PAGE9_DELET_ALL_DATA_VLU			(0X0901)
 #define DMG_FUNC_PAGE9_OUTPUT_CUR_PAGE_ADDRESS		(0X8009)
 #define DMG_FUNC_PAGE9_OUTPUT_CUR_PAGE_VLU			(0X0912)
@@ -720,12 +719,12 @@ typedef struct structSdweType
 	UINT16  screenHomePageNum;/**< 屏幕 主页 页面序号*/
 	UINT16  screenOutputCpltPageNum;/**< 屏幕 导出数据完成 页面序号*/
 
-	UINT16  screenBanlingPageNum;/**< 屏幕 配平 页面序号*/
-	UINT16 	screenCalibrationPage;/**< 屏幕 计算 页面序号*/
-	UINT16 	screenActivePage;/**< 屏幕 激活 页面序号*/
-	UINT16  screenSysParaPage;/**< 屏幕 系统参数 页面序号*/
-	UINT16  screenBalancingCleanPage;/**< 暂未使用 屏幕 配平清爽 页面序号*/
-	UINT16  screenBalancingMainPage;/**< 暂未使用 屏幕 配平主页 页面序号*/
+	enumDMGPageType  screenBanlingPageNum;/**< 屏幕 配平 页面序号*/
+	enumDMGPageType  screenCalibrationPage;/**< 屏幕 计算 页面序号*/
+	enumDMGPageType  screenActivePage;/**< 屏幕 激活 页面序号*/
+	enumDMGPageType  screenSysParaPage;/**< 屏幕 系统参数 页面序号*/
+	enumDMGPageType  screenBalancingCleanPage;/**< 暂未使用 屏幕 配平清爽 页面序号*/
+	enumDMGPageType  screenBalancingMainPage;/**< 暂未使用 屏幕 配平主页 页面序号*/
 	UINT16 	freshDP;/**< 刷新描述指针*/
 	UINT16  isCascadTrigger;/**< 级联触发*/
 	UINT16  isWriteWeightIndexTrigger;/**< 写序号触发*/
@@ -735,7 +734,7 @@ typedef struct structSdweType
 	UINT16 	triggerSaveVlu;
 	UINT16 	triggerSaveVluPre;
 
-	UINT16 	dataCenterDisplayPage;
+	enumISPageType 	dataCenterDisplayPage;
 	UINT16 	dataCenterDisplayPagePre;
 
 	UINT8   jumpToDataCenterHandle;
@@ -745,6 +744,7 @@ typedef struct structSdweType
 	//跳转至指定界面
 	UINT8 	jumpToPageEvent;
 	enumISPageType 	jumpToPageEvent_PageNum;
+	enumISPageType 	jumpToPageEvent_PageNum_Pre;
 
 
 	ISPopupWindowType *PopupWindow;
@@ -857,7 +857,8 @@ typedef struct structSdweType
 	.jumpToHomeHandle = 0 ,\
 	.jumpToOutputCpltPageHandle = 0 ,\
 	.jumpToPageEvent = 0 ,\
-	.jumpToPageEvent_PageNum = 0,\
+	.jumpToPageEvent_PageNum = IS_PAGE_00_0X00_HOMEPAGEE,\
+	.jumpToPageEvent_PageNum_Pre = IS_PAGE_00_0X00_HOMEPAGEE,\
 	.PopupWindow = &IS_PopupWindow[0],\
 	.RxEventTable = &IS_Event,\
 }
@@ -941,7 +942,8 @@ typedef struct structSdweType
 	.jumpToHomeHandle = 0 ,\
 	.jumpToOutputCpltPageHandle = 0 ,\
 	.jumpToPageEvent = 0 ,\
-	.jumpToPageEvent_PageNum = 0 ,\
+	.jumpToPageEvent_PageNum = IS_PAGE_00_0X00_HOMEPAGEE ,\
+	.jumpToPageEvent_PageNum_Pre = IS_PAGE_00_0X00_HOMEPAGEE,\
 	.PopupWindow = &IS_PopupWindow[0],\
 	.RxEventTable = &IS_Event,\
 }

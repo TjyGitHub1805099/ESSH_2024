@@ -596,7 +596,6 @@ uint8 USBIf_WriteHanle_PrepareData(tUsbStoreHandleStruct *pContex)
 void USBIf_Mainfunction_Ready(tUsbStoreHandleStruct *pContex)
 {
     uint8 retWriteHoldOn = DATA_NEED_WRITE_TO_FILE_HOLDON;
-    uint8 ret = 0 ;
     FRESULT f_ret;
     //
     switch(pContex->usbIfAppMainFunctionState)
@@ -802,8 +801,7 @@ void USBIf_Mainfunction_Ready(tUsbStoreHandleStruct *pContex)
                 pContex->usbFileSuccessHandleMask |= USB_HANDLE_MASK_UNMOUNT;
                 pContex->usbIfAppMainFunctionState = USBIF_MAINFUNCTION_HANDLE_IDLE;
                 //
-                g_T5LCtx[ScreenIndex_Smaller].jumpToPageEvent = TRUE;
-                g_T5LCtx[ScreenIndex_Smaller].jumpToPageEvent_PageNum = IS_PAGE_15_0X0F_OUTPUTCPLT;
+                IS_JumpToPage_Trigger(IS_PAGE_15_0X0F_OUTPUTCPLT);
             }
             else
             {
@@ -829,6 +827,7 @@ void USBIf_Mainfunction_Disconnect(tUsbStoreHandleStruct *pContex)
     switch(pContex->usbIfAppMainFunctionState)
     {
         case USBIF_MAINFUNCTION_HANDLE_IDLE:
+            pContex->eventTriggered = 0;
         break;
 
         default:
@@ -896,14 +895,13 @@ void USBIf_Mainfunction(ApplicationTypeDef driver_status)
     if(pContex->plugInOut != pContex->plugInOut_Pre)
     {
         pContex->plugInOut_Pre = pContex->plugInOut;
-        g_T5LCtx[ScreenIndex_Smaller].jumpToPageEvent = TRUE;
         if(pContex->plugInOut == U_USP_PULG_IN)
         {
-            g_T5LCtx[ScreenIndex_Smaller].jumpToPageEvent_PageNum = IS_PAGE_11_0X0B_UPAN_PLUG_IN;
+            IS_JumpToPage_Trigger(IS_PAGE_11_0X0B_UPAN_PLUG_IN);       
         }
         else
         {
-            g_T5LCtx[ScreenIndex_Smaller].jumpToPageEvent_PageNum = IS_PAGE_12_0X0C_UPAN_PLUG_OUT;
+            IS_JumpToPage_Trigger(IS_PAGE_12_0X0C_UPAN_PLUG_OUT);
         }
     }
 }

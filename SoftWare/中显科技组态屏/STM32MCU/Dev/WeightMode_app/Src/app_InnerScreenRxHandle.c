@@ -37,7 +37,7 @@ UINT8 innerScreenRxHandle_Version(T5LType *pSdwe)
 	return matched;
 }
 //0
-UINT8 innerScreenRxHandle_CurPage(T5LType *pSdwe)
+UINT8 innerScreenRxHandle_CycleRx_CurPage(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
 	if((INNER_SCREEN_CURPAGE_GET_ADD+1) == pSdwe->SetAdd)
@@ -50,18 +50,20 @@ UINT8 innerScreenRxHandle_CurPage(T5LType *pSdwe)
 
 extern UINT8 u8xuejiangleixing_OK;
 extern UINT16 u16xuejiangleixing[IS_LEN_XUEJIANG_LEIXING];
-UINT8 innerScreenRxHandle_Xuejiangleixing(T5LType *pSdwe)
+UINT8 innerScreenRxHandle_Page18_Xuejiangleixing(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
-	if((IS_ADD_TYPECHOICE_PAGE_EVENT) == pSdwe->SetAdd)
+	if(IS_ADD_TYPECHOICE_PAGE_EVENT == pSdwe->SetAdd)
 	{
+		//血浆确认
 		if(IS_VLU_TYPECHOICE_PAGE_EVENT_OK == pSdwe->SetData)
 		{
 			u8xuejiangleixing_OK = IS_PopupWindow_OK;
 			matched = TRUE;
 		}		
 	}
-	if((IS_ADD_XUEJIANG_LEIXING_CHONGICE) == pSdwe->SetAdd)
+	//血浆类型选则
+	if(IS_ADD_XUEJIANG_LEIXING_CHONGICE == pSdwe->SetAdd)
 	{
 		u16xuejiangleixing[0] = pSdwe->SetData;
 		matched = TRUE;		
@@ -69,10 +71,10 @@ UINT8 innerScreenRxHandle_Xuejiangleixing(T5LType *pSdwe)
 	return matched;
 }
 extern enumISPopupWindowType u8gonghao_OK;
-UINT8 innerScreenRxHandle_Gonghao(T5LType *pSdwe)
+UINT8 innerScreenRxHandle_Page19_Gonghao(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
-	if((IS_ADD_INPUTGONGHAO_PAGE_EVENT) == pSdwe->SetAdd)
+	if(IS_ADD_INPUTGONGHAO_PAGE_EVENT == pSdwe->SetAdd)
 	{
 		if(IS_VLU_INPUTGONGHAO_PAGE_EVENT_OK == pSdwe->SetData)
 		{
@@ -82,6 +84,46 @@ UINT8 innerScreenRxHandle_Gonghao(T5LType *pSdwe)
 	}
 	return matched;
 }
+
+UINT8 innerScreenRxHandle_Page13_DeleteAllDataCplt(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	if(IS_ADD_DELETECHOICE_PAGE_EVENT == pSdwe->SetAdd)
+	{
+		if((IS_VLU_DELETECHOICE_PAGE_EVENT_OK == pSdwe->SetData)||
+		 (IS_VLU_DELETECHOICE_PAGE_EVENT_CLOSE == pSdwe->SetData)||
+		 (IS_VLU_DELETECHOICE_PAGE_EVENT_BACK == pSdwe->SetData))
+		{
+            IS_JumpToPage_Trigger(IS_PAGE_00_0X00_HOMEPAGEE);
+			matched = TRUE;
+		}		
+	}
+	return matched;
+}
+
+#define IS_VLU_FINDUPAN_PAGE_EVENT_OK					(0x1101)//确认键
+#define IS_VLU_FINDUPAN_PAGE_EVENT_CLOSE				(0x1112)//关闭键
+#define IS_VLU_FINDUPAN_PAGE_EVENT_BACK					(0x1123)//返回键
+
+UINT8 innerScreenRxHandle_Page11_UDiskPlugIN(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	if(IS_ADD_FINDUPAN_PAGE_EVENT == pSdwe->SetAdd)
+	{
+		if((IS_VLU_FINDUPAN_PAGE_EVENT_OK == pSdwe->SetData)||
+		  (IS_VLU_FINDUPAN_PAGE_EVENT_CLOSE == pSdwe->SetData)||
+		  (IS_VLU_FINDUPAN_PAGE_EVENT_BACK == pSdwe->SetData))
+		{
+			//IS_JumpToPage_Trigger(pSdwe->jumpToPageEvent_PageNum_Pre);
+			matched = TRUE;
+		}		
+	}
+	return matched;
+}
+
+
+
+
 #if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
 UINT8 innerScreenRxHandle_RTC_YMDHMS(T5LType *pSdwe)
 {
@@ -435,26 +477,48 @@ UINT8 innerScreenRxHandle_JumpToDataCenterTriger(T5LType *pSdwe)
 			matched = TRUE;
 		}
 	}
-	//2.数据筛选界面 点击 数据筛选预览
+	//2.第5页面 数据筛选界面
 	if(IS_ADD_DATACHOICE_PAGE_EVENT == pSdwe->SetAdd)
 	{
+		//点击 数据筛选预览
 		if(IS_VLU_DATACHOICE_PAGE_EVENT_SHOWCHOICE == (UINT16)pSdwe->SetData)
 		{
 			pSdweSmaller->jumpToDataCenterHandle = TRUE;
 			matched = TRUE;
 		}
+		//点击 选中筛选导出
 		if(IS_VLU_DATACHOICE_PAGE_EVENT_OUTPUTCHOICE == (UINT16)pSdwe->SetData)
 		{
 			APP_TriggerOutPut2Udisk();
-			g_TrigerUSBStoreAll = APP_TRIGER_USB_STORE_ALL_VAL;
 			matched = TRUE;
 		}
+		//点击 选中筛选删除
 		if(IS_VLU_DATACHOICE_PAGE_EVENT_DELETECHOICE == (UINT16)pSdwe->SetData)
 		{
 			g_TrigerUSBDeletedAll = APP_TRIGER_USB_DELETED_ALL_VAL;
+			//
+			ApplicationEventSet_Delete_ALL_RecodeData(APPLICATION_TRIGGER_DELETE_ALL_DATA_1STSET);//需要二次确认
+            IS_JumpToPage_Trigger(IS_PAGE_17_0X11_DELETEALLDATA_DOUBCHECK);       
+			//
 			matched = TRUE;
 		}
 	}
+	//第17页面 删除所有数据 二次确认
+	if(IS_ADD_IFDELETECHOICE_PAGE_EVENT == pSdwe->SetAdd)
+	{
+		if(IS_VLU_IFDELETECHOICE_PAGE_EVENT_OK == (UINT16)pSdwe->SetData)
+		{
+			if(APPLICATION_TRIGGER_DELETE_ALL_DATA_1STSET == ApplicationEventGet_Delete_ALL_RecodeData())
+			{
+				ApplicationEventSet_Delete_ALL_RecodeData(APPLICATION_TRIGGER_DELETE_ALL_DATA_DOUBLECHECK);
+			}
+			else
+			{
+				ApplicationEventSet_Delete_ALL_RecodeData(0);
+			}
+		}
+	}
+	
 	//
 	return matched;
 }
@@ -556,7 +620,7 @@ UINT8 innerScreenRxHandle_SystemReset(T5LType *pSdwe)
 
 
 //16
-UINT8 innerScreenRxHandle_Sizer_ClassifySet(T5LType *pSdwe)
+UINT8 innerScreenRxHandle_Page5_Set_SizerClassify(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
 	UINT8 i = 0 , j = 0;
@@ -587,25 +651,9 @@ UINT8 innerScreenRxHandle_Sizer_ClassifySet(T5LType *pSdwe)
 	}
 	return matched;
 }
-//16
-UINT8 innerScreenRxHandle_PageHomeTriggerSingleSave(T5LType *pSdwe)
-{
-	UINT8 matched = FALSE;
-	if(pSdwe->SetAdd == IS_ADD_HOME_PAGE_EVENT)
-	{
-		if(IS_VLU_HOME_PAGE_EVENT_TRIGER_SAVE == pSdwe->SetData)
-		{
-			if(1 == InnerScreenDataCenteHandle.weigthClassifyCplt)
-			{
-				appTrigerDatacenter2Store();
-			}
-			matched = TRUE;	
-		}
-	}
-	return matched;
-}
+
 //17
-UINT8 innerScreenRxHandle_SearchSet(T5LType *pSdwe)
+UINT8 innerScreenRxHandle_Page5_Set_SearchTime(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
 	UINT8 offset = 0;
@@ -637,7 +685,24 @@ UINT8 innerScreenRxHandle_SearchSet(T5LType *pSdwe)
 	return matched;
 }
 //18
-UINT8 innerScreenRxHandle_OutputAll2Upan(T5LType *pSdwe)
+UINT8 innerScreenRxHandle_Page5_PageHomeTriggerSingleSave(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	if(pSdwe->SetAdd == IS_ADD_HOME_PAGE_EVENT)
+	{
+		if(IS_VLU_HOME_PAGE_EVENT_TRIGER_SAVE == pSdwe->SetData)
+		{
+			if(1 == InnerScreenDataCenteHandle.weigthClassifyCplt)
+			{
+				appTrigerDatacenter2Store();
+			}
+			matched = TRUE;	
+		}
+	}
+	return matched;
+}
+//19
+UINT8 innerScreenRxHandle_Page5_OutputAll2Upan(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE , i = 0;
 	if(pSdwe->SetAdd == IS_ADD_DATACHOICE_PAGE_EVENT)
@@ -645,6 +710,7 @@ UINT8 innerScreenRxHandle_OutputAll2Upan(T5LType *pSdwe)
 		if(IS_VLU_DATACHOICE_PAGE_EVENT_OUTPUTCHOICE == pSdwe->SetData)
 		{
 			matched = TRUE;
+			//
 			InnerScreenDataCenterHandle_WeightClassification_Init(&InnerScreenDataCenteHandle);
 			for(i = 0 ; i < D_C_CLASSIFICATION_NUM ; i++)
 			{
@@ -652,31 +718,27 @@ UINT8 innerScreenRxHandle_OutputAll2Upan(T5LType *pSdwe)
 			}
 
 			APP_TriggerOutPut2Udisk();
-			g_TrigerUSBStoreAll = APP_TRIGER_USB_STORE_ALL_VAL;
 		}
 	}
 	return matched;
 }
-//19
-UINT8 innerScreenRxHandle_DataCenterPageHandle(T5LType *pSdwe)
+//20
+UINT8 innerScreenRxHandle_Page9_DataCenterPageHandle(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
+	//第9页 数据中心页面
 	if(pSdwe->SetAdd == IS_ADD_DATACENTER_PAGE_EVENT)
 	{
-
+		//点击 导出全部
 		if(IS_VLU_DATACENTER_PAGE_EVENT_OUTPUTCHOICE == pSdwe->SetData)
 		{
 			APP_TriggerOutPut2Udisk();
-			g_TrigerUSBStoreAll = APP_TRIGER_USB_STORE_ALL_VAL;
+			matched = TRUE;
 		}
-
-
 		//下一页
-		if(IS_VLU_DATACENTER_PAGE_EVENT_PAGEDOWN == pSdwe->SetData)
+		else if(IS_VLU_DATACENTER_PAGE_EVENT_PAGEDOWN == pSdwe->SetData)
 		{
 			InnerScreenDataCenteHandle.serchDir = D_C_SEARCH_DIR_DOWN;
-
-
 			InnerScreenDataCenteHandle.curPageNum = 0 ;
 			InnerScreenDataCenteHandle.targetPageNum = 1 ;
 			//
@@ -708,8 +770,6 @@ UINT8 innerScreenRxHandle_DataCenterPageHandle(T5LType *pSdwe)
 		else if(IS_VLU_DATACENTER_PAGE_EVENT_PAGEUP == pSdwe->SetData)
 		{
 			InnerScreenDataCenteHandle.serchDir = D_C_SEARCH_DIR_UP;
-
-
 			InnerScreenDataCenteHandle.curPageNum = 1 ;
 			InnerScreenDataCenteHandle.targetPageNum = 0 ;
 			//
@@ -756,19 +816,10 @@ UINT8 innerScreenRxHandle_DataCenterPageHandle(T5LType *pSdwe)
 }
 
 
-
-
-//0:主页事件处理
-UINT8 innerScreenRxHandle_HomePageHandle(T5LType *pSdwe)
+//21:主页事件处理
+UINT8 innerScreenRxHandle_Page0_HomePageHandle(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
-	if(pSdwe->SetAdd == DMG_FUNC_PAGE9_OUTPUT_CUR_PAGE_ADDRESS)
-	{
-		if(DMG_FUNC_PAGE9_PAGEDOWN_PAGE_VLU == pSdwe->SetData)
-		{
-
-		}
-	}
 	return matched;
 }
 
@@ -849,17 +900,17 @@ screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM]=
 	{0,	13,0},//
 	{0,	14,&innerScreenRxHandle_SystemReset},			//收到-重启系统
 	{0,	15,&innerScreenRxHandle_RTC_YMDHMS},			//收到-更新RTC值
-	{0, 16,&innerScreenRxHandle_Sizer_ClassifySet},		//收到-数据筛选(是否选择)+系统参数(分类设置)界面 - 分类区间设置
-	{0, 17,&innerScreenRxHandle_SearchSet},				//收到-数据筛选界面 - 时间区间设置 - 分类选择设置
+	{0, 16,&innerScreenRxHandle_Page5_Set_SizerClassify},		//收到-数据筛选(是否选择)+系统参数(分类设置)界面 - 分类区间设置
+	{0, 17,&innerScreenRxHandle_Page5_Set_SearchTime},	//收到-数据筛选界面 - 时间区间设置 - 分类选择设置
 	{0, 28,&innerScreenRxHandle_JumpToDataCenterTriger},//跳转-数据中心
 
-	{0, 18,&innerScreenRxHandle_PageHomeTriggerSingleSave},		//收到-主界面 点击 存储按钮		
-	{0, 19,&innerScreenRxHandle_OutputAll2Upan},		
-	{0, 20,&innerScreenRxHandle_DataCenterPageHandle},
-	{0, 21,&innerScreenRxHandle_HomePageHandle},
-	{0, 22,&innerScreenRxHandle_CurPage},
-	{0, 23,&innerScreenRxHandle_Xuejiangleixing},
-	{0, 24,&innerScreenRxHandle_Gonghao},
+	{0, 18,&innerScreenRxHandle_Page5_PageHomeTriggerSingleSave},		//收到-主界面 点击 存储按钮		
+	{0, 19,&innerScreenRxHandle_Page5_OutputAll2Upan},		
+	{0, 20,&innerScreenRxHandle_Page9_DataCenterPageHandle},
+	{0, 21,&innerScreenRxHandle_Page0_HomePageHandle},
+	{0, 22,&innerScreenRxHandle_CycleRx_CurPage},
+	{0, 23,&innerScreenRxHandle_Page18_Xuejiangleixing},
+	{0, 24,&innerScreenRxHandle_Page19_Gonghao},
 
 	
 };

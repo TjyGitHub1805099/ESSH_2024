@@ -516,7 +516,7 @@ static void screenPrivate_Init(T5LType *t5lCtx)
 		t5lCtx->screenCycle.handle_i  = &g_handle_i[ScreenIndex_Larger];
 		t5lCtx->screenCycle.rmTrigerInnerSts = &g_rmTrigerInnerSts[ScreenIndex_Larger];
 
-		t5lCtx->screenCalibrationPage = 7;
+		t5lCtx->screenCalibrationPage = DMG_FUNC_CalibrationPage;
 
 		//t5lCtx->sdweJumpBalancingMainPage = TRUE;
 		t5lCtx->sdweChangeDescriblePoint = TRUE;

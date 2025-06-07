@@ -51,5 +51,15 @@
 			"usb_essh.h": "c",
 			"usbh_diskio.h": "c"
 		}
+		"files.exclude":{
+			"**/Listings": true,
+			"**/Objects": true,
+			"**/MDK-ARM/SoftWare": true,
+		},
+		"search.exclude": {
+			"**/Listings":true,
+			"**/Objects": true,
+			"**/MDK-ARM/SoftWare": true,
+		} 
 	}
 }

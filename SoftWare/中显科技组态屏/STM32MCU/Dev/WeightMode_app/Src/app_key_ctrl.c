@@ -96,25 +96,19 @@ void key_MainFunction(void)
 		}
 	}
 
-	//主页 和 配平模式来回切
+	//主页 和 数据中心来回切
 	if(SYS_KEY_INVALUED == preHomeAndCalibrateKey)
 	{
 		if(SYS_KEY_VALUED == key_FilterGet(SYS_KEY_1))
 		{
 			preHomeAndCalibrateKey = SYS_KEY_VALUED;
-			//
-			switch((preHomeAndCalibrateStatus++)%2)
+			if(IS_PAGE_00_0X00_HOMEPAGEE == g_T5LCtx[ScreenIndex_Smaller].curPage)
 			{
-				case 0://切主页
-						g_T5LCtx[ScreenIndex_Smaller].sdweJumpToHomePage = TRUE;
-						g_T5LCtx[ScreenIndex_Larger].sdweJumpToHomePage = TRUE;
-				break;
-				case 1://切配平
-						g_T5LCtx[ScreenIndex_Smaller].sdweJumpToBanlingPage = TRUE;
-						g_T5LCtx[ScreenIndex_Larger].sdweJumpToBanlingPage = TRUE;
-				break;
-				default:
-				break;
+                IS_JumpToPage_Trigger(IS_PAGE_09_0X09_DATACENTERPAGEE);
+			}
+			else
+			{
+                IS_JumpToPage_Trigger(IS_PAGE_00_0X00_HOMEPAGEE);
 			}
 		}
 	}

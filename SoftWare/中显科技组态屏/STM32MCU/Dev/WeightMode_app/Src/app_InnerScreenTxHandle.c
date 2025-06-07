@@ -351,6 +351,13 @@ UINT8 ISTxHandle_Event_JumpToDataCenterPage(T5LType *pSdwe)
 }
 
 
+//触发页面跳转
+void IS_JumpToPage_Trigger(enumISPageType page)
+{
+	g_T5LCtx[ScreenIndex_Smaller].jumpToPageEvent_PageNum_Pre = g_T5LCtx[ScreenIndex_Smaller].curPage;
+	g_T5LCtx[ScreenIndex_Smaller].jumpToPageEvent = TRUE;
+	g_T5LCtx[ScreenIndex_Smaller].jumpToPageEvent_PageNum = page;
+}
 
 
 //==20250513 序号7 跳转至 导出完成 中心前处理
@@ -479,8 +486,8 @@ UINT8 ISTxHandle_Page_Home_CycleDataHandle(T5LType *pSdwe)
 
 	if(IS_PAGE_00_0X00_HOMEPAGEE == pSdwe->curPage)
 	{
-		//重量
-		weight = hx711_getWeight(HX711Chanel_1);
+		//重量f
+		weight = hx711_getWeight(HX711Chanel_1) + 0.5f;
 		//重量转ml
 		if((0 != gSystemPara.mlYugBiLv) && (SYS_ML_G_WAS_ML == gSystemPara.uint))
 		{
@@ -488,7 +495,11 @@ UINT8 ISTxHandle_Page_Home_CycleDataHandle(T5LType *pSdwe)
 			weight /= gSystemPara.mlYugBiLv;
 		}
 		//1.重量
-		u16_IS_CycleData[0] = (UINT16)weight;
+		u16_IS_CycleData[0] = (INT16)weight;
+		if(weight < 0)
+		{
+			u16_IS_CycleData[0] = 0xFFFF - (UINT16)(-weight) + 1;
+		}
 		//2.重量的分类
 		u16_IS_CycleData[1] = InnerScreenDataCenter_GetClassfication();
 		//3.执行状态
@@ -508,8 +519,12 @@ UINT8 ISTxHandle_Page_Home_CycleDataHandle(T5LType *pSdwe)
 			{
 				u16_IS_CycleData[offset+i] = 0;
 			}
-
 		}
+		offset += IS_LEN_BCCODE;
+		u16_IS_CycleData[offset] = InnerScreenDataCenteHandle.userStorePosition;
+		offset += 1;
+		u16_IS_CycleData[offset] = CLASSIFICATION_STORE_MAX_NUM;
+		
 		//
 		if(FALSE == needSend)
 		{
@@ -548,6 +563,7 @@ UINT8 ISTxHandle_Page_Home_CycleDataHandle(T5LType *pSdwe)
 	return matched;
 }
 
+#if 0
 //测试函数
 UINT8 TEST_DIS(T5LType *pSdwe)
 {
@@ -562,7 +578,7 @@ UINT8 TEST_DIS(T5LType *pSdwe)
 	}
 
 }
-
+#endif
 //P:0x50
 //鲜浆：0xCFCA 0xBDAC
 //冰浆：0xB1F9 0xBDAC

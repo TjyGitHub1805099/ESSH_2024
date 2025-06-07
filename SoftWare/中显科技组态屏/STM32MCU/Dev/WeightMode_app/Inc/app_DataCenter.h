@@ -212,7 +212,7 @@ typedef enum
     D_C_HANDLE_YUANGONGHAO,
     D_C_HANDLE_BCCODE,
     D_C_HANDLE_UTCTIME2CHAR,
-    D_C_HANDLE_WEIGHT,
+    D_C_HANDLE_SCAN_FTROM_WEIGHT,//从重量开始扫描
     D_C_HANDLE_LEIXING,
     D_C_HANDLE_GUIGE,
 
@@ -230,6 +230,13 @@ typedef enum
     //第一份数据和第二份数据 均存储完成
     D_C_HANDLE_STORE2EE_ALL_CPLT,
 
+
+    //删除所有数据
+    D_C_HANDLE_APP_DELETE_ALL_RECODEDATA,
+    D_C_HANDLE_APP_DELETE_ALL_RECODEDATA_WAIT,
+
+    //
+    D_C_HANDLE_CYCLE_SCAN,//事件扫描，发现事件，就处理事件，正常周期分类重量.....
     D_C_HANDLE_MAX_NUM
 }eDataCenterHandleType;
 
@@ -264,13 +271,16 @@ typedef enum
 }eDataCenterSearchDirType;
 
 
-
+#define APPLICATION_TRIGGER_DELETE_ALL_DATA_1STSET          (0xDEEE)
+#define APPLICATION_TRIGGER_DELETE_ALL_DATA_DOUBLECHECK     (0xD000)
 
 //local data center handle
 typedef struct sInnerScreenDataCenterHandleStruct
 {
     uint32 ticks;
     uint8 initSuccess;
+    uint16 appTrigerDeleteAllData;
+    uint16 appTrigerDeleteAllData_Sure;
     uint8 trigerStroreFromScreen;//触发单次存储
     uint8 weigthClassifyCplt;
     //cfg info store in extern e2
@@ -343,7 +353,6 @@ typedef struct sInnerScreenDataCenterHandleStruct
 
 
     //20250509 数据中心上下页 数据显示 控制逻辑
-
     eDataCenterSearchType serchState;
     eDataCenterSearchDirType serchDir;
     eDataCenterSearchDirType serchDirPre;
@@ -370,8 +379,15 @@ extern uint8 InnerScreenDataCenterHandle_Searching_Use_WeightType(tInnerScreenDa
 extern void InnerScreenDataCenterHandle_WeightClassification_Init(tInnerScreenDataCenterHandleStruct *pContex);
 extern void appTrigerDatacenter2Store(void);
 extern uint16 InnerScreenDataCenter_GetClassfication(void);
+#if 0
 extern UINT8  DataCenterDisplay_Prepare_OneGroupData(UINT8 up_dowm);
-extern UINT8  DataCenterDisplay_Prepare_OneGroupData_20250509(tInnerScreenDataCenterHandleStruct *pContex , INT16 *searchedIdx);
+#endif
 
+extern UINT8  DataCenterDisplay_Prepare_OneGroupData_20250509(tInnerScreenDataCenterHandleStruct *pContex , INT16 *searchedIdx);
+extern UINT8 DataCenter_DeleteData_FlashWriteTrigger(UINT16 position);
+extern UINT8 DataCenter_DeleteData_WaitDone(UINT16 position);
+extern void ApplicationEventSet_Delete_ALL_RecodeData(UINT16 setVlu);
+extern UINT16 ApplicationEventGet_Delete_ALL_RecodeData(void);
+extern void IS_JumpToPage_Trigger(enumISPageType page);
 
 #endif
