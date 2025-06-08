@@ -7,6 +7,7 @@
 
 #define EXTFLASH_ORDER_BUZY (0x78)
 
+#define DATA_CENTER_DISPLAY_RECOREDE_INDEX TRUE
 
 
 //数据中心显示界面
@@ -360,6 +361,14 @@ typedef struct sInnerScreenDataCenterHandleStruct
     INT16 curSerchIndex;
     INT16 maxSerchIndex;
 
+    UINT8 outPutToUDiskType;//0:全部 1:带筛选条件导出
+    sint64 store_utc64; //外部E2存的utc时间 8 字节
+    uint16 store_guige; //外部E2存的规格    1 字节
+    uint8 store_Leixing;//外部E2存的类型    1 字节
+    uint16 store_weight;//外部E2存的重量    2 字节
+    INT16 curSerchIndex_MatchedIndex;
+
+    
     INT16 serchIndex_start;//每一页第一条的位置
     INT16 serchIndex_end;//每一页最后一条的位置
 
@@ -370,6 +379,7 @@ typedef struct sInnerScreenDataCenterHandleStruct
 }tInnerScreenDataCenterHandleStruct;
 
 extern tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle;
+extern UINT8 zhixingzhuangtai3002;
 
 extern tDataCenterExtFlashCallbackStruct dataCenterCallbackRegisterList[E_F_HANDLE_JOBID_WR_MAX];
 extern void InnerScreenDataCenterHandle_MainFunction(void);

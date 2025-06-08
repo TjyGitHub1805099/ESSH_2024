@@ -15,7 +15,7 @@
 #include "app_password.h"
 #include "app_t5l_cfg.h"
 #include "app_BalancingDataHandle.h"
-
+#include "app_version.h"
 //外屏初始化
 UINT8 externalScreenTxHandle_Init(T5LType *pSdwe)
 {
@@ -209,10 +209,6 @@ UINT8 externalScreenTxHandle_JumpToBanlingPage(T5LType *pSdwe)
 	if(TRUE == pSdwe->sdweJumpToBanlingPage)
 	{
 		matched = TRUE;
-		if(0 != gSystemPara.isCascade)
-		{
-			pSdwe->screenBanlingPageNum = 2;
-		}
 		if(0 != screenPublic_PageJump(pSdwe,1))
 		{
 			pSdwe->sdweJumpToBanlingPage = FALSE;

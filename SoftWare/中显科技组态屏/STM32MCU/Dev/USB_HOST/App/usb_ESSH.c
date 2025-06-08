@@ -49,10 +49,10 @@ uint8 UPAN_STRORE_SINGLE_GROUP_HEAD[81] =
     0x0D,
 };
 
-uint8 UPAN_STRORE_SINGLE_GROUP_END[9+4] = 
+uint8 UPAN_STRORE_SINGLE_GROUP_END[2*7 + 4 + 2 + 1     +1] = 
 {
-//  导        出        完         成           写入数量                换行
-    0xB5,0xBC,0xB3,0xF6,0xCD,0xEA,0xB3,0xC9,   0x30,0x30,0x30,0x30,   0x0D 
+//  本         次        共        计        导        出        :           0000                条         回车黄行
+    0xB1,0xBE,0xB4,0xCE,0xB9,0xB2,0xBC,0xC6,0xB5,0xBC,0xB3,0xF6,0xA3,0xBA,  0x30,0x30,0x30,0x30,0xCC,0xF5, 0x0D,0x0A
 };
 
 //"导出完成\r";
@@ -114,10 +114,18 @@ tUsbStoreHandleStruct UsbStoreHandle = {
 };
 
 
-void APP_TriggerOutPut2Udisk(void)
+void APP_TriggerOutPut2Udisk(UINT8 allORSelect)
 {
     tUsbStoreHandleStruct *pContex = &UsbStoreHandle;
     pContex->eventTriggered = APP_TRIGER_USB_STORE_ALL_VAL;
+    if(1 == allORSelect)
+    {
+        InnerScreenDataCenteHandle.outPutToUDiskType = 1;//0:全部 1:带筛选条件导出
+    }
+    else
+    {
+        InnerScreenDataCenteHandle.outPutToUDiskType = 0;//0:全部 1:带筛选条件导出
+    }
 }
 
 //usb if filename prepare
@@ -189,6 +197,7 @@ uint8 upanPrepareStoreData_StoreAll_20250512_While1(uint16 *start_idx , uint16 m
 {
     tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
     //
+    UINT8 retSearched = FALSE , j = 0;
     uint8 findoutLine = 0 ,*pData = 0 , *pDataFrom = UPAN_STRORE_LINE_PART_DIFF;
     uint16 upanDataOffset = 0 , upanDataFromLen;
     //
@@ -202,15 +211,23 @@ uint8 upanPrepareStoreData_StoreAll_20250512_While1(uint16 *start_idx , uint16 m
     UINT32 leixing_gbk[2] = {0};
     //==基本待过滤数据 过滤结果
     //uint8 searchResult_guige = FALSE ; // 规格满足 ：25 50 75 ....
+    //==基本待过滤数据 过滤结果
+    uint8 searchResult_guige = FALSE ; // 规格满足 ：25 50 75 ....
     uint8 searchResult_utctime = FALSE ; // 时间满足 ：t1 ~ t2
+    uint8 searchResult_leixing = FALSE ; // 类型满足 ：P1 ~ P4
 
     uint16 idx = *start_idx;
 
     //最大条数以内
     while((idx < CLASSIFICATION_STORE_MAX_NUM) && (findoutLine < max_mun))
     {
+        searchResult_guige = FALSE ; // 规格满足 ：25 50 75 ....
+        searchResult_utctime = FALSE ; // 时间满足 ：t1 ~ t2
+        searchResult_leixing = FALSE ; // 类型满足 ：P1 ~ P4
+        retSearched = FALSE;
+        //
         store_base = (idx)*CF_STORE_TOTAL_LEN;
-        //=====二、基本数据提取
+//=====二、基本数据提取
 //#define CF_STORE_GONGHAO_TYPEBYTE       ( 4)  //1.员工工号：4字节 0000 - 9999
 //#define CF_STORE_BCCODE_TYPEBYTE        (15+1)//2.献血条码：15位 在加=号
 //#define CF_STORE_CFG_TIME_TYPEBYTE      ( 4)  //3.称重时间：utc time at 1970~2099 存储到显示需要转换
@@ -218,6 +235,12 @@ uint8 upanPrepareStoreData_StoreAll_20250512_While1(uint16 *start_idx , uint16 m
 //#define CF_STORE_LEIXING_TYPEBYTE       ( 1)  //5.血浆类型：1字节 存储到显示需要转换:1->P1鲜浆 , 2->P2冰浆 , 3->P3病灭鲜浆 , 4->P4冰灭冰浆
 //#define CF_STORE_GUIGE_TYPEBYTE         ( 2)  //6.血浆规格：2字节 存储到显示需要转换:0->50 , 1->75 ..
 //#define CF_STORE_CHECKSUM               ( 0)  //7.CRC 低字节
+    
+#if 1//20250608..
+        //一、依据 当前查找的索引 计算 外部E2数据存储的位置
+        store_base = CF_STORE_TOTAL_LEN*idx;
+        store_offset = 0;
+        //二、从外部E2 提取基本数据
         #if 1 //utc时间 存储是8个字节
             store_offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE;
             store_pos = store_base + store_offset;
@@ -231,18 +254,89 @@ uint8 upanPrepareStoreData_StoreAll_20250512_While1(uint16 *start_idx , uint16 m
             store_utc64 <<= 8;
             store_utc64 +=  pContex->s_StoreData[store_pos+3];
         #endif
+        #if 1 //规格
+            store_offset =  CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + \
+                            CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE + \
+                            CF_STORE_LEIXING_TYPEBYTE;
+            store_pos = store_base + store_offset;
+            //
+            store_guige = pContex->s_StoreData[store_pos+0];
+            store_guige <<= 8;
+            store_guige &= 0xff00;
+            store_guige += pContex->s_StoreData[store_pos+1];
+        #endif
+        #if 1 //类型
+            store_offset =  CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + \
+                            CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE ;
+            store_pos = store_base + store_offset;
+            //
+            store_Leixing = pContex->s_StoreData[store_pos+0];
+        #endif
+        #if 1//重量
+            store_offset =  CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + \
+                            CF_STORE_CFG_TIME_TYPEBYTE;
+            store_pos = store_base + store_offset;
+            //
+            store_weight = 0;
+            store_weight +=  pContex->s_StoreData[store_pos+0];
+            store_weight <<= 8;
+            store_weight +=  pContex->s_StoreData[store_pos+1];
+        #endif
         //
-        if((pContex->searchUseUTCTimeStart <= store_utc64) &&
-            (pContex->searchUseUTCTimeEnd >= store_utc64))
+        pContex->store_utc64 = store_utc64; //外部E2存的utc时间 8 字节
+        pContex->store_guige = store_guige; //外部E2存的规格    1 字节
+        pContex->store_Leixing = store_Leixing;//外部E2存的类型    1 字节
+        pContex->store_weight = store_weight;//外部E2存的重量    2 字节
+
+        //三、开始过滤基本数据数据
+        #if 1//1.查询《规格》匹配
+            for(j = 0 ; j < SIZER_CLASSIFY_GROUP_NUM ; j++)
+            {
+                if(FALSE == gSystemPara.Sizer_ClassifySet[j][3])//适配屏幕反逻辑
+                {
+                    if((store_guige == gSystemPara.Sizer_ClassifySet[j][0]) ||
+                        ((store_weight >= gSystemPara.Sizer_ClassifySet[j][1]) && (store_weight <= gSystemPara.Sizer_ClassifySet[j][2])))
+                    {
+                        searchResult_guige = TRUE;//重量满足 或 则规格序号满足(因为规格也是通过重量筛选的)
+                        break;
+                    }
+                }
+            }
+        #endif
+        #if 1//2.查询《时间区间》匹配
+            if((pContex->searchUseUTCTimeStart <= store_utc64) &&
+                (pContex->searchUseUTCTimeEnd >= store_utc64))
+            {
+                searchResult_utctime = TRUE;
+            }
+        #endif
+        #if 1//3.类型在筛选区间
+            if((pContex->leixingxuanze & (1<<((store_Leixing-1)%8))) != 0 )
+            {
+                searchResult_leixing = TRUE;
+            }
+        #endif
+
+        //四、结果组合判断
+        if(1 == pContex->outPutToUDiskType)//选择了筛选条件
         {
-            searchResult_utctime = TRUE;
+            if((TRUE == searchResult_guige) && //规格在筛选区间
+                (TRUE == searchResult_utctime) &&//时间在筛选区间
+                (TRUE == searchResult_leixing))//类型在筛选区间
+            {
+                retSearched = TRUE;
+            }
         }
-        else
+        else//未选择筛选条件-全部
         {
-            searchResult_utctime = FALSE;
+            if(TRUE == searchResult_utctime)//时间在筛选区间
+            {
+                retSearched = TRUE;
+            }
         }
+#endif
         //
-        if(TRUE == searchResult_utctime)
+        if(TRUE == retSearched)
         {
             memcpy(&upanStoreDataGroup[0+2*findoutLine][0],UPAN_STRORE_LINE_LINE_DIFF,UPAN_STRORE_LINE_MAX_LEN);
             memcpy(&upanStoreDataGroup[1+2*findoutLine][0],UPAN_STRORE_LINE_LINE_DIFF,UPAN_STRORE_LINE_MAX_LEN);
@@ -549,10 +643,10 @@ uint8 USBIf_WriteHanle_PrepareData(tUsbStoreHandleStruct *pContex)
 
         case USBIF_MAINFUNCTION_PREPARE_SUB_END:
             //总共输出多上行
-            UPAN_STRORE_SINGLE_GROUP_END[8] = pContex->totalWriteLines/1000 + '0';
-            UPAN_STRORE_SINGLE_GROUP_END[9] = pContex->totalWriteLines%1000/100 + '0';
-            UPAN_STRORE_SINGLE_GROUP_END[10] = pContex->totalWriteLines%100/10 + '0';
-            UPAN_STRORE_SINGLE_GROUP_END[11] = pContex->totalWriteLines%10 + '0';
+            UPAN_STRORE_SINGLE_GROUP_END[14] = pContex->totalWriteLines/1000 + '0';
+            UPAN_STRORE_SINGLE_GROUP_END[15] = pContex->totalWriteLines%1000/100 + '0';
+            UPAN_STRORE_SINGLE_GROUP_END[16] = pContex->totalWriteLines%100/10 + '0';
+            UPAN_STRORE_SINGLE_GROUP_END[17] = pContex->totalWriteLines%10 + '0';
             //
             ret = USBIf_OrderTrigger_Write(pContex,
                                         localFileName,
@@ -647,9 +741,9 @@ void USBIf_Mainfunction_Ready(tUsbStoreHandleStruct *pContex)
                 FA_OPEN_APPEND	    文件存在则追加到末尾，不存在则创建（需配合 FA_WRITE）。
                 FA_CREATE_ALWAYS	总是创建新文件（覆盖已存在的文件）。
             */
-            //准备文件名 = 月时分秒.txt
-            localFileName[0] = '0' + gUTCDecodeTime.tm_mon/10;
-            localFileName[1] = '0' + gUTCDecodeTime.tm_mon%10;
+            //准备文件名 = 日时分秒.txt
+            localFileName[0] = '0' + gUTCDecodeTime.tm_mday/10;
+            localFileName[1] = '0' + gUTCDecodeTime.tm_mday%10;
             localFileName[2] = '0' + gUTCDecodeTime.tm_hour/10;
             localFileName[3] = '0' + gUTCDecodeTime.tm_hour%10;
             localFileName[4] = '0' + gUTCDecodeTime.tm_min/10;

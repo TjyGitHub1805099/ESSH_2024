@@ -704,10 +704,6 @@ typedef struct structSdweType
 	UINT16 	sdweJumpToCalitrationPage;	/**< sdweJumpToCalitrationPage：(事件)跳转至校准页面 */
 	UINT16	sdweJumpToHomePage;			/**< sdweJumpToHomePage：(事件)跳转至主页面 */
 	UINT16	sdweJumpToBanlingPage;		/**< 目前使用 */
-	UINT16 	sdweJumpActivePage;			/**< sdweJumpActivePage：(事件)跳转至激活页面 */
-	UINT16 	sdweJumpBalancingMainPage;	/**< 暂未使用 */
-	UINT16 	sdweJumpBalancing_home;		/**< 暂未使用 */
-	UINT16 	sdweJumpBalancing_cleanpagee;/**< 暂未使用 */
 	UINT16 	sdweJumpToSysParaPage;		/**< sdweJumpToSysParaPage：(事件)跳转至参数页面 */
 	UINT16 	sdweFreshScreenLight;		/**< sdweFreshScreenLight：(事件)刷新背光亮度 */
 	UINT16  sdweChangeDescriblePoint;	/**< sdweChangeDescriblePoint：(事件)修改小数显示 */
@@ -723,10 +719,7 @@ typedef struct structSdweType
 	enumDMGPageType  screenCalibrationPage;/**< 屏幕 计算 页面序号*/
 	enumDMGPageType  screenActivePage;/**< 屏幕 激活 页面序号*/
 	enumDMGPageType  screenSysParaPage;/**< 屏幕 系统参数 页面序号*/
-	enumDMGPageType  screenBalancingCleanPage;/**< 暂未使用 屏幕 配平清爽 页面序号*/
-	enumDMGPageType  screenBalancingMainPage;/**< 暂未使用 屏幕 配平主页 页面序号*/
 	UINT16 	freshDP;/**< 刷新描述指针*/
-	UINT16  isCascadTrigger;/**< 级联触发*/
 	UINT16  isWriteWeightIndexTrigger;/**< 写序号触发*/
 	UINT16 	bcCodeVlu[(INNER_SCREEN_DATACENTER_LENOF_BARCODE+1)/2];//bc code
 	UINT8 	bcCodeTriger;
@@ -746,7 +739,7 @@ typedef struct structSdweType
 	enumISPageType 	jumpToPageEvent_PageNum;
 	enumISPageType 	jumpToPageEvent_PageNum_Pre;
 
-
+	//
 	ISPopupWindowType *PopupWindow;
 	InnerScreenEventType *RxEventTable;
 }T5LType;
@@ -824,10 +817,6 @@ typedef struct structSdweType
 	.sdweJumpToCalitrationPage = 0,/**/\
 	.sdweJumpToHomePage = 0,/**/\
 	.sdweJumpToBanlingPage = 0,/**/\
-	.sdweJumpActivePage = 0,/**/\
-	.sdweJumpBalancingMainPage = 0,/**/\
-	.sdweJumpBalancing_home = 0,/**/\
-	.sdweJumpBalancing_cleanpagee = 0,/**/\
 	.sdweJumpToSysParaPage = 0,/**/\
 	.sdweFreshScreenLight = 0,/**/\
 	.sdweChangeDescriblePoint = 0,/**/\
@@ -841,10 +830,7 @@ typedef struct structSdweType
 	.screenCalibrationPage = DMG_FUNC_CalibrationPage,\
 	.screenActivePage = DMG_FUNC_ActivePage,\
 	.screenSysParaPage = DMG_FUNC_SysParaPage,\
-	.screenBalancingCleanPage = DMG_FUNC_BalancingCleanPage,\
-	.screenBalancingMainPage = DMG_FUNC_BalancingMainPage,\
 	.freshDP=0,\
-	.isCascadTrigger=0,\
 	.isWriteWeightIndexTrigger=0,\
 	.bcCodeVlu = {0},\
 	.bcCodeTriger = 0,\
@@ -909,10 +895,6 @@ typedef struct structSdweType
 	.sdweJumpToCalitrationPage = 0,/**/\
 	.sdweJumpToHomePage = 0,/**/\
 	.sdweJumpToBanlingPage = 0,/**/\
-	.sdweJumpActivePage = 0,/**/\
-	.sdweJumpBalancingMainPage = 0,/**/\
-	.sdweJumpBalancing_home = 0,/**/\
-	.sdweJumpBalancing_cleanpagee = 0,/**/\
 	.sdweJumpToSysParaPage = 0,/**/\
 	.sdweFreshScreenLight = 0,/**/\
 	.sdweChangeDescriblePoint = 0,/**/\
@@ -926,10 +908,7 @@ typedef struct structSdweType
 	.screenCalibrationPage = DMG_FUNC_CalibrationPage,\
 	.screenActivePage = DMG_FUNC_ActivePage,\
 	.screenSysParaPage = DMG_FUNC_SysParaPage,\
-	.screenBalancingCleanPage = DMG_FUNC_BalancingCleanPage,\
-	.screenBalancingMainPage = DMG_FUNC_BalancingMainPage,\
 	.freshDP=0,\
-	.isCascadTrigger=0,\
 	.isWriteWeightIndexTrigger=0,\
 	.bcCodeVlu = {0},\
 	.bcCodeTriger = 0,\

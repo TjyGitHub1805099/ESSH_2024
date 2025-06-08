@@ -422,7 +422,6 @@ UINT8 innerScreenRxHandle_JumpToCalibrateOrActivePage(T5LType *pSdwe)
 		else if(DMG_FUNC_JUNPTO_ACTIVE_VAL == (UINT16)pSdwe->SetData)
 		{
 			matched = TRUE;
-			pSdwe->sdweJumpActivePage = TRUE;//跳转至激活界面
 		}
 	}
 	return matched;
@@ -464,6 +463,7 @@ UINT8 innerScreenRxHandle_RemoveWeightTriger(T5LType *pSdwe)
 	return matched;
 }
 
+//28 跳转到数据中心 事件处理
 UINT8 innerScreenRxHandle_JumpToDataCenterTriger(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
@@ -489,7 +489,7 @@ UINT8 innerScreenRxHandle_JumpToDataCenterTriger(T5LType *pSdwe)
 		//点击 选中筛选导出
 		if(IS_VLU_DATACHOICE_PAGE_EVENT_OUTPUTCHOICE == (UINT16)pSdwe->SetData)
 		{
-			APP_TriggerOutPut2Udisk();
+			APP_TriggerOutPut2Udisk(1);//0:全部 1:带筛选条件导出
 			matched = TRUE;
 		}
 		//点击 选中筛选删除
@@ -522,7 +522,6 @@ UINT8 innerScreenRxHandle_JumpToDataCenterTriger(T5LType *pSdwe)
 	//
 	return matched;
 }
-
 
 //11
 UINT8 innerScreenRxHandle_CalibratePointSet(T5LType *pSdwe)
@@ -663,19 +662,19 @@ UINT8 innerScreenRxHandle_Page5_Set_SearchTime(T5LType *pSdwe)
 		offset = pSdwe->SetAdd -INNERSCRENN_DATACENTER_SEARCH_TIME_ADDRESS;
 		gSystemPara.TimerSearch[offset/6][offset%6] = pSdwe->SetData;
 		//起止时间-开始
-		localtm.tm_sec  = gSystemPara.TimerSearch[0][5];
-		localtm.tm_min  = gSystemPara.TimerSearch[0][4];
-		localtm.tm_hour = gSystemPara.TimerSearch[0][3];
-		localtm.tm_mday = gSystemPara.TimerSearch[0][2];
-		localtm.tm_mon  = gSystemPara.TimerSearch[0][1];
+		localtm.tm_sec  = gSystemPara.TimerSearch[0][5]%60;
+		localtm.tm_min  = gSystemPara.TimerSearch[0][4]%60;
+		localtm.tm_hour = gSystemPara.TimerSearch[0][3]%24;
+		localtm.tm_mday = gSystemPara.TimerSearch[0][2]%32;
+		localtm.tm_mon  = gSystemPara.TimerSearch[0][1]%13;
 		localtm.tm_year = gSystemPara.TimerSearch[0][0];
 		InnerScreenDataCenteHandle.searchUseUTCTimeStart =  mymktime(&localtm);
 		//起止时间-结束
-		localtm.tm_sec  = gSystemPara.TimerSearch[1][5];
-		localtm.tm_min  = gSystemPara.TimerSearch[1][4];
-		localtm.tm_hour = gSystemPara.TimerSearch[1][3];
-		localtm.tm_mday = gSystemPara.TimerSearch[1][2];
-		localtm.tm_mon  = gSystemPara.TimerSearch[1][1];
+		localtm.tm_sec  = gSystemPara.TimerSearch[1][5]%60;
+		localtm.tm_min  = gSystemPara.TimerSearch[1][4]%60;
+		localtm.tm_hour = gSystemPara.TimerSearch[1][3]%24;
+		localtm.tm_mday = gSystemPara.TimerSearch[1][2]%32;
+		localtm.tm_mon  = gSystemPara.TimerSearch[1][1]%13;
 		localtm.tm_year = gSystemPara.TimerSearch[1][0];
 		InnerScreenDataCenteHandle.searchUseUTCTimeEnd =  mymktime(&localtm);
 		//
@@ -717,7 +716,7 @@ UINT8 innerScreenRxHandle_Page5_OutputAll2Upan(T5LType *pSdwe)
 				InnerScreenDataCenteHandle.searchUseWeightType[i] = i;
 			}
 
-			APP_TriggerOutPut2Udisk();
+			APP_TriggerOutPut2Udisk(1);//0:全部 1:带筛选条件导出
 		}
 	}
 	return matched;
@@ -732,7 +731,7 @@ UINT8 innerScreenRxHandle_Page9_DataCenterPageHandle(T5LType *pSdwe)
 		//点击 导出全部
 		if(IS_VLU_DATACENTER_PAGE_EVENT_OUTPUTCHOICE == pSdwe->SetData)
 		{
-			APP_TriggerOutPut2Udisk();
+			APP_TriggerOutPut2Udisk(0);//0:全部 1:带筛选条件导出
 			matched = TRUE;
 		}
 		//下一页
@@ -911,8 +910,6 @@ screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM]=
 	{0, 22,&innerScreenRxHandle_CycleRx_CurPage},
 	{0, 23,&innerScreenRxHandle_Page18_Xuejiangleixing},
 	{0, 24,&innerScreenRxHandle_Page19_Gonghao},
-
-	
 };
 
 #endif//end of _APP_INNER_SCREEN_RX_HANDLE_C_

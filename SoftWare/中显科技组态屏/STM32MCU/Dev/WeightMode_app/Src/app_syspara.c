@@ -12,8 +12,39 @@ unionFloatInt32 flashStoreDataBuf[FLASH_STORE_MAX_LEN]={0};
 unionFloatInt32 flashStoreDataBuf_3030[FLASH_SYS_PARA_STORE_MAX_LEN]={0};
 
 //=======================sys parameter read :unit min max....
-gSystemParaType gSystemPara = gSystemParaDefault;
-
+gSystemParaType gSystemPara = 
+{
+.paraKBStartAdd = EXT_EEPROM_FLASH_STORE_ADDRESS_START,\
+.paraKBEndAdd = (EXT_EEPROM_FLASH_STORE_ADDRESS_START+FLASH_STORE_MAX_LEN*4),\
+.sparaSYSStartAdd = EXT_EEPROM_FLASH_SYS_PARA_STORE_ADDRESS_START,\
+.sparaSYSEndAdd = (EXT_EEPROM_FLASH_SYS_PARA_STORE_ADDRESS_START+FLASH_SYS_PARA_STORE_MAX_LEN*4),\
+.uint = 0, \
+.minWeight = 0, \
+.maxWeight = 5000, \
+.errRange = (float)(2.0), \
+.isCascade = 0, \
+.isLedIndicate = TRUE, \
+.userColorSet = {LED_COLOR_GREEN, LED_COLOR_NONE, LED_COLOR_NONE, LED_COLOR_NONE },\
+.zeroRange = (float)(5.0), \
+.ScreenVoiceSwitch = 0,\
+.ScreenCastMode = 0,\
+.FlashEraseTimes = 0,\
+.McuVersion = 608,\
+.DiWenVersion = 608,\
+.VoiceNum = 30,\
+.VoiceNumTouch = 30,\
+.ScreenLight = 50,\
+.xiaoShuXianShi = 0,\
+.mlYugBiLv = 1050,\
+.daPinXianShi = 0,\
+.weightNum = 8,\
+.RTC_YMD = 0,\
+.RTC_HMS = 0,\
+.userColorUsed = {FALSE, FALSE, FALSE, FALSE },\
+.Sizer_TimeSet = {0},\
+.Sizer_ClassifySet = {{0}},\
+.TimerSearch = {{2000,1,1,0,0,0},{2099,8,8,8,8,8}},\
+};
 //==系统HX711校准相关参数：读取
 void readSysDataFromFlash(void)
 {

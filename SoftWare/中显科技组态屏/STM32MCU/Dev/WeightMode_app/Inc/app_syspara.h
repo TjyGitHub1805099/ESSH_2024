@@ -205,36 +205,7 @@ typedef struct SystemParaType
 	UINT16 TimerSearch[2][6];
 
 } gSystemParaType;
-//
-#define gSystemParaDefault {\
-EXT_EEPROM_FLASH_STORE_ADDRESS_START,\
-(EXT_EEPROM_FLASH_STORE_ADDRESS_START+FLASH_STORE_MAX_LEN*4),\
-EXT_EEPROM_FLASH_SYS_PARA_STORE_ADDRESS_START,\
-(EXT_EEPROM_FLASH_SYS_PARA_STORE_ADDRESS_START+FLASH_SYS_PARA_STORE_MAX_LEN*4),\
-0, \
-0, \
-5000, \
-(float)(2.0), \
-0, \
-TRUE, \
-{LED_COLOR_GREEN, LED_COLOR_NONE, LED_COLOR_NONE, LED_COLOR_NONE },\
-(float)(5.0), \
-0,\
-0,\
-0,\
-100,\
-30,\
-30,\
-30,\
-50,\
-0,\
-1050,\
-0,\
-8,\
-0,\
-0,\
-{FALSE, FALSE, FALSE, FALSE },\
-}
+
 //
 #define SYS_ML_G_WAS_G	(0X67FF)//g
 #define SYS_ML_G_WAS_ML	(0X6D6C)//ml

@@ -7,6 +7,7 @@
 #include "app_sdwe_ctrl.h"
 #include "app_t5l_ctrl.h"
 #include "app_modbus_rtu_ctrl.h"
+#include "app_DataCenter.h"
 
 /*******************************************************************************
  * Definitions
@@ -72,7 +73,7 @@ void key_MainFunction(void)
 {
 	static UINT8 preRemoveKey=SYS_KEY_INVALUED;
 	static UINT8 preHomeAndCalibrateKey=SYS_KEY_INVALUED;
-	static UINT8 preHomeAndCalibrateStatus = 0 ;
+	//static UINT8 preHomeAndCalibrateStatus = 0 ;
 	key_filter();
 
 	//去皮

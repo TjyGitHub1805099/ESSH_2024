@@ -518,7 +518,6 @@ static void screenPrivate_Init(T5LType *t5lCtx)
 
 		t5lCtx->screenCalibrationPage = DMG_FUNC_CalibrationPage;
 
-		//t5lCtx->sdweJumpBalancingMainPage = TRUE;
 		t5lCtx->sdweChangeDescriblePoint = TRUE;
 
 		#if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)
@@ -554,7 +553,6 @@ static void screenPrivate_Init(T5LType *t5lCtx)
 		t5lCtx->screenCycle.rmTrigerInnerSts = &g_rmTrigerInnerSts[ScreenIndex_Smaller];
 
 
-		//t5lCtx->sdweJumpBalancingMainPage = TRUE;
 		t5lCtx->sdweChangeDescriblePoint = TRUE;
 
 		#if (INNERSCREEN_TYPE == INNERSCREEN_TYPE_ZHONGXIAN)

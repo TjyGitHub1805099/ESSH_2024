@@ -157,7 +157,7 @@ extern uint8 upanPrepareStoreData_StoreAll_20250512(uint16 *start_idx);
 #endif
 
 
-extern void APP_TriggerOutPut2Udisk(void);
+extern void APP_TriggerOutPut2Udisk(UINT8 allORSelect);
 
 extern uint16 g_TrigerUSBStoreAll;
 extern uint16 g_TrigerUSBDeletedAll;

@@ -17,8 +17,21 @@
 #include "app_BalancingDataHandle.h"
 #include "app_DataCenter.h"
 #include "app_usbsmq.h"
+#include "app_version.h"
+#include "app_DataCenter.h"
 
 InnerScreenEventType IS_Event = InnerScreenEventTypeDefault;
+
+UINT8 u8gonghao_pre[2*IS_LEN_GONGHAO]={0xff};
+UINT16 u16gonghaoBuf[IS_LEN_GONGHAO];
+enumISPopupWindowType u8gonghao_OK = IS_PopupWindow_Max ;
+
+enumISPopupWindowType u8xuejiangleixing_OK = IS_PopupWindow_Max ;
+UINT16 u16xuejiangleixing[IS_LEN_XUEJIANG_LEIXING] = {0xFF};
+UINT16 u16xuejiangleixingUsed[IS_LEN_XUEJIANG_LEIXING] = {0x01};//1->P1鲜浆 , 2->P2冰浆 , 3->P3病灭鲜浆 , 4->P4冰灭冰浆
+
+UINT16 u16_IS_CycleData[IS_LEN_HOMEPAGE_CYCLE_DATA]={0};
+UINT16 u16_IS_CycleData_Pre[IS_LEN_HOMEPAGE_CYCLE_DATA]={0xff};
 
 //0.0内屏初始化
 UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
@@ -161,12 +174,6 @@ UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
 	return result;
 }
 
-
-
-
-
-
-
 //5
 UINT8 innerScreenTxHandle_JumpToSysParaPage(T5LType *pSdwe)
 {
@@ -183,123 +190,6 @@ UINT8 innerScreenTxHandle_JumpToSysParaPage(T5LType *pSdwe)
 }
 
 
-
-
-
-
-//公共函数：校准时 单点触发 处理
-UINT8 innerScreenTxHandle_IsCascadTriggerHandle(T5LType *pSdwe)
-{
-	UINT8 matched = FALSE;
-	static UINT8 stepIndex = 0;
-
-	if(TRUE == pSdwe->isCascadTrigger)
-	{
-		matched = TRUE;
-		if(0 == stepIndex)
-		{
-			if(0 != screenPublic_WriteIndexHandle(pSdwe))
-			{
-				stepIndex = 0 ;
-				pSdwe->isCascadTrigger = FALSE;
-			}
-		}
-	}
-	return matched;
-}
-
-
-
-void innerScreenTxHandle_ScreenBcCode_Upgrade(T5LType *pSdwe , UINT8 *pData , UINT8 len)
-{
-	UINT8 i = 0 ;
-	pSdwe->bcCodeTriger = 1;
-	if(len <= INNER_SCREEN_DATACENTER_LENOF_BARCODE)
-	{
-		pSdwe->bcCodeLen = (len+1)/2;
-	}
-	else
-	{
-		pSdwe->bcCodeLen = 1;
-	}
-	for(i=0;i<len;i++)
-	{
-		pSdwe->bcCodeVlu[i] = 0 ;
-		pSdwe->bcCodeVlu[i] = pData[2*i + 0];
-		pSdwe->bcCodeVlu[i] <<= 8;
-		pSdwe->bcCodeVlu[i] &= 0xff00;
-		pSdwe->bcCodeVlu[i] += pData[2*i + 1];
-	}
-
-}
-void innerScreenDiwenLSBChangeToMSB(T5LType *pSdwe)
-{
-	uint16 i = 0 , temp = 0;
-
-	for( i = 0 ; i < (sUSBSMQHandleContex.decodeVaildLen/2) ; i++)
-	{
-		temp = 0 ;
-		temp = (pSdwe->bcCodeVlu[i]>>0)&0xff;
-		temp <<= 8;
-		temp += (pSdwe->bcCodeVlu[i]>>8)&0xff;
-		pSdwe->bcCodeVlu[i] = temp;
-	}
-	if(2*i < sUSBSMQHandleContex.decodeVaildLen)
-	{
-		temp = 0 ;
-		temp = (pSdwe->bcCodeVlu[i]>>0)&0xff;
-		temp <<= 8;
-		pSdwe->bcCodeVlu[i] = temp;
-		pSdwe->bcCodeVlu[i] &= 0xFF00;//clear last vlu
-	}
-
-}
-
-UINT8 innerScreenDataCenter_Display(T5LType *pSdwe)
-{
-	UINT8 ret = 0 ;
-	return ret;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //==20250330 序号0 内屏初始化 事件处理
 UINT8 innerScreenTxHandle_ScreenInit(T5LType *pSdwe)
 {
@@ -314,6 +204,7 @@ UINT8 innerScreenTxHandle_ScreenInit(T5LType *pSdwe)
 	}
 	return matched;
 }
+
 //====20250330 序号2 跳转至校准界面 密码正确 处理
 UINT8 innerScreenTxHandle_JumpToCalibrationPage(T5LType *pSdwe)
 {
@@ -350,15 +241,13 @@ UINT8 ISTxHandle_Event_JumpToDataCenterPage(T5LType *pSdwe)
 	return matched;
 }
 
-
-//触发页面跳转
+//==20250608 触发页面跳转
 void IS_JumpToPage_Trigger(enumISPageType page)
 {
 	g_T5LCtx[ScreenIndex_Smaller].jumpToPageEvent_PageNum_Pre = g_T5LCtx[ScreenIndex_Smaller].curPage;
 	g_T5LCtx[ScreenIndex_Smaller].jumpToPageEvent = TRUE;
 	g_T5LCtx[ScreenIndex_Smaller].jumpToPageEvent_PageNum = page;
 }
-
 
 //==20250513 序号7 跳转至 导出完成 中心前处理
 UINT8 ISTxHandle_Event_JumpToPage(T5LType *pSdwe)
@@ -379,13 +268,7 @@ UINT8 ISTxHandle_Event_JumpToPage(T5LType *pSdwe)
 	return matched;
 }
 
-
-
 //==20250330 序号8 工号录入处理
-UINT8 u8gonghao_pre[2*IS_LEN_GONGHAO]={0xff};
-UINT16 u16gonghaoBuf[IS_LEN_GONGHAO];
-enumISPopupWindowType u8gonghao_OK = IS_PopupWindow_Max ;
-
 UINT8 ISTxHandle_Page_GongHaoLuRu(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
@@ -441,10 +324,8 @@ UINT8 ISTxHandle_Page_GongHaoLuRu(T5LType *pSdwe)
 	//
 	return matched;
 }
+
 //==20250330 序号9 血浆类型选择处理
-enumISPopupWindowType u8xuejiangleixing_OK = IS_PopupWindow_Max ;
-UINT16 u16xuejiangleixing[IS_LEN_XUEJIANG_LEIXING] = {0xFF};
-UINT16 u16xuejiangleixingUsed[IS_LEN_XUEJIANG_LEIXING] = {0x01};//1->P1鲜浆 , 2->P2冰浆 , 3->P3病灭鲜浆 , 4->P4冰灭冰浆
 UINT8 ISTxHandle_Page_XueJiangLeiXingXuanZhe(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE , needSend = 0;
@@ -468,10 +349,8 @@ UINT8 ISTxHandle_Page_XueJiangLeiXingXuanZhe(T5LType *pSdwe)
 	//
 	return matched;
 }
+
 //==20250330 序号10 周期数据发送处理
-UINT16 u16_IS_CycleData[IS_LEN_HOMEPAGE_CYCLE_DATA]={0};
-UINT16 u16_IS_CycleData_Pre[IS_LEN_HOMEPAGE_CYCLE_DATA]={0xff};
-extern UINT8 zhixingzhuangtai3002;
 UINT8 ISTxHandle_Page_Home_CycleDataHandle(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE  , i = 0 , offset = 0;
@@ -563,8 +442,7 @@ UINT8 ISTxHandle_Page_Home_CycleDataHandle(T5LType *pSdwe)
 	return matched;
 }
 
-#if 0
-//测试函数
+#if 0 //发送到屏幕的测试函数
 UINT8 TEST_DIS(T5LType *pSdwe)
 {
 	tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
@@ -579,13 +457,11 @@ UINT8 TEST_DIS(T5LType *pSdwe)
 
 }
 #endif
+
 //P:0x50
 //鲜浆：0xCFCA 0xBDAC
 //冰浆：0xB1F9 0xBDAC
 //病灭：0xB2A1 0xC3F0 
-#define DATA_CENTER_DISPLAY_RECOREDE TRUE
-#define DATA_CENTER_DISPLAY_RECOREDE_INDEX TRUE
-
 //进入数据中心后采用此函数
 UINT8 ISTxHandle_Page_Datacenter_CycleDataHandle_20250509(T5LType *pSdwe)
 {
@@ -769,38 +645,6 @@ UINT8 ISTxHandle_Page_Datacenter_CycleDataHandle_20250509(T5LType *pSdwe)
 	//
 	return matched;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 //================================================================================================
