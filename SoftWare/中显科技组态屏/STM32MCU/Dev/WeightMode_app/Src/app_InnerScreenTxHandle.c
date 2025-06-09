@@ -330,7 +330,7 @@ UINT8 ISTxHandle_Page_XueJiangLeiXingXuanZhe(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE , needSend = 0;
 	//
-	if(IS_PopupWindow_OK == u8xuejiangleixing_OK)
+	if((IS_PopupWindow_OK == u8xuejiangleixing_OK) && (u16xuejiangleixing[0] != 0 ))
 	{
 		if(u16xuejiangleixingUsed[0] != u16xuejiangleixing[0])
 		{
@@ -400,9 +400,9 @@ UINT8 ISTxHandle_Page_Home_CycleDataHandle(T5LType *pSdwe)
 			}
 		}
 		offset += IS_LEN_BCCODE;
-		u16_IS_CycleData[offset] = InnerScreenDataCenteHandle.userStorePosition;
+		u16_IS_CycleData[offset] = InnerScreenDataCenteHandle.todayStoreedNum;
 		offset += 1;
-		u16_IS_CycleData[offset] = CLASSIFICATION_STORE_MAX_NUM;
+		u16_IS_CycleData[offset] = InnerScreenDataCenteHandle.userStorePosition;
 		
 		//
 		if(FALSE == needSend)

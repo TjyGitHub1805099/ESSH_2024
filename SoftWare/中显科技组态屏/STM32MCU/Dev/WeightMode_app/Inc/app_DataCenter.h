@@ -305,6 +305,9 @@ typedef struct sInnerScreenDataCenterHandleStruct
     //search need step2: use weight type search
     sint64 searchUseUTCTimeStart;
     sint64 searchUseUTCTimeEnd;
+    sint64 triggerCaculateTodataNum;//触发统计今日数量
+    sint64 todayUTCTimeStart;//今日数量
+    sint64 todayUTCTimeEnd;
     uint16 searchOutIndex_CheckedBy_UTCTime;
     UINT16 leixingxuanze;
     //search out buffer
@@ -341,6 +344,7 @@ typedef struct sInnerScreenDataCenterHandleStruct
     uint8 s_StoreData[CF_ATC24_USERDATA_STORE_LEN];
     uint8 s_StoreData_Backup[CF_ATC24_USERDATA_BACKUP_STORE_LEN];
     //
+    uint16 todayStoreedNum;//今日存储数量
     uint16 userStorePosition;
     uint16 crc16;
     //
@@ -399,5 +403,5 @@ extern UINT8 DataCenter_DeleteData_WaitDone(UINT16 position);
 extern void ApplicationEventSet_Delete_ALL_RecodeData(UINT16 setVlu);
 extern UINT16 ApplicationEventGet_Delete_ALL_RecodeData(void);
 extern void IS_JumpToPage_Trigger(enumISPageType page);
-
+extern void DataCenter_PrepareStoreDataAtToday_Num(tInnerScreenDataCenterHandleStruct *pContex);
 #endif

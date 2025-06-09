@@ -21,6 +21,7 @@
 #include "usb_ESSH.h"
 
 struct tm localtm;
+struct tm localtmToday;//今日
 //屏幕语音播报状态
 UINT8 g_u8InnerScreenVoicePrintfStatus = 0XFF;
 
@@ -56,7 +57,8 @@ UINT8 innerScreenRxHandle_Page18_Xuejiangleixing(T5LType *pSdwe)
 	if(IS_ADD_TYPECHOICE_PAGE_EVENT == pSdwe->SetAdd)
 	{
 		//血浆确认
-		if(IS_VLU_TYPECHOICE_PAGE_EVENT_OK == pSdwe->SetData)
+		if((IS_VLU_TYPECHOICE_PAGE_EVENT_OK == pSdwe->SetData) &&
+			(u16xuejiangleixing[0] != 0xFF))
 		{
 			u8xuejiangleixing_OK = IS_PopupWindow_OK;
 			matched = TRUE;
@@ -197,6 +199,16 @@ UINT8 innerScreenRxHandle_RTC_YMDHMS(T5LType *pSdwe)
 		matched = TRUE;
 		gS64UTCTime = mymktime(&localtm);
 		gUTCDecodeTime = *(mygmtime(&gS64UTCTime));
+
+		//今日
+		localtmToday = localtm;
+		localtmToday.tm_hour = 0;
+		localtmToday.tm_min = 0;
+		localtmToday.tm_sec = 0;
+		//
+		InnerScreenDataCenteHandle.triggerCaculateTodataNum = 0xA5A5;
+		InnerScreenDataCenteHandle.todayUTCTimeStart = mymktime(&localtmToday);
+		InnerScreenDataCenteHandle.todayUTCTimeEnd = InnerScreenDataCenteHandle.todayUTCTimeStart + 24*60*60;
 	}
 
 	return matched;

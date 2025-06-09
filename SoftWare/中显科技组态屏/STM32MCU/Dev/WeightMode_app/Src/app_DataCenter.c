@@ -77,6 +77,9 @@ tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle =
     //search need step2: use weight type search
     .searchUseUTCTimeStart = 0x386CD300 ,//2000-01-01 00:00:00
     .searchUseUTCTimeEnd = 0xF3C5DDE8 ,//2099-08-08 08:08:08
+    .triggerCaculateTodataNum = 0,
+    .todayUTCTimeStart = 0x386CD300 ,//2000-01-01 00:00:00
+    .todayUTCTimeEnd = 0xF3C5DDE8 ,//2099-08-08 08:08:08
     .searchOutIndex_CheckedBy_UTCTime = 0,
     .leixingxuanze = 0xF,//P1 P2 P3 P4
     //search out buffer
@@ -535,6 +538,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
     static uint32 preWeight;
     static uint32 weightHoldOnTime;
     static uint16 l_CF_StoreMask = 0;
+    static uint8 caculateToday = 1;
     //struct tm lUTCDecodeTime;
     pContex->ticks++;
     switch(pContex->handle)
@@ -687,6 +691,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
                     if(pContex->userStorePosition != 0)
                     {
                         pContex->userStorePosition += 1;///////////////////因为存的序号比实际的少1
+                        //DataCenter_PrepareStoreDataAtToday_Num(pContex);//统计今日数量
                     }
                     pContex->userStorePosition = pContex->userStorePosition % CLASSIFICATION_STORE_MAX_NUM;
                     pContex->handle = D_C_HANDLE_READUSERDATA_CPLT;
@@ -735,6 +740,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             {
                 pContex->appTrigerDeleteAllData = 0;
                 IS_JumpToPage_Trigger(IS_PAGE_13_0X0D_DELETEALLDATA_CPLT); //跳转至提示界面 
+                InnerScreenDataCenteHandle.todayStoreedNum = 0;
                 InnerScreenDataCenteHandle.userStorePosition = 0;
                 //    
                 pContex->handle = D_C_HANDLE_CYCLE_SCAN; 
@@ -1069,6 +1075,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
                 pContex->screenTrigerToSingleStore = FALSE;
                 pContex->userStorePosition++;
                 pContex->userStorePosition = pContex->userStorePosition % CLASSIFICATION_STORE_MAX_NUM;
+                pContex->todayStoreedNum++;//今日数据++
                 //
                 pContex->handle = D_C_HANDLE_STORE2EE_ALL_CPLT;
             }
@@ -1087,6 +1094,15 @@ void InnerScreenDataCenterHandle_MainFunction(void)
 
         default:
         break;
+    }
+
+    //档从显示屏获取的RTC时间后执行 统计今日数量 一次
+    if((1 == caculateToday) &&
+      (0xA5A5 == InnerScreenDataCenteHandle.triggerCaculateTodataNum))
+    {
+        DataCenter_PrepareStoreDataAtToday_Num(pContex);//统计今日数量
+        caculateToday = 0 ;
+        InnerScreenDataCenteHandle.triggerCaculateTodataNum = 0;
     }
 }
 
@@ -1432,6 +1448,53 @@ UINT8  DataCenterDisplay_Prepare_OneGroupData_20250509(tInnerScreenDataCenterHan
 }
 
 #endif
+
+
+
+//统计今日存储数量
+void DataCenter_PrepareStoreDataAtToday_Num(tInnerScreenDataCenterHandleStruct *pContex)
+{
+    INT16 idx = 0;
+    //
+    uint16 store_base = 0 , store_offset = 0 , store_pos = 0 ;
+    //==基本待过滤数据
+    sint64 store_utc64 = 0;
+    InnerScreenDataCenteHandle.todayStoreedNum = 0;
+    while((idx < CLASSIFICATION_STORE_MAX_NUM) && (idx < pContex->userStorePosition))
+    {
+        //=====一、依据当前查找的索引计算数据存储的位置
+        store_base = CF_STORE_TOTAL_LEN*idx;
+        store_offset = 0;
+        //=====二、基本数据提取
+        #if 1 //utc时间 存储是8个字节
+            store_offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE;
+            store_pos = store_base + store_offset;
+            //
+            store_utc64 = 0;
+            store_utc64 +=  pContex->s_StoreData[store_pos+0];
+            store_utc64 <<= 8;
+            store_utc64 +=  pContex->s_StoreData[store_pos+1];
+            store_utc64 <<= 8;
+            store_utc64 +=  pContex->s_StoreData[store_pos+2];
+            store_utc64 <<= 8;
+            store_utc64 +=  pContex->s_StoreData[store_pos+3];
+        #endif
+
+        #if 1//2.查询《时间区间》匹配
+            if((pContex->todayUTCTimeStart <= store_utc64) &&
+                (pContex->todayUTCTimeEnd >= store_utc64))
+            {
+                InnerScreenDataCenteHandle.todayStoreedNum++;
+            }
+        #endif
+        //
+        idx++;
+    }
+}
+
+
+
+
 
 //1234
 
