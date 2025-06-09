@@ -1426,11 +1426,13 @@ UINT8  DataCenterDisplay_Prepare_OneGroupData_20250509(tInnerScreenDataCenterHan
             //处理当前查找序号
             if(D_C_SEARCH_DIR_DOWN == pContex->serchDir)
             {
-                idx++;
+                //idx++;
+                idx--;//倒序
             }
             else if(D_C_SEARCH_DIR_UP == pContex->serchDir)
             {
-                idx--;
+                //idx--;
+                idx++;//倒序
             }
             else
             {

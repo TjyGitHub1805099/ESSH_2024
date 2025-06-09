@@ -468,7 +468,8 @@ UINT8 ISTxHandle_Page_Datacenter_CycleDataHandle_20250509(T5LType *pSdwe)
 	static UINT8 matched = FALSE;
 	tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
 	UINT16 i = 0 ;
-	INT16 serchedIdx = 0 ;
+	//INT16 serchedIdx = 0 ;
+	INT16 serchedIdx = pContex->userStorePosition ;//倒序
 	UINT8 retSearched = FALSE ;
 	//
 	if(IS_PAGE_09_0X09_DATACENTERPAGEE == pSdwe->curPage)
@@ -478,6 +479,7 @@ UINT8 ISTxHandle_Page_Datacenter_CycleDataHandle_20250509(T5LType *pSdwe)
 			case D_C_SEARCH_DATA_EVENT_WAIT:
 				if(D_C_SEARCH_DIR_NUM != pContex->serchDir)//非上下页 最多发送 IS_NUM_DATACENTER_GROUP 组数据
 				{
+					pContex->curSerchIndex = pContex->userStorePosition;
 					pContex->serchState = D_C_SEARCH_DATA_INIT;
 					matched = TRUE;
 				}
@@ -510,12 +512,14 @@ UINT8 ISTxHandle_Page_Datacenter_CycleDataHandle_20250509(T5LType *pSdwe)
 						//点击 <上一页> ， 之前是<下一页>
 						if(D_C_SEARCH_DIR_UP == pContex->serchDir)
 						{
-							pContex->curSerchIndex = pContex->serchIndex_start - 1;
+							//pContex->curSerchIndex = pContex->serchIndex_start - 1;
+							pContex->curSerchIndex = pContex->serchIndex_start + 1;//倒序
 						}
 						//点击 <下一页> ， 之前是<上一页>
 						if(D_C_SEARCH_DIR_DOWN == pContex->serchDir)
 						{
-							pContex->curSerchIndex = pContex->serchIndex_start + 1;
+							//pContex->curSerchIndex = pContex->serchIndex_start + 1;
+							pContex->curSerchIndex = pContex->serchIndex_start - 1;//倒序
 						}						
 					}
 					else//==同向查找
@@ -523,12 +527,14 @@ UINT8 ISTxHandle_Page_Datacenter_CycleDataHandle_20250509(T5LType *pSdwe)
 						//继续点击 <下一页>
 						if(D_C_SEARCH_DIR_DOWN == pContex->serchDir)
 						{
-							pContex->curSerchIndex = pContex->serchIndex_end + 1;
+							//pContex->curSerchIndex = pContex->serchIndex_end + 1;
+							pContex->curSerchIndex = pContex->serchIndex_end - 1;//倒序
 						}
 						//继续点击 <上一页>
 						if(D_C_SEARCH_DIR_UP == pContex->serchDir)
 						{
-							pContex->curSerchIndex = pContex->serchIndex_end - 1;
+							//pContex->curSerchIndex = pContex->serchIndex_end - 1;
+							pContex->curSerchIndex = pContex->serchIndex_end + 1;//倒序
 						}
 					}
 				#endif
@@ -636,8 +642,10 @@ UINT8 ISTxHandle_Page_Datacenter_CycleDataHandle_20250509(T5LType *pSdwe)
 		//==这里需要特殊处理serchIndex_end = -1
 		pContex->serchDir = D_C_SEARCH_DIR_DOWN;
 		pContex->serchDirPre = D_C_SEARCH_DIR_DOWN;
-		pContex->serchIndex_end = -1;
-		pContex->serchIndex_start = -1;
+		//pContex->serchIndex_end = -1;
+		//pContex->serchIndex_start = -1;
+		pContex->serchIndex_end = pContex->userStorePosition;//倒序
+		pContex->serchIndex_start = pContex->userStorePosition;//倒序
 		//
 		pContex->serchState = D_C_SEARCH_DATA_EVENT_WAIT ;
 		matched = FALSE;
