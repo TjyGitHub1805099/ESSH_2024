@@ -236,6 +236,10 @@ typedef enum
     D_C_HANDLE_APP_DELETE_ALL_RECODEDATA,
     D_C_HANDLE_APP_DELETE_ALL_RECODEDATA_WAIT,
 
+    //删除单条数据
+    D_C_HANDLE_APP_DELETE_SELECT_RECODEDATA,
+    D_C_HANDLE_APP_DELETE_SELECT_RECODEDATA_WAIT,
+
     //
     D_C_HANDLE_CYCLE_SCAN,//事件扫描，发现事件，就处理事件，正常周期分类重量.....
     D_C_HANDLE_MAX_NUM
@@ -274,6 +278,8 @@ typedef enum
 
 #define APPLICATION_TRIGGER_DELETE_ALL_DATA_1STSET          (0xDEEE)
 #define APPLICATION_TRIGGER_DELETE_ALL_DATA_DOUBLECHECK     (0xD000)
+#define APPLICATION_TRIGGER_DELETE_SINGLE_DATA_1STSET          (0xDEEE)
+#define APPLICATION_TRIGGER_DELETE_SINGLE_DATA_DOUBLECHECK     (0xD000)
 
 //local data center handle
 typedef struct sInnerScreenDataCenterHandleStruct
@@ -282,6 +288,8 @@ typedef struct sInnerScreenDataCenterHandleStruct
     uint8 initSuccess;
     uint16 appTrigerDeleteAllData;
     uint16 appTrigerDeleteAllData_Sure;
+    uint16 appTrigerDeleteSingleData;
+    uint16 appTrigerDeleteSingleData_Sure;
     uint8 trigerStroreFromScreen;//触发单次存储
     uint8 weigthClassifyCplt;
     //cfg info store in extern e2
@@ -375,11 +383,16 @@ typedef struct sInnerScreenDataCenterHandleStruct
     
     INT16 serchIndex_start;//每一页第一条的位置
     INT16 serchIndex_end;//每一页最后一条的位置
-
+    INT16 searchedIndexArry[IS_NUM_DATACENTER_GROUP];
     INT16 sendIndex;//发送屏幕地址 = 序号 * 长度
     UINT16 sendCnt;//已经发送了几组数据
     UINT16 firstEntry;//首次从其他页面 到 数据页面
     UINT16 u16DataCenterDisData[IS_LEN_DATACENTER_SINGLE];    
+    UINT16 u16DataCenterDisDataBackup[IS_NUM_DATACENTER_GROUP][IS_LEN_DATACENTER_SINGLE];    
+
+
+    UINT16 deleteEvent;
+    UINT16 deleteIndex;
 }tInnerScreenDataCenterHandleStruct;
 
 extern tInnerScreenDataCenterHandleStruct InnerScreenDataCenteHandle;
@@ -398,9 +411,11 @@ extern UINT8  DataCenterDisplay_Prepare_OneGroupData(UINT8 up_dowm);
 #endif
 
 extern UINT8  DataCenterDisplay_Prepare_OneGroupData_20250509(tInnerScreenDataCenterHandleStruct *pContex , INT16 *searchedIdx);
+extern UINT8  DataCenterDisplay_Prepare_OneGroupData_ToDelete_20250711(tInnerScreenDataCenterHandleStruct *pContex , INT16 idx_delete);
 extern UINT8 DataCenter_DeleteData_FlashWriteTrigger(UINT16 position);
 extern UINT8 DataCenter_DeleteData_WaitDone(UINT16 position);
 extern void ApplicationEventSet_Delete_ALL_RecodeData(UINT16 setVlu);
+extern void ApplicationEventSet_Delete_Single_RecodeData(UINT16 setVlu);
 extern UINT16 ApplicationEventGet_Delete_ALL_RecodeData(void);
 extern void IS_JumpToPage_Trigger(enumISPageType page);
 extern void DataCenter_PrepareStoreDataAtToday_Num(tInnerScreenDataCenterHandleStruct *pContex);

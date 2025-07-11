@@ -6,6 +6,7 @@
 #include "hal_delay.h"
 #include "hal_gpio.h"
 #include "app_main_task.h"
+#include "app_DataCenter.h"
 
 tUSBSMQHandle sUSBSMQHandleContex = {
     .uartDev = &g_UartDevice[UART3_CHANNEL_XX],
@@ -129,6 +130,11 @@ void USB_SMQ_Decode(tUSBSMQHandle *pCtx)
                 vlu = 0xff;
             }
         }
+    }
+    //截断处理
+    if( pCtx->decodeVaildLen > CF_STORE_BCCODE_TYPEBYTE)
+    {
+        pCtx->decodeVaildLen = CF_STORE_BCCODE_TYPEBYTE;
     }
 }
 //码校验

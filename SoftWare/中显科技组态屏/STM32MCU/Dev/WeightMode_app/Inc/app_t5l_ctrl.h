@@ -50,6 +50,7 @@ typedef enum ZHONGXIANPageType
 	IS_PAGE_18_0X12_XUEJIANGLEIXING = 18,//血浆类型选择界面
 	IS_PAGE_19_0X13_GONGHAO = 19,//工号录入界面
 	IS_PAGE_20_0X14_PLEASE_PLUGIN_UDISK = 20,//请插入U盘
+	IS_PAGE_21_0X15_SURETODELETESINGLE = 21,//删除单条确认
 
 	IS_PAGE_IVALID = 0xff,
 }enumISPageType;
@@ -102,6 +103,8 @@ extern ISPopupWindowType IS_PopupWindow[IS_PopupWindow_MAX_HANDLE];
 #define IS_VLU_DATACENTER_PAGE_EVENT_OUTPUTCHOICE		(0x0923)//导出全部
 #define IS_VLU_DATACENTER_PAGE_EVENT_PAGEUP				(0x0934)//上一页
 #define IS_VLU_DATACENTER_PAGE_EVENT_PAGEDOWN			(0x0945)//下一页
+#define IS_VLU_DATACENTER_PAGE_EVENT_DELETE_1			(0x6001)//删除数据中心的第1个
+#define IS_VLU_DATACENTER_PAGE_EVENT_DELETE_7			(0x6007)//删除数据中心的第7个
 
 //页面10 10系统参数2：相关事件
 #define IS_ADD_SYSPARA2_PAGE_EVENT						(0x0510)
@@ -161,6 +164,14 @@ extern ISPopupWindowType IS_PopupWindow[IS_PopupWindow_MAX_HANDLE];
 #define IS_VLU_INPUTGONGHAO_PAGE_EVENT_OK				(0x1901)//确认键
 #define IS_VLU_INPUTGONGHAO_PAGE_EVENT_CLOSE			(0x1912)//关闭键
 #define IS_VLU_INPUTGONGHAO_PAGE_EVENT_BACK				(0x1923)//返回键
+
+
+//页面21 21删除本条：相关事件
+#define IS_ADD_DELETE_PAGE_EVENT						(0x0521)
+#define IS_VLU_DELETE_PAGE_EVENT_OK						(0x2101)//确认键
+#define IS_VLU_DELETE_PAGE_EVENT_CLOSE					(0x2112)//关闭键
+#define IS_VLU_DELETE_PAGE_EVENT_BACK					(0x2123)//返回键
+
 
 #define DMG_FUNC_SET_UNIT_ADDRESS				(0X1000)//0x1000 2024-10-06
 
@@ -243,6 +254,8 @@ extern ISPopupWindowType IS_PopupWindow[IS_PopupWindow_MAX_HANDLE];
 //页面9：数据中心 显示7组数据
 #define IS_ADD_DATACENTER_GROUP_START        			(0x3500)
 #define IS_NUM_DATACENTER_GROUP        					(7)
+
+#define IS_ADD_DATACENTER_DELETE_DIS_START        		(0x35E0)//删除单条数据的提示显示地址
 
 #define IS_LEN_DATACENTER_SINGLE        				(0x20)//员工工号 + ...
 //
@@ -951,8 +964,8 @@ typedef struct structScreenHandleType
 	UINT8 matchedIdx;
 }ScreenHandleType;
 
-#define SCREEN_RX_HANDLE_TOTAL_NUM	(26)	/**< 屏幕RX数据处理事件数量 */
-#define SCREEN_TX_HANDLE_TOTAL_NUM	(13)	/**< 屏幕TX数据处理事件数量 */
+#define SCREEN_RX_HANDLE_TOTAL_NUM	(27)	/**< 屏幕RX数据处理事件数量 */
+#define SCREEN_TX_HANDLE_TOTAL_NUM	(14)	/**< 屏幕TX数据处理事件数量 */
 extern screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM];
 extern screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM];
 

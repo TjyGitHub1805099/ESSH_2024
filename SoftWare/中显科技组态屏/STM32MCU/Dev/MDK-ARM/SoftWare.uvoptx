@@ -254,6 +254,21 @@
           <WinNumber>1</WinNumber>
           <ItemText>pContex-&gt;todayUTCTimeEnd</ItemText>
         </Ww>
+        <Ww>
+          <count>11</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>InnerScreenDataCenteHandle.curSerchIndex</ItemText>
+        </Ww>
+        <Ww>
+          <count>12</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>pCtx</ItemText>
+        </Ww>
+        <Ww>
+          <count>13</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>InnerScreenDataCenteHandle.deleteIndex</ItemText>
+        </Ww>
       </WatchWindow1>
       <Tracepoint>
         <THDelay>0</THDelay>

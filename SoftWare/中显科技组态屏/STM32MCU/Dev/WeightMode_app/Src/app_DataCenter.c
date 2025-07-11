@@ -30,6 +30,7 @@
 #include "app_syspara.h"
 #include "app_t5l_ctrl.h"
 #include "app_usbsmq.h"
+#include "app_version.h"
 
 #if (CF_ATC24_USERDATA_BACKUP_STORE_END_ADD > EXT_FLASH_MAX_LOGIC_ADD)
 # error "CF_ATC24_USERDATA_BACKUP_STORE_END_ADD overflow"
@@ -188,7 +189,10 @@ tDataCenterExtFlashCallbackStruct dataCenterCallbackRegisterList[E_F_HANDLE_JOBI
     {E_F_HANDLE_JOBID_W_DATACENTER_CRC_DATAPAYLOAD_2025,DataCenterHandle_Callback},
     {E_F_HANDLE_JOBID_W_DATACENTER_BACKUP_CRC_DATAPAYLOAD_2025,DataCenterHandle_Callback},
     {E_F_HANDLE_JOBID_W_DATACENTER_CLEAR_DATAPAYLOAD_2025,DataCenterHandle_Callback},
-    {E_F_HANDLE_JOBID_W_DATACENTER_CLEAR_BACKUP_DATAPAYLOAD_2025,DataCenterHandle_Callback}
+    {E_F_HANDLE_JOBID_W_DATACENTER_CLEAR_BACKUP_DATAPAYLOAD_2025,DataCenterHandle_Callback},
+    {E_F_HANDLE_JOBID_W_DATACENTER_DELETE_SINGLE_2025,DataCenterHandle_Callback},
+    {E_F_HANDLE_JOBID_W_DATACENTER_DELETE_SINGLE_CRC_2025,DataCenterHandle_Callback},
+    {E_F_HANDLE_JOBID_W_DATACENTER_DELETE_BACKUP_SINGLE_2025,DataCenterHandle_Callback}
 };
 
 void InnerScreenDataCenterHandle_WeightClassification_Init(tInnerScreenDataCenterHandleStruct *pContex)
@@ -237,12 +241,15 @@ uint8 InnerScreenDataCenterHandle_UseWeight_Classification(float weight , uint8 
     type[0] = 0;
     type[1] = 0;
 
+    weight = weight/10;
+
     if(weight > gSystemPara.zeroRange)
     {
         for(i = 0 ; i < D_C_CLASSIFICATION_NUM ; i++)
         {
             //0 代表选中
-            if((0 == cfg->clssSelected) && (cfg->min <= weight) && (weight < cfg->max))
+            //最小值 ≤ 采样值 ≤ 最大值
+            if((0 == cfg->clssSelected) && (cfg->min <= (uint32)weight) && ((uint32)weight <= cfg->max))
             {
                 break;
             }                
@@ -531,11 +538,10 @@ extern UINT16 u16xuejiangleixingUsed[IS_LEN_XUEJIANG_LEIXING];//1->P1鲜浆 , 2-
 void InnerScreenDataCenterHandle_MainFunction(void)
 {
     tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
-    uint16 offset = 0 , len = 0 , ret = 0;
+    uint16 offset = 0 , len = 0 , ret = 0 , deletePosition;
     uint16 crc16;
-    float weight;
+    static float f_weight=0.0f,f_weight_pre=0.0f,f_weight_diff=0.0f,f_weight_range = 1.0;
     tExtFlashOrderStruct pushOrder;
-    static uint32 preWeight;
     static uint32 weightHoldOnTime;
     static uint16 l_CF_StoreMask = 0;
     static uint8 caculateToday = 1;
@@ -713,9 +719,13 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             pContex->handle = D_C_HANDLE_CYCLE_SCAN;
         break;
 
-        //周期事件扫描
+        //周期事件扫描 如果没有事件 则执行重量扫描
         case D_C_HANDLE_CYCLE_SCAN:
-            if(APPLICATION_TRIGGER_DELETE_ALL_DATA_DOUBLECHECK == pContex->appTrigerDeleteAllData)
+            if(APPLICATION_TRIGGER_DELETE_SINGLE_DATA_DOUBLECHECK == pContex->appTrigerDeleteSingleData)
+            {
+                 pContex->handle = D_C_HANDLE_APP_DELETE_SELECT_RECODEDATA;
+            }
+            else if(APPLICATION_TRIGGER_DELETE_ALL_DATA_DOUBLECHECK == pContex->appTrigerDeleteAllData)
             {
                  pContex->handle = D_C_HANDLE_APP_DELETE_ALL_RECODEDATA;
             }
@@ -747,6 +757,32 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             }
         break;
         #endif
+
+        #if 1//删除单条数据 事件处理
+        case D_C_HANDLE_APP_DELETE_SELECT_RECODEDATA:
+            deletePosition = InnerScreenDataCenteHandle.deleteIndex;//来之屏端设置的0~6
+            //从每次显示数据中心时存储的实际物理位置
+            deletePosition = InnerScreenDataCenteHandle.searchedIndexArry[deletePosition%IS_NUM_DATACENTER_GROUP];
+            if(1 == DataCenter_DeleteData_FlashWriteTrigger(deletePosition))
+            {
+                pContex->handle = D_C_HANDLE_APP_DELETE_SELECT_RECODEDATA_WAIT;
+            }
+        break;
+        case D_C_HANDLE_APP_DELETE_SELECT_RECODEDATA_WAIT:
+            //deletePosition = InnerScreenDataCenteHandle.deleteIndex;//来之屏端设置的0~6
+            //从每次显示数据中心时存储的实际物理位置
+            //deletePosition = InnerScreenDataCenteHandle.searchedIndexArry[deletePosition%IS_NUM_DATACENTER_GROUP];
+            if(1 == DataCenter_DeleteData_WaitDone(0xFFFF))
+            {
+                pContex->appTrigerDeleteSingleData = 0;
+                IS_JumpToPage_Trigger(IS_PAGE_09_0X09_DATACENTERPAGEE); //跳转至提示界面 
+                //InnerScreenDataCenteHandle.todayStoreedNum = 0;
+                //InnerScreenDataCenteHandle.userStorePosition = 0;
+                //    
+                pContex->handle = D_C_HANDLE_CYCLE_SCAN; 
+            }
+        break;
+        #endif
         //==============================================================================================================
         //==============================================================================================================
         //==============================================================================================================
@@ -758,45 +794,46 @@ void InnerScreenDataCenterHandle_MainFunction(void)
         //==开始正常控制之1：等待重量稳定
         #if 1
         case D_C_HANDLE_SCAN_FTROM_WEIGHT:
-            weight = hx711_getWeight(HX711Chanel_1);
-            if((0 != gSystemPara.mlYugBiLv) && (SYS_ML_G_WAS_ML == gSystemPara.uint))
-            {
-                weight *= 1000;
-                weight /= gSystemPara.mlYugBiLv;
-            }
-            //
-            pContex->weightVlu = weight;
-            if(preWeight != pContex->weightVlu)
-            {
-                preWeight = pContex->weightVlu;
-                weightHoldOnTime = get_SysTick_ByTimer();
-            }
-            else
+            f_weight = hx711_getWeight(HX711Chanel_1);
+            f_weight_diff = f_weight - f_weight_pre;
+            if((-f_weight_range <= f_weight_diff) && (f_weight_diff <= f_weight_range))//重量在小范围内波动
             {
                 if((get_SysTick_ByTimer() - weightHoldOnTime) >= 500)
                 {
+                    f_weight_pre = f_weight;
                     ret = 1;//数据已稳定500ms
                 }
-                else
-                {
-                    ret = 0;
-                }
             }
-            //数据已稳定500ms
+            else//重量在小范围外波动
+            {
+                weightHoldOnTime = get_SysTick_ByTimer();
+                f_weight_pre = f_weight;
+                ret = 0;//数据未稳定
+            }
+            //数据如果稳定了 则处理数据
             if(1 == ret)
             {
-                //
+                //1.单位换算 g->ml
+                if((0 != gSystemPara.mlYugBiLv) && (SYS_ML_G_WAS_ML == gSystemPara.uint))
+                {
+                    f_weight *= 1000;
+                    f_weight /= gSystemPara.mlYugBiLv;
+                }
+                //2.数据扩大10倍存储 带1位小数
+                f_weight *= 10;
+                //3.准备存储重量
+                pContex->weightVlu = f_weight;//取整
                 pContex->weight[0] = ( pContex->weightVlu >> 8 ) & 0x00ff;
                 pContex->weight[1] = ( pContex->weightVlu >> 0 ) & 0x00ff;
-                //==
+                //4.准备单组数据的存储位置及数据
                 offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + CF_STORE_CFG_TIME_TYPEBYTE;
                 len = CF_STORE_WEIGHT_TYPEBYTE;
                 memcpy(&pContex->singleStoreData[offset],&pContex->weight[0],len);
-                //
+                //5.重量稳定 开始判断规格
                 l_CF_StoreMask |= (CF_STORE_MASK_WEIGHT);
                 pContex->handle = D_C_HANDLE_GUIGE;
             }
-            else
+            else//重量不稳定 回到事件扫描 然后再次获取重量判断重量
             {
                 l_CF_StoreMask &= (~CF_STORE_MASK_WEIGHT);
                 pContex->handle = D_C_HANDLE_CYCLE_SCAN;
@@ -809,24 +846,23 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             pContex->weigthClassifyCplt = InnerScreenDataCenterHandle_UseWeight_Classification(pContex->weightVlu,&pContex->guige[0]);     
             if(TRUE == pContex->weigthClassifyCplt)
             {
-                //==
+                //==数据分类成功 准备单组存储的数据
                 offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE + CF_STORE_LEIXING_TYPEBYTE;
                 len = CF_STORE_GUIGE_TYPEBYTE;
                 memcpy(&pContex->singleStoreData[offset],&pContex->guige[0],len);
-                //
+                //==数据分类成功 开始准备类型
                 l_CF_StoreMask |= (CF_STORE_MASK_GUIGE);
                 pContex->handle = D_C_HANDLE_LEIXING;
             }
-            else
+            else//数据未分类成功 回到事件扫描
             {               
-                //
                 l_CF_StoreMask &= (~CF_STORE_MASK_GUIGE);
                 pContex->handle = D_C_HANDLE_CYCLE_SCAN;
             }
             //
             if(0 == jiluwanchengkeyishaomiao)
             {
-                if(pContex->weightVlu < gSystemPara.zeroRange)
+                if(pContex->weightVlu < 10*gSystemPara.zeroRange)//因为重量扩大了10倍
                 {
                     zhixingzhuangtai3002 = 0;//请放血袋  
                 }
@@ -842,7 +878,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
             else
             {
                 zhixingzhuangtai3002 = 3;//记录完成
-                if(pContex->weightVlu < gSystemPara.zeroRange)
+                if(pContex->weightVlu < 10*gSystemPara.zeroRange)//因为重量扩大了10倍
                 {
                     jiluwanchengkeyishaomiao = 0;
                     USB_SMQ_ClearDecodeData();//清除条码
@@ -1096,7 +1132,7 @@ void InnerScreenDataCenterHandle_MainFunction(void)
         break;
     }
 
-    //档从显示屏获取的RTC时间后执行 统计今日数量 一次
+    //当从显示屏获取的RTC时间后执行 统计今日数量 一次
     if((1 == caculateToday) &&
       (0xA5A5 == InnerScreenDataCenteHandle.triggerCaculateTodataNum))
     {
@@ -1120,7 +1156,12 @@ void ApplicationEventSet_Delete_ALL_RecodeData(UINT16 setVlu)
     tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
     pContex->appTrigerDeleteAllData = setVlu;
 }
-
+//触发删除单个数据入口：是存在二次确认的
+void ApplicationEventSet_Delete_Single_RecodeData(UINT16 setVlu)
+{
+    tInnerScreenDataCenterHandleStruct *pContex = &InnerScreenDataCenteHandle;
+    pContex->appTrigerDeleteSingleData = setVlu;
+}
 //获取当前触发删除所有数据的事件
 UINT16 ApplicationEventGet_Delete_ALL_RecodeData(void)
 {
@@ -1158,7 +1199,40 @@ UINT8 DataCenter_DeleteData_FlashWriteTrigger(UINT16 position)
     }
     else//删除单条数据
     {
-
+        //一、计算单条实际的物理位置 触发写入
+        offset = (position%CLASSIFICATION_STORE_MAX_NUM)*CF_STORE_TOTAL_LEN;
+        //设置单条数据全为0
+        memset(&pContex->s_StoreData[offset],0,CF_STORE_TOTAL_LEN);
+        //
+        pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
+        pushOrder.RegAddress = CF_ATC24_USERDATA_STORE_START_ADD + offset;
+        pushOrder.totalLen = CF_STORE_TOTAL_LEN;
+        pushOrder.remainLen = CF_STORE_TOTAL_LEN;
+        pushOrder.writePtr = &pContex->s_StoreData[offset];
+        pushOrder.timeout = 10000;
+        ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_DELETE_SINGLE_2025,&pushOrder);    
+        if(1 == ret)
+        {
+            InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_DELETE_SINGLE_2025);
+        }
+        
+        //一、计算CRC位置及CRC值 触发写入
+        offset = CF_ATC24_USERDATA_STORE_LEN - CF_ATC24_USERDATA_STORE_POSITION_LEN - CLASSIFICATION_STORE_CFG_CRCLEN;
+        crc16 = EECRC16(&pContex->s_StoreData[0],(CF_ATC24_USERDATA_STORE_LEN-2));
+        pContex->s_StoreData[offset + 2] = (crc16 >> 8) & 0xff;
+        pContex->s_StoreData[offset + 3] = (crc16 >> 0) & 0xff;
+        //
+        pushOrder.DevAddress = EXT_EEPROM_SLAVE_ADDRESS ;
+        pushOrder.RegAddress = CF_ATC24_USERDATA_STORE_START_ADD + offset + 2;
+        pushOrder.totalLen = CLASSIFICATION_STORE_CFG_CRCLEN;
+        pushOrder.remainLen = CLASSIFICATION_STORE_CFG_CRCLEN;
+        pushOrder.writePtr = &pContex->s_StoreData[offset+2];
+        pushOrder.timeout = 10000;
+        ret = ExFlashIf_Sync_Write(E_F_HANDLE_JOBID_W_DATACENTER_DELETE_SINGLE_CRC_2025,&pushOrder);    
+        if(1 == ret)
+        {
+            InnerScreenDataCenterHandle_Set_jobStatus(pContex,E_F_HANDLE_JOBID_W_DATACENTER_DELETE_SINGLE_CRC_2025);
+        }
     }
     //
     return ret;
@@ -1267,8 +1341,9 @@ UINT8  DataCenterDisplay_Prepare_OneGroupData_20250509(tInnerScreenDataCenterHan
                     if(FALSE == gSystemPara.Sizer_ClassifySet[j][3])//适配屏幕反逻辑
                     {
                         if((store_guige == gSystemPara.Sizer_ClassifySet[j][0]) ||
-                            ((store_weight >= gSystemPara.Sizer_ClassifySet[j][1]) && (store_weight <= gSystemPara.Sizer_ClassifySet[j][2])))
+                            ((store_weight/10 >= gSystemPara.Sizer_ClassifySet[j][1]) && (store_weight/10 <= gSystemPara.Sizer_ClassifySet[j][2])))
                         {
+                            //因为要显示小数 所以存储是扩大10倍存储的
                             searchResult_guige = TRUE;//重量满足 或 则规格序号满足(因为规格也是通过重量筛选的)
                             break;
                         }
@@ -1342,6 +1417,7 @@ UINT8  DataCenterDisplay_Prepare_OneGroupData_20250509(tInnerScreenDataCenterHan
                 pContex->u8dataCenterSearchOut[append_offset + 1] = ' ';
                 pContex->u8dataCenterSearchOut[append_offset + 2] = ' ';
                 pContex->u8dataCenterSearchOut[append_offset + 3] = ' ';
+                #if 0
                 if(store_weight >= 1000)
                 {
                     pContex->u8dataCenterSearchOut[append_offset + 0] = '0' + store_weight/1000;
@@ -1358,10 +1434,15 @@ UINT8  DataCenterDisplay_Prepare_OneGroupData_20250509(tInnerScreenDataCenterHan
                 {
                     pContex->u8dataCenterSearchOut[append_offset + 3] = '0' + store_weight%10;
                 } 
+                #else
+                pContex->u8dataCenterSearchOut[append_offset + 0] = (store_weight>>8)&0xff;
+                pContex->u8dataCenterSearchOut[append_offset + 1] = (store_weight>>0)&0xff;
+                
+                #endif
 
                 //5.血浆类型：P1鲜浆 ....
                 append_offset += 4;//屏幕预留了2个地址 = 4个字节
-                pContex->u8dataCenterSearchOut[append_offset + 0] = 'P' + store_weight/1000;
+                pContex->u8dataCenterSearchOut[append_offset + 0] = 'P';
                 pContex->u8dataCenterSearchOut[append_offset + 1] = '0' + store_Leixing;
                 // #define LEIXING_XIANJIANG 0xCFCABDAC
                 // #define LEIXING_BINGJIANG 0xB1F9BDAC
@@ -1448,6 +1529,266 @@ UINT8  DataCenterDisplay_Prepare_OneGroupData_20250509(tInnerScreenDataCenterHan
     }
     return retSearched;
 }
+
+
+//数据中心 数据准备 
+UINT8  DataCenterDisplay_Prepare_OneGroupData_ToDelete_20250711(tInnerScreenDataCenterHandleStruct *pContex , INT16 idx_delete)
+{
+	UINT8 retSearched = FALSE ;
+    INT16 idx;
+    UINT32 leixing_gbk[2] = {0};
+    //
+    uint16 j = 0 ;
+    uint16 store_base = 0 , store_offset = 0 , store_pos = 0 ;
+    struct tm lUTCDecodeTime;
+    //==基本待过滤数据
+    sint64 store_utc64 = 0;
+    uint16 store_guige = 0 ;
+    uint16 store_weight = 0 ;
+    uint8 store_Leixing = 0 ;
+
+    //==基本待过滤数据 过滤结果
+    uint8 searchResult_guige = FALSE ; // 规格满足 ：25 50 75 ....
+    uint8 searchResult_utctime = FALSE ; // 时间满足 ：t1 ~ t2
+
+    //==组装屏幕需要的数据
+    uint8 append_offset = 0 , append_i = 0;
+    idx = idx_delete;
+
+    //while(FALSE == retSearched)
+    {
+        //当前查找序号在区间内 则查找
+        if((0 <= idx) && (idx < pContex->maxSerchIndex))
+        {
+//============================================================================================================
+            searchResult_guige = FALSE;
+            searchResult_utctime = FALSE;
+
+            //=====一、依据当前查找的索引计算数据存储的位置
+            store_base = CF_STORE_TOTAL_LEN*idx;
+            store_offset = 0;
+
+            //=====二、基本数据提取
+            #if 1 //utc时间 存储是8个字节
+                store_offset = CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE;
+                store_pos = store_base + store_offset;
+                //
+                store_utc64 = 0;
+                store_utc64 +=  pContex->s_StoreData[store_pos+0];
+                store_utc64 <<= 8;
+                store_utc64 +=  pContex->s_StoreData[store_pos+1];
+                store_utc64 <<= 8;
+                store_utc64 +=  pContex->s_StoreData[store_pos+2];
+                store_utc64 <<= 8;
+                store_utc64 +=  pContex->s_StoreData[store_pos+3];
+            #endif
+            #if 1 //规格
+                store_offset =  CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + \
+                                CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE + \
+                                CF_STORE_LEIXING_TYPEBYTE;
+                store_pos = store_base + store_offset;
+                //
+                store_guige = pContex->s_StoreData[store_pos+0];
+                store_guige <<= 8;
+                store_guige &= 0xff00;
+                store_guige += pContex->s_StoreData[store_pos+1];
+            #endif
+            #if 1 //类型
+                store_offset =  CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + \
+                                CF_STORE_CFG_TIME_TYPEBYTE + CF_STORE_WEIGHT_TYPEBYTE ;
+                store_pos = store_base + store_offset;
+                //
+                store_Leixing = pContex->s_StoreData[store_pos+0];
+            #endif
+            #if 1//重量
+                store_offset =  CF_STORE_GONGHAO_TYPEBYTE + CF_STORE_BCCODE_TYPEBYTE + \
+                                CF_STORE_CFG_TIME_TYPEBYTE;
+                store_pos = store_base + store_offset;
+                //
+                store_weight = 0;
+                store_weight +=  pContex->s_StoreData[store_pos+0];
+                store_weight <<= 8;
+                store_weight +=  pContex->s_StoreData[store_pos+1];
+            #endif
+            //=====三、开始过滤基本数据数据
+            #if 1//1.查询《规格》匹配
+                for(j = 0 ; j < SIZER_CLASSIFY_GROUP_NUM ; j++)
+                {
+                    if(FALSE == gSystemPara.Sizer_ClassifySet[j][3])//适配屏幕反逻辑
+                    {
+                        if((store_guige == gSystemPara.Sizer_ClassifySet[j][0]) ||
+                            ((store_weight/10 >= gSystemPara.Sizer_ClassifySet[j][1]) && (store_weight/10 <= gSystemPara.Sizer_ClassifySet[j][2])))
+                        {
+                            //因为要显示小数 所以存储是扩大10倍存储的
+                            searchResult_guige = TRUE;//重量满足 或 则规格序号满足(因为规格也是通过重量筛选的)
+                            break;
+                        }
+                    }
+                }
+            #endif
+            #if 1//2.查询《时间区间》匹配
+                if((pContex->searchUseUTCTimeStart <= store_utc64) &&
+                    (pContex->searchUseUTCTimeEnd >= store_utc64))
+                {
+                    searchResult_utctime = TRUE;
+                }
+            #endif
+            //====规格/重量 + 时间都匹配
+            if((TRUE == searchResult_guige) && 
+               (TRUE == searchResult_utctime) && 
+               ((pContex->leixingxuanze & (1<<((store_Leixing-1)%8))) != 0 ))
+            {
+                //准备发送的数据
+                //#define CF_STORE_GONGHAO_TYPEBYTE       ( 4)//1.员工工号：4字节 0000 - 9999
+                //#define CF_STORE_BCCODE_TYPEBYTE        (15+1)//2.献血条码：15位 在加=号
+                //#define CF_STORE_CFG_TIME_TYPEBYTE      ( 4)//3.称重时间：utc time at 1970~2099 存储到显示需要转换
+                //#define CF_STORE_WEIGHT_TYPEBYTE        ( 2)//4.血浆重量：2字节重量 0~65535ml    存储到显示需要转换
+                //#define CF_STORE_LEIXING_TYPEBYTE       ( 1)//5.血浆类型：1字节 存储到显示需要转换:1->P1鲜浆 , 2->P2冰浆 , 3->P3病灭鲜浆 , 4->P4冰灭冰浆
+                //#define CF_STORE_GUIGE_TYPEBYTE         ( 1)//6.血浆规格：1字节 存储到显示需要转换:0->50 , 1->75 ..
+                
+                //！！！！！需要根据屏幕实际开辟空间来组装数据！！！！！
+                //1.工号 存储只存了4个字节 但是发送需要8个字节
+                append_offset = 0;
+                pContex->u8dataCenterSearchOut[append_offset + 0] = pContex->s_StoreData[store_base+0];
+                pContex->u8dataCenterSearchOut[append_offset + 1] = pContex->s_StoreData[store_base+1];
+                pContex->u8dataCenterSearchOut[append_offset + 2] = pContex->s_StoreData[store_base+2];
+                pContex->u8dataCenterSearchOut[append_offset + 3] = pContex->s_StoreData[store_base+3];
+                pContex->u8dataCenterSearchOut[append_offset + 4] = 0;
+                pContex->u8dataCenterSearchOut[append_offset + 5] = 0;
+            
+                //2.条码值 16位
+                append_offset += 6;//屏幕预留了3个地址 = 6个字节
+                store_offset = 4;
+                for(append_i = 0 ; append_i < CF_STORE_BCCODE_TYPEBYTE ; append_i++)
+                {
+                    pContex->u8dataCenterSearchOut[append_offset + append_i] = pContex->s_StoreData[store_base+store_offset+append_i];
+
+                }
+                //3.utc时间 存储4字节
+                append_offset += CF_STORE_BCCODE_TYPEBYTE;//屏幕预留了8个地址 = 16个字节
+                lUTCDecodeTime = *(mygmtime(&store_utc64));
+                pContex->u8dataCenterSearchOut[append_offset + 0] = '0' + lUTCDecodeTime.tm_year/1000;
+                pContex->u8dataCenterSearchOut[append_offset + 1] = '0' + lUTCDecodeTime.tm_year%1000/100;
+                pContex->u8dataCenterSearchOut[append_offset + 2] = '0' + lUTCDecodeTime.tm_year%100/10;
+                pContex->u8dataCenterSearchOut[append_offset + 3] = '0' + lUTCDecodeTime.tm_year%10;
+                pContex->u8dataCenterSearchOut[append_offset + 4] = '/';
+                pContex->u8dataCenterSearchOut[append_offset + 5] = '0' + lUTCDecodeTime.tm_mon%100/10;
+                pContex->u8dataCenterSearchOut[append_offset + 6] = '0' + lUTCDecodeTime.tm_mon%10;
+                pContex->u8dataCenterSearchOut[append_offset + 7] = '/';
+                pContex->u8dataCenterSearchOut[append_offset + 8] = '0' + lUTCDecodeTime.tm_mday%100/10;
+                pContex->u8dataCenterSearchOut[append_offset + 9] = '0' + lUTCDecodeTime.tm_mday%10;
+                pContex->u8dataCenterSearchOut[append_offset + 10] = ' ';
+                pContex->u8dataCenterSearchOut[append_offset + 11] = '0' + lUTCDecodeTime.tm_hour%100/10;
+                pContex->u8dataCenterSearchOut[append_offset + 12] = '0' + lUTCDecodeTime.tm_hour%10;
+                pContex->u8dataCenterSearchOut[append_offset + 13] = ':';
+                pContex->u8dataCenterSearchOut[append_offset + 14] = '0' + lUTCDecodeTime.tm_min%100/10;
+                pContex->u8dataCenterSearchOut[append_offset + 15] = '0' + lUTCDecodeTime.tm_min%10;
+                pContex->u8dataCenterSearchOut[append_offset + 16] = ':';
+                pContex->u8dataCenterSearchOut[append_offset + 17] = '0' + lUTCDecodeTime.tm_sec%100/10;
+                pContex->u8dataCenterSearchOut[append_offset + 18] = '0' + lUTCDecodeTime.tm_sec%10;
+                pContex->u8dataCenterSearchOut[append_offset + 19] = 0;
+                //4.重量
+                append_offset += 20;//屏幕预留了10个地址 = 20个字节
+                pContex->u8dataCenterSearchOut[append_offset + 0] = ' ';
+                pContex->u8dataCenterSearchOut[append_offset + 1] = ' ';
+                pContex->u8dataCenterSearchOut[append_offset + 2] = ' ';
+                pContex->u8dataCenterSearchOut[append_offset + 3] = ' ';
+                #if 0
+                if(store_weight >= 1000)
+                {
+                    pContex->u8dataCenterSearchOut[append_offset + 0] = '0' + store_weight/1000;
+                }
+                if(store_weight >= 100)
+                {
+                    pContex->u8dataCenterSearchOut[append_offset + 1] = '0' + store_weight%1000/100;
+                } 
+                if(store_weight >= 10)
+                {
+                    pContex->u8dataCenterSearchOut[append_offset + 2] = '0' + store_weight%100/10;
+                } 
+                //if(store_weight >= 0)
+                {
+                    pContex->u8dataCenterSearchOut[append_offset + 3] = '0' + store_weight%10;
+                } 
+                #else
+                pContex->u8dataCenterSearchOut[append_offset + 0] = (store_weight>>8)&0xff;
+                pContex->u8dataCenterSearchOut[append_offset + 1] = (store_weight>>0)&0xff;
+                
+                #endif
+
+                //5.血浆类型：P1鲜浆 ....
+                append_offset += 4;//屏幕预留了2个地址 = 4个字节
+                pContex->u8dataCenterSearchOut[append_offset + 0] = 'P' + store_weight/1000;
+                pContex->u8dataCenterSearchOut[append_offset + 1] = '0' + store_Leixing;
+                // #define LEIXING_XIANJIANG 0xCFCABDAC
+                // #define LEIXING_BINGJIANG 0xB1F9BDAC
+                // #define LEIXING_BINMIE    0xB2A1C3F0 
+                switch(store_Leixing)//1->P1鲜浆 , 2->P2冰浆 , 3->P3病灭鲜浆 , 4->P4冰灭冰浆
+                {
+                    case 1:
+                        leixing_gbk[0] = LEIXING_XIANJIANG;
+                        leixing_gbk[1] = LEIXING_KONGGE;
+                    break;
+                    case 2:
+                        leixing_gbk[0] = LEIXING_BINGJIANG;
+                        leixing_gbk[1] = LEIXING_KONGGE;
+                    break;
+                    case 3:
+                        leixing_gbk[0] = LEIXING_BINMIE;
+                        leixing_gbk[1] = LEIXING_XIANJIANG;
+                    break;
+                    case 4:
+                        leixing_gbk[0] = LEIXING_BINMIE;
+                        leixing_gbk[1] = LEIXING_BINGJIANG;
+                    break;
+                    default:
+                        leixing_gbk[0] = LEIXING_KONGGE;
+                        leixing_gbk[1] = LEIXING_KONGGE;
+                    break;
+                }
+                pContex->u8dataCenterSearchOut[append_offset + 2] = (leixing_gbk[0] >> 24) & 0XFF;
+                pContex->u8dataCenterSearchOut[append_offset + 3] = (leixing_gbk[0] >> 16) & 0XFF;
+                pContex->u8dataCenterSearchOut[append_offset + 4] = (leixing_gbk[0] >> 8) & 0XFF;
+                pContex->u8dataCenterSearchOut[append_offset + 5] = (leixing_gbk[0] >> 0) & 0XFF;
+
+                pContex->u8dataCenterSearchOut[append_offset + 6] = (leixing_gbk[1] >> 24) & 0XFF;
+                pContex->u8dataCenterSearchOut[append_offset + 7] = (leixing_gbk[1] >> 16) & 0XFF;
+                pContex->u8dataCenterSearchOut[append_offset + 8] = (leixing_gbk[1] >> 8) & 0XFF;
+                pContex->u8dataCenterSearchOut[append_offset + 9] = (leixing_gbk[1] >> 0) & 0XFF;
+                //汉字结束
+                pContex->u8dataCenterSearchOut[append_offset + 10] = 0xFF;
+                pContex->u8dataCenterSearchOut[append_offset + 11] = 0xFF;      
+                
+                //6.规格 ： 25/50/75 .....
+                append_offset += 12;//屏幕预留了6个地址 = 12个字节
+                pContex->u8dataCenterSearchOut[append_offset + 0] = ' ';
+                if(store_guige >= 100)
+                {
+                    pContex->u8dataCenterSearchOut[append_offset + 1] = '0' + store_guige/100%10;
+                }
+				else
+				{
+					pContex->u8dataCenterSearchOut[append_offset + 1] = ' ';
+				}
+                pContex->u8dataCenterSearchOut[append_offset + 2] = '0' + store_guige/10%10;
+                pContex->u8dataCenterSearchOut[append_offset + 3] = '0' + store_guige/1%10;
+                pContex->u8dataCenterSearchOut[append_offset + 4] = 'm';
+                pContex->u8dataCenterSearchOut[append_offset + 5] = 'l';           
+
+                //==
+                retSearched = TRUE;
+            }
+        }
+    }
+    return retSearched;
+}
+
+
+
+
+
+
+
 
 #endif
 

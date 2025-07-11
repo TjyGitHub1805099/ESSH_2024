@@ -450,16 +450,18 @@ uint8 upanPrepareStoreData_StoreAll_20250512_While1(uint16 *start_idx , uint16 m
                 } 
                 ///if(store_weight >= 0)
                 {
-                    pData[upanDataOffset + 3] = '0' + store_weight%10;
+                    pData[upanDataOffset + 3] = '.';
+                }                 {
+                    pData[upanDataOffset + 4] = '0' + store_weight%10;
                 } 
-                pData[upanDataOffset + 4] = '(';
-                pData[upanDataOffset + 5] = 'm';
-                pData[upanDataOffset + 6] = 'l';
-                pData[upanDataOffset + 7] = ')';
+                pData[upanDataOffset + 5] = '(';
+                pData[upanDataOffset + 6] = 'm';
+                pData[upanDataOffset + 7] = 'l';
+                pData[upanDataOffset + 8] = ')';
 
                 //
                 pDataFrom = UPAN_STRORE_LINE_PART_DIFF;
-                upanDataOffset += 8;
+                upanDataOffset += 9;
                 upanDataFromLen = 3;
                 memcpy(&pData[upanDataOffset],pDataFrom,upanDataFromLen);
             #endif

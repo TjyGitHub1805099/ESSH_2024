@@ -733,15 +733,54 @@ UINT8 innerScreenRxHandle_Page5_OutputAll2Upan(T5LType *pSdwe)
 	}
 	return matched;
 }
+//21
+UINT8 innerScreenRxHandle_Page21_DataCenterPageHandle(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	//第21页 数据中心页面
+	if(pSdwe->SetAdd == IS_ADD_DELETE_PAGE_EVENT)
+	{
+		if(IS_VLU_DELETE_PAGE_EVENT_OK == pSdwe->SetData)
+		{
+			ApplicationEventSet_Delete_Single_RecodeData(APPLICATION_TRIGGER_DELETE_SINGLE_DATA_DOUBLECHECK);
+			matched = TRUE;
+		}
+		if(IS_VLU_DELETE_PAGE_EVENT_CLOSE == pSdwe->SetData)
+		{
+			IS_JumpToPage_Trigger(IS_PAGE_09_0X09_DATACENTERPAGEE); //跳转至提示界面 
+			matched = TRUE;
+		}
+		if(IS_VLU_DELETE_PAGE_EVENT_BACK == pSdwe->SetData)
+		{
+			IS_JumpToPage_Trigger(IS_PAGE_09_0X09_DATACENTERPAGEE); //跳转至提示界面 
+			matched = TRUE;
+		}
+	}
+	return matched;
+}
+
 //20
 UINT8 innerScreenRxHandle_Page9_DataCenterPageHandle(T5LType *pSdwe)
 {
 	UINT8 matched = FALSE;
+	UINT16 deletePosition = 0 ;
 	//第9页 数据中心页面
 	if(pSdwe->SetAdd == IS_ADD_DATACENTER_PAGE_EVENT)
 	{
+		if((IS_VLU_DATACENTER_PAGE_EVENT_DELETE_1 <= pSdwe->SetData) &&
+			(pSdwe->SetData <= IS_VLU_DATACENTER_PAGE_EVENT_DELETE_7))
+		{
+			InnerScreenDataCenteHandle.deleteIndex = pSdwe->SetData - IS_VLU_DATACENTER_PAGE_EVENT_DELETE_1;
+			deletePosition = InnerScreenDataCenteHandle.deleteIndex;//来之屏端设置的0~6
+			//记录查找的1~7显示的时用的内部存储的序号 用于单条删除时使用
+			deletePosition = InnerScreenDataCenteHandle.searchedIndexArry[deletePosition%IS_NUM_DATACENTER_GROUP];
+			if(0xFFFF != deletePosition)
+			{
+				InnerScreenDataCenteHandle.deleteEvent = 1234;
+			}
+		}
 		//点击 导出全部
-		if(IS_VLU_DATACENTER_PAGE_EVENT_OUTPUTCHOICE == pSdwe->SetData)
+		else if(IS_VLU_DATACENTER_PAGE_EVENT_OUTPUTCHOICE == pSdwe->SetData)
 		{
 			APP_TriggerOutPut2Udisk(0);//0:全部 1:带筛选条件导出
 			matched = TRUE;
@@ -922,6 +961,7 @@ screenRxTxHandleType innerScreenRxHandle[SCREEN_RX_HANDLE_TOTAL_NUM]=
 	{0, 22,&innerScreenRxHandle_CycleRx_CurPage},
 	{0, 23,&innerScreenRxHandle_Page18_Xuejiangleixing},
 	{0, 24,&innerScreenRxHandle_Page19_Gonghao},
+	{0, 25,&innerScreenRxHandle_Page21_DataCenterPageHandle},
 };
 
 #endif//end of _APP_INNER_SCREEN_RX_HANDLE_C_

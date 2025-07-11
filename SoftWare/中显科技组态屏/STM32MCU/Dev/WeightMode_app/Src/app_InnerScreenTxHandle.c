@@ -163,6 +163,26 @@ UINT8 innerScreenTxHandle_Init(T5LType *pSdwe)
 				pSdwe->sendSysParaDataToDiwenIndex++;
 			}		
 		break;
+		case 11:
+			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
+				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
+			{
+				len=1;
+				sendData[0] = 1;
+				t5lWriteVarible(pSdwe,0x0115,sendData,len,0);
+				pSdwe->sendSysParaDataToDiwenIndex++;
+			}		
+		break;
+		case 12:
+			if(((pSdwe->LastSendTick > pSdwe->CurTick)&&((pSdwe->LastSendTick-pSdwe->CurTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER))||
+				((pSdwe->LastSendTick < pSdwe->CurTick)&&((pSdwe->CurTick - pSdwe->LastSendTick) >= 2*DMG_MIN_DIFF_OF_TWO_SEND_ORDER)))
+			{
+				len=1;
+				sendData[0] = 1;
+				t5lWriteVarible(pSdwe,0x0105,sendData,len,0);
+				pSdwe->sendSysParaDataToDiwenIndex++;
+			}		
+		break;
 		default:
 			if(TRUE == pSdwe->sdweHX711FirstSampleCoplt)
 			{
@@ -277,7 +297,8 @@ UINT8 ISTxHandle_Page_GongHaoLuRu(T5LType *pSdwe)
 	//
 	UINT8 u8gonghao[2*IS_LEN_GONGHAO] , i = 0 , validLen;
 	//
-	if(u8gonghao_OK == IS_PopupWindow_OK)
+	if((u8gonghao_OK == IS_PopupWindow_OK) && 
+		(u16gonghaoBuf[0]!= 0))
 	{
 		matched = TRUE;
 		if(TRUE == t5lWriteData(pSdwe,IS_ADD_GONGHAO,(INT16 *)u16gonghaoBuf,IS_LEN_GONGHAO,0))
@@ -366,13 +387,14 @@ UINT8 ISTxHandle_Page_Home_CycleDataHandle(T5LType *pSdwe)
 	if(IS_PAGE_00_0X00_HOMEPAGEE == pSdwe->curPage)
 	{
 		//重量f
-		weight = hx711_getWeight(HX711Chanel_1) + 0.5f;
+		weight = hx711_getWeight(HX711Chanel_1);
 		//重量转ml
 		if((0 != gSystemPara.mlYugBiLv) && (SYS_ML_G_WAS_ML == gSystemPara.uint))
 		{
 			weight *= 1000;
 			weight /= gSystemPara.mlYugBiLv;
 		}
+		weight *= 10;//扩大10倍存储
 		//1.重量
 		u16_IS_CycleData[0] = (INT16)weight;
 		if(weight < 0)
@@ -442,6 +464,45 @@ UINT8 ISTxHandle_Page_Home_CycleDataHandle(T5LType *pSdwe)
 	return matched;
 }
 
+
+UINT8 ISTxHandle_Page_DeleteSingleDataTrigerHandle(T5LType *pSdwe)
+{
+	UINT8 matched = FALSE;
+	static UINT8 deleteInnerState = 0 ;
+	UINT16 deletePosition;
+	INT16 *sendPtr = 0;
+	switch(deleteInnerState)
+	{
+		case 0://如果选中某条 需要发送要显示的数据
+			if(1234 == InnerScreenDataCenteHandle.deleteEvent)
+			{
+				matched = 1;
+				deleteInnerState = 1;//先发送将要删除的数据给屏幕
+			}
+		break;
+		//
+		case 1:
+			matched = 1;
+			deletePosition = InnerScreenDataCenteHandle.deleteIndex;//来之屏端设置的0~6
+			sendPtr = (INT16 *)&InnerScreenDataCenteHandle.u16DataCenterDisDataBackup[deletePosition][0];
+			if(TRUE == t5lWriteData(pSdwe,IS_ADD_DATACENTER_DELETE_DIS_START,sendPtr,IS_LEN_DATACENTER_SINGLE,0))
+			{
+				deleteInnerState = 2;
+				IS_JumpToPage_Trigger(IS_PAGE_21_0X15_SURETODELETESINGLE);
+			}
+		break;
+		
+		default:
+			deleteInnerState = 0 ;
+			InnerScreenDataCenteHandle.deleteEvent = 0;
+		break;
+	}
+	//
+	return matched;
+}
+
+
+
 #if 0 //发送到屏幕的测试函数
 UINT8 TEST_DIS(T5LType *pSdwe)
 {
@@ -489,6 +550,7 @@ UINT8 ISTxHandle_Page_Datacenter_CycleDataHandle_20250509(T5LType *pSdwe)
 				pContex->sendCnt = 0 ;
 				pContex->dataAllSendToScreen = FALSE;
 				pContex->maxSerchIndex= CLASSIFICATION_STORE_MAX_NUM;//最大查找标号就是能存储的最大数量
+				memset(pContex->searchedIndexArry,0xff,2*IS_NUM_DATACENTER_GROUP);//删除单条 依赖的序号 FFFF 代表没有记录到
 				//记录查找的下标 被打开
 				#if (TRUE == DATA_CENTER_DISPLAY_RECOREDE_INDEX)
 					//发送给屏幕的index管理
@@ -544,7 +606,7 @@ UINT8 ISTxHandle_Page_Datacenter_CycleDataHandle_20250509(T5LType *pSdwe)
 
 			case D_C_SEARCH_DATA_SEARCHUNTIL:
 				memset(pContex->u8dataCenterSearchOut,0,(2*INNERSCREEN_DATACENTER_GROUP_OFFSET));//至0
-				retSearched = DataCenterDisplay_Prepare_OneGroupData_20250509(pContex,&serchedIdx);//如果查找成功 这里会更新待发送屏幕的数据
+				retSearched = DataCenterDisplay_Prepare_OneGroupData_20250509(pContex,&serchedIdx);//如果查找成功 这里会更新u8dataCenterSearchOut待发送屏幕的数据
 				for( i = 0 ; i < IS_LEN_DATACENTER_SINGLE ; i++)//将UIN8转换成屏幕需要的UINT16
 				{
 					pContex->u16DataCenterDisData[i] = pContex->u8dataCenterSearchOut[2*i+0];
@@ -555,11 +617,13 @@ UINT8 ISTxHandle_Page_Datacenter_CycleDataHandle_20250509(T5LType *pSdwe)
 				#if (TRUE == DATA_CENTER_DISPLAY_RECOREDE_INDEX)
 					if(TRUE == retSearched)
 					{
+						pContex->searchedIndexArry[pContex->sendIndex%IS_NUM_DATACENTER_GROUP] = serchedIdx;//记录查找的1~7显示的时用的内部存储的序号 用于单条删除时使用
+						//
 						if(0 == pContex->sendCnt)
 						{
-							pContex->serchIndex_start = serchedIdx;
+							pContex->serchIndex_start = serchedIdx;//记录成功查找的第一次的存储位置 index
 						}
-						pContex->serchIndex_end = serchedIdx;
+						pContex->serchIndex_end = serchedIdx;//记录成功查找的最后一次的存储位置 index
 					}
 				#endif
 				//====特殊退出 未查找到匹配数据 且 当前发送的数量是0
@@ -580,6 +644,10 @@ UINT8 ISTxHandle_Page_Datacenter_CycleDataHandle_20250509(T5LType *pSdwe)
 				//点击上一页 是从6~0的顺序发给屏幕
 				if(TRUE == t5lWriteData(pSdwe,(IS_ADD_DATACENTER_GROUP_START + IS_LEN_DATACENTER_SINGLE*pContex->sendIndex),(INT16 *)pContex->u16DataCenterDisData,IS_LEN_DATACENTER_SINGLE,0))
 				{
+					//发送成功后用于
+					memcpy(pContex->u16DataCenterDisDataBackup[pContex->sendIndex%IS_NUM_DATACENTER_GROUP],
+							pContex->u16DataCenterDisData,2*IS_LEN_DATACENTER_SINGLE);
+					//
 					pContex->sendCnt++;
 					pContex->serchState = D_C_SEARCH_DATA_INDEX_HANDLE;
 				}
@@ -673,7 +741,8 @@ screenRxTxHandleType innerScreenTxHandle[SCREEN_TX_HANDLE_TOTAL_NUM]=
 	{0 , 9, &ISTxHandle_Page_GongHaoLuRu},					//工号录入界面
 	{0 ,10, &ISTxHandle_Page_XueJiangLeiXingXuanZhe},		//血浆类型确认后发送给主页
 	{0 ,11, &ISTxHandle_Page_Datacenter_CycleDataHandle_20250509},	//数据中心数据发送
-	{0 ,12, &ISTxHandle_Page_Home_CycleDataHandle},			//正常周期数据
+	{0 ,12, &ISTxHandle_Page_DeleteSingleDataTrigerHandle},	//数据中心删除处理
+	{0 ,13, &ISTxHandle_Page_Home_CycleDataHandle},			//正常周期数据
 };
 
 #endif// end of _APP_INNER_SCREEN_TX_HANDLE_C_
